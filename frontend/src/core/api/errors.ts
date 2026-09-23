@@ -26,8 +26,8 @@ export const toApiError = (
   requestId?: string
 ): ApiError => {
   if (hasErrorBody(body)) {
-    const { code, message, details } = body.error;
-    return { status, code, message, details, requestId };
+    const { code, message, fields, details } = body.error;
+    return { status, code, message, fields, details, requestId };
   }
   return {
     status,
@@ -59,7 +59,9 @@ type ValidationIssue = { loc?: unknown[]; msg?: string };
  * field name, which matches react-hook-form's `setError(name, ...)`.
  */
 export const getFieldErrors = (error: unknown): Record<string, string> => {
-  if (!isApiError(error) || !Array.isArray(error.details)) return {};
+  if (!isApiError(error)) return {};
+  if (error.fields) return error.fields;
+  if (!Array.isArray(error.details)) return {};
   const result: Record<string, string> = {};
   for (const issue of error.details as ValidationIssue[]) {
     const loc = Array.isArray(issue.loc) ? issue.loc : [];

@@ -1,28 +1,21 @@
-import { tokenStorage } from "@/core/api";
 import { create } from "zustand";
 
+import type { User } from "../types";
+
 type AuthState = {
-  token: string | null;
-  /** Derived from `token` — kept in sync by the tokenStorage subscription below. */
-  isAuthenticated: boolean;
-  setToken: (token: string | null) => void;
-  logout: () => void;
+  user: User | null;
+  status: "loading" | "ready" | "error";
+  setUser: (user: User) => void;
+  clearUser: () => void;
+  setLoading: () => void;
+  setError: () => void;
 };
 
-const initialToken = tokenStorage.get();
-
-export const useAuthStore = create<AuthState>(() => ({
-  token: initialToken,
-  isAuthenticated: initialToken !== null,
-  // Both actions write tokenStorage; the subscription routes the change back
-  // into the store, so there is a single code path for every token update.
-  setToken: (token) => tokenStorage.set(token),
-  logout: () => tokenStorage.clear(),
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  status: "loading",
+  setUser: (user) => set({ user, status: "ready" }),
+  clearUser: () => set({ user: null, status: "ready" }),
+  setLoading: () => set({ status: "loading" }),
+  setError: () => set({ user: null, status: "error" }),
 }));
-
-// tokenStorage is the source of truth for the JWT. Any change — login, logout,
-// or the axios interceptor clearing a rejected token on 401 — lands here, so
-// the UI reacts (e.g. RequireAuth redirects) no matter who cleared it.
-tokenStorage.subscribe((token) => {
-  useAuthStore.setState({ token, isAuthenticated: token !== null });
-});

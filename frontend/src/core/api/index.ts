@@ -7,5 +7,5 @@ export {
   toApiError,
 } from "./errors";
 export { streamSse, type SseEvent } from "./sse";
-export { tokenStorage } from "./token";
+export { sessionEvents, removeLegacyToken } from "./session";
 export type { ApiError, ApiErrorBody, OkResponse, Page } from "./types";
