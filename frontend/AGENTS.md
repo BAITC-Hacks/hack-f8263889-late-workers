@@ -4,13 +4,14 @@ Guidance for coding agents (Codex, Claude Code, etc.) working in this repository
 
 ## What this is
 
-A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*` and the task catalog (`/api/tasks`, `/api/industries`, saved tasks, business tasks). Development uses a Vite mock server; the existing FastAPI backend does not yet implement either contract. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
+A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*` and the task catalog (`/api/tasks`, `/api/industries`, saved tasks, business tasks). Development uses the FastAPI backend and PostgreSQL by default; the Vite mock server is opt-in. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
 
 ## Commands
 
 ```bash
 yarn install --frozen-lockfile       # install deps
-npm run dev                          # :5173, cookie auth mocks on by default
+npm run dev                          # :5173, /api proxied to FastAPI :8000
+AUTH_MOCKS=true npm run dev           # standalone in-memory auth/catalog mocks
 npm run build                        # production build; no mock API
 npm run preview                      # preview production assets; no mock API
 npm run lint                         # ESLint src, dev, e2e and TS configs
@@ -147,11 +148,11 @@ Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border an
 - `User` is discriminated by `role: "business" | "student"`; `createdAt` and profile fields use camelCase and the other role's profile is `null`.
 - Axios uses relative `/api`, `withCredentials: true` and JSON headers. SSE also includes credentials and uses the shared expiry event; its retained demo endpoint remains `/api/v1/ai/chat/stream`.
 - Errors normalize to `{ status, code, message, fields?, details?, requestId? }`, preserving server messages and code case. `getFieldErrors` supports contract `fields` plus legacy FastAPI `details`. Field-level 409/422 errors stay in forms; preserve server text instead of translating it.
-- `AUTH_MOCKS=true` is the default only for Vite development serve. The plugin's `configureServer` middleware runs before the proxy; it is absent from production builds and `vite preview`. The old MSW worker is not started.
+- `AUTH_MOCKS=false` is the default, including Docker Compose. Setting it to `true` opts into mocks only for Vite development serve. The plugin's `configureServer` middleware runs before the proxy; it is absent from production builds and `vite preview`. The old MSW worker is not started.
 - The mock sets `access_token=<opaque session id>; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800`; logout clears the cookie and revokes the session. Accounts and expiring sessions are held in memory: page reload preserves login, Vite restart resets all registrations and sessions.
-- Seed accounts: business `owner@zerno.kz` / `coffee2026` (Кофейня «Зерно»); student `arman@student.kz` / `arman2026` (Арман Сейтказы). These credentials are development fixtures only.
-- `AUTH_MOCKS=false` sends `/api` to `API_PROXY_TARGET` without rewriting the path. Local default: `http://localhost:8000`; Docker Compose: `http://api:8000`. These variables are Vite server settings without the `VITE_` prefix; authentication never uses `VITE_API_URL`.
-- The current FastAPI backend uses a different contract. Keep real-API acceptance open until a compatible backend exists; then disable mocks and repeat registration, login, reload, guards and logout against it. Do not adapt the backend as part of this frontend scope.
+- Mock seed accounts: business `owner@zerno.kz` / `coffee2026` (Кофейня «Зерно»); student `arman@student.kz` / `arman2026` (Арман Сейтказы). Real backend seed uses the same emails with password `demo2026` for both. These credentials are development fixtures only.
+- `AUTH_MOCKS=false` sends `/api` to `API_PROXY_TARGET` without rewriting the path. Local default: `http://127.0.0.1:8000`; Docker Compose: `http://api:8000`. These variables are Vite server settings without the `VITE_` prefix; authentication never uses `VITE_API_URL`.
+- FastAPI implements the same cookie contract. Its cookie contains a JWT and logout clears the browser cookie; unlike the mock, it has no server-side revocation list. `ACCESS_TOKEN_EXPIRE_MINUTES=10080` configures the seven-day lifetime. Switch modes by signing in again; mock sessions and real JWTs are not interchangeable.
 - Production hosting must route `/api` to the compatible backend and serve SPA fallback routes. Build and preview do not provide an authentication mock server.
 
 ## Catalog API and mocks
@@ -162,7 +163,7 @@ Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border an
 - Saving is not optimistic: the button is disabled until the 204, then `useToggleSave` patches every cached copy (catalog lists, task detail, saved list). Failures keep the old state and show a toast. The button renders only for students.
 - Catalog queries do not retry 4xx (`retryUnlessClientError`). Level and the in-progress label are translated by `code`; industry and business-task status names come from the server.
 - The catalog mock runs inside the auth mock plugin, so `AUTH_MOCKS` switches both. It validates query parameters (422 with `fields`), returns 401/403/404 per the contract, shows only `published`/`in_progress` tasks in the catalog and lets an owner open its draft. Seed: 26 tasks, 25 visible; Кофейня «Зерно» (the seed business) owns tasks 12 (published), 15 (draft) and 21 (in progress). Saved tasks are kept per user in memory until Vite restarts.
-- Real-API acceptance stays open until a compatible backend exists; then run the catalog scenarios with `AUTH_MOCKS=false`.
+- FastAPI implements these endpoints against PostgreSQL. Its seed has 7 tasks (6 visible and an owner-only draft), with database-generated IDs; real-API tests must locate tasks by title/response rather than hardcode mock IDs. The seed command deletes existing accounts and their related data; use it only for disposable or intentionally reset demo databases.
 
 ## ~~Don'ts~~
 
