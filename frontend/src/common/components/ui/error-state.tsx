@@ -1,7 +1,8 @@
 import { Stack } from "@/common/components/layout";
-import { Button } from "@/common/components/ui";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+
+import { Button } from "./button";
 
 type ErrorStateProps = {
   message: string;

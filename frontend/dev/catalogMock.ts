@@ -266,6 +266,18 @@ export function catalogMock(
       return;
     }
 
+    // Teams and proposals are not mocked: the student task page's proposals
+    // block just sees no teams and no proposals.
+    if (
+      path === "/api/teams/my" ||
+      /^\/api\/tasks\/[^/]+\/my-proposals$/.test(path)
+    ) {
+      if (method !== "GET") return methodNotAllowed(res, "GET");
+      if (user.role !== "student") return forbidden(res);
+      json(res, 200, { items: [] });
+      return;
+    }
+
     const detail = path.match(/^\/api\/tasks\/([^/]+)$/);
     if (detail) {
       if (method !== "GET") return methodNotAllowed(res, "GET");
@@ -286,7 +298,8 @@ export function catalogMock(
     path === "/api/tasks" ||
     path.startsWith("/api/tasks/") ||
     path === "/api/me/saved-tasks" ||
-    path === "/api/business/tasks";
+    path === "/api/business/tasks" ||
+    path === "/api/teams/my";
 
   return (req, res, next) => {
     const path = req.url?.split("?")[0] ?? "";

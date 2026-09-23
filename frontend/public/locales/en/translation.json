@@ -182,12 +182,17 @@
     "sections": "Sections",
     "catalog": "Catalog",
     "saved": "Saved",
-    "myTasks": "My tasks"
+    "myTasks": "My tasks",
+    "teams": "Teams",
+    "proposals": "My proposals",
+    "profile": "Profile"
   },
   "common": {
     "close": "Close",
     "retry": "Try again",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "catalog": {
     "title": "Task catalog",
@@ -269,6 +274,116 @@
     "add": "Save",
     "saved": "Saved",
     "error": "Could not save your changes"
+  },
+  "profile": {
+    "title": "Profile",
+    "saved": "Profile saved",
+    "saveFailed": "Couldn't save the profile. Please try again"
+  },
+  "teams": {
+    "title": "My teams",
+    "create": "Create team",
+    "empty": "You're not in any team yet",
+    "loadFailed": "Couldn't load teams",
+    "loadOneFailed": "Couldn't load the team",
+    "notFound": "Team not found",
+    "myTeams": "My teams",
+    "newTitle": "New team",
+    "createFailed": "Couldn't create the team. Please try again",
+    "saveFailed": "Couldn't save the team. Please try again",
+    "edit": "Edit",
+    "editTitle": "Team profile",
+    "leave": "Leave team",
+    "leaveConfirm": "Leave team {{name}}?",
+    "actionFailed": "Couldn't complete the action. Please try again",
+    "none": "Not specified",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "roles": {
+      "captain": "Captain",
+      "member": "Member"
+    },
+    "card": {
+      "tags": "Skills and technologies",
+      "membersLabel": "Members: {{count}} of {{limit}}"
+    },
+    "form": {
+      "name": "Name",
+      "interests": "Interests",
+      "ownSkills": "Team skills",
+      "ownTechnologies": "Team technologies",
+      "skillsHint": "Members' skills are added automatically",
+      "create": "Create"
+    },
+    "fields": {
+      "interests": "Interests",
+      "skills": "Skills",
+      "technologies": "Technologies"
+    },
+    "members": {
+      "title": "Members",
+      "email": "Student email",
+      "add": "Add",
+      "addFailed": "Couldn't add the member. Please try again",
+      "full": "The team already has {{limit}} members",
+      "remove": "Remove",
+      "removeConfirm": "Remove {{name}} from the team?",
+      "tags": "Skills and technologies: {{name}}"
+    },
+    "errors": {
+      "nameInvalid": "Name: 2 to 60 characters"
+    }
+  },
+  "proposals": {
+    "title": "My proposals",
+    "empty": "Your teams haven't sent any proposals yet",
+    "loadFailed": "Couldn't load proposals",
+    "open": "Open",
+    "respond": "Send a proposal",
+    "captainOnly": "Proposals are sent by a team captain",
+    "taskBlockTitle": "Your teams' proposals",
+    "notFound": "Proposal not found",
+    "withdrawConfirm": "Withdraw the proposal for {{title}}?",
+    "withdrawFailed": "Couldn't withdraw the proposal. Please try again",
+    "filter": {
+      "label": "Team",
+      "all": "All teams"
+    },
+    "card": {
+      "expand": "Show more",
+      "collapse": "Show less",
+      "weeks": "{{count}} wk",
+      "sentAt": "Sent {{date}}",
+      "edit": "Edit",
+      "withdraw": "Withdraw",
+      "businessComment": "Business comment:"
+    },
+    "form": {
+      "team": "Team",
+      "chooseTeam": "Choose a team",
+      "idea": "Solution idea",
+      "plan": "Plan",
+      "durationWeeks": "Duration in weeks",
+      "prototypeUrl": "Prototype link (optional)",
+      "submit": "Send proposal",
+      "failed": "Couldn't send the proposal. Please try again",
+      "exists": "The team already has an active proposal for this task.",
+      "lowRating": "This task needs clarification: the business may ask extra questions before work starts",
+      "backToTask": "Back to task",
+      "loadFailed": "Couldn't load the proposal data",
+      "allTeamsResponded": "All your teams already have an active proposal for this task",
+      "sent": "Proposal sent",
+      "saved": "Changes saved",
+      "locked": "This proposal can't be changed: it has been reviewed or withdrawn"
+    },
+    "errors": {
+      "teamId": "Choose a team you captain",
+      "idea": "Idea: 20 to 2000 characters",
+      "plan": "Plan: 20 to 3000 characters",
+      "durationWeeks": "Duration: a whole number of weeks from 1 to 52",
+      "prototypeUrl": "The link must start with http:// or https://",
+      "prototypeUrlLong": "Link: up to 500 characters"
+    }
   },
   "builder": {
     "title": "Task builder",

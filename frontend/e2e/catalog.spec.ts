@@ -12,13 +12,18 @@ test.beforeEach(async ({ page }) => {
 const sections = (page: Page) =>
   page.getByRole("navigation", { name: "Разделы", exact: true });
 
-test("student lands on the catalog with catalog and saved sections", async ({
+test("student lands on the catalog with the student sections", async ({
   page,
 }) => {
   await signIn(page, "student");
   await expect(page).toHaveURL("/catalog");
   const nav = sections(page);
-  await expect(nav.getByRole("link")).toHaveText(["Каталог", "Интересное"]);
+  await expect(nav.getByRole("link")).toHaveText([
+    "Каталог",
+    "Интересное",
+    "Команды",
+    "Мои отклики",
+  ]);
   await expect(
     nav.getByRole("link", { name: "Каталог", exact: true })
   ).toHaveAttribute("aria-current", "page");

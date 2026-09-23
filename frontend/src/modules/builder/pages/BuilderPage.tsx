@@ -1,7 +1,7 @@
 import { Page, Stack } from "@/common/components/layout";
-import { Button } from "@/common/components/ui";
+import { Button, ErrorState } from "@/common/components/ui";
 import { inlineLink, pageTitle } from "@/common/styles";
-import { ErrorState, isNotFound, parseTaskId } from "@/modules/catalog";
+import { isNotFound, parseTaskId } from "@/modules/catalog";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";

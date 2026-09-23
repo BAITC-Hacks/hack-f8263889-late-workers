@@ -1,5 +1,5 @@
 import { Page, Stack } from "@/common/components/layout";
-import { Button, Card, Select } from "@/common/components/ui";
+import { Button, Card, ErrorState, Select } from "@/common/components/ui";
 import { cn } from "@/common/lib/utils";
 import {
   field,
@@ -11,7 +11,7 @@ import {
   pageTitle,
   prose,
 } from "@/common/styles";
-import { ErrorState, useIndustries } from "@/modules/catalog";
+import { useIndustries } from "@/modules/catalog";
 import { ArrowLeft } from "lucide-react";
 import { useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";

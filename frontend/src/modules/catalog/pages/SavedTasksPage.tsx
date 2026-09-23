@@ -1,10 +1,9 @@
 import { Page, Stack } from "@/common/components/layout";
-import { Button } from "@/common/components/ui";
+import { Button, ErrorState } from "@/common/components/ui";
 import { cardGrid, pageTitle } from "@/common/styles";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import { ErrorState } from "../components/ErrorState";
 import { TaskCard } from "../components/TaskCard";
 import { TaskCardSkeletons } from "../components/TaskCardSkeletons";
 import { useSavedTasks } from "../hooks/useSavedTasks";

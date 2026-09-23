@@ -4,6 +4,9 @@ export { GuestOnly, SessionRedirect } from "./components/GuestOnly";
 export { LoginPage } from "./pages/LoginPage";
 export { BusinessRegisterPage } from "./pages/BusinessRegisterPage";
 export { StudentRegisterPage } from "./pages/StudentRegisterPage";
+export { ProfilePage } from "./pages/ProfilePage";
+export { TagsInput } from "./components/TagsInput";
+export { useTagsInput } from "./hooks/useTagsInput";
 export { useAuthStore } from "./stores/useAuthStore";
 export { useMe } from "./hooks/useMe";
 export { useLogin } from "./hooks/useLogin";
@@ -19,4 +22,5 @@ export type {
   LoginInput,
   RegisterBusinessInput,
   RegisterStudentInput,
+  UpdateProfileInput,
 } from "./types";
