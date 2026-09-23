@@ -29,6 +29,7 @@ export const TopBar = () => {
                 <NavLink
                   key={link.to}
                   to={link.to}
+                  end={link.end}
                   className="text-muted-foreground hover:text-foreground aria-[current=page]:border-primary aria-[current=page]:text-foreground border-b-2 border-transparent py-1 text-sm font-medium transition-colors"
                 >
                   {t(link.labelKey)}
@@ -38,12 +39,18 @@ export const TopBar = () => {
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {user && (
+          {user?.role === "business" && (
             <span className="text-muted-foreground mr-2 min-w-0 text-sm break-words">
-              {user.role === "business"
-                ? user.business.companyName
-                : user.student.name}
+              {user.business.companyName}
             </span>
+          )}
+          {user?.role === "student" && (
+            <NavLink
+              to="/student/profile"
+              className="text-muted-foreground hover:text-foreground aria-[current=page]:text-foreground mr-2 min-w-0 text-sm break-words transition-colors"
+            >
+              {user.student.name}
+            </NavLink>
           )}
           {user && (
             <Button

@@ -5,7 +5,11 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
-import { formatUpdatedDate, statusBadgeVariant } from "../helpers";
+import {
+  businessTaskHref,
+  formatUpdatedDate,
+  statusBadgeVariant,
+} from "../helpers";
 import type { BusinessTask } from "../types";
 import { LevelBadge } from "./TaskBadges";
 
@@ -49,12 +53,12 @@ export const BusinessTasksTable = ({ tasks }: { tasks: BusinessTask[] }) => {
       {tasks.map((task) => (
         <tr
           key={task.id}
-          onClick={() => navigate(`/catalog/${task.id}`)}
+          onClick={() => navigate(businessTaskHref(task))}
           className="hover:bg-muted/50 cursor-pointer transition-colors"
         >
           <td className={cn(tableCell, "min-w-48 font-medium")}>
             <Link
-              to={`/catalog/${task.id}`}
+              to={businessTaskHref(task)}
               onClick={(event) => event.stopPropagation()}
               className="hover:text-primary"
             >

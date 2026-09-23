@@ -1,6 +1,6 @@
+import { FormField } from "@/common/components/ui";
 import { useTranslation } from "react-i18next";
 
-import { AuthField } from "../components/AuthField";
 import { AuthForm } from "../components/AuthForm";
 import { AuthFormShell } from "../components/AuthFormShell";
 import { RegistrationLinks } from "../components/RegistrationLinks";
@@ -32,7 +32,7 @@ export const StudentRegisterPage = () => {
         error={errors.root?.message}
         action="register"
       >
-        <AuthField
+        <FormField
           id="email"
           label={t("auth.form.email")}
           type="email"
@@ -40,7 +40,7 @@ export const StudentRegisterPage = () => {
           error={errors.email?.message}
           {...register("email")}
         />
-        <AuthField
+        <FormField
           id="password"
           label={t("auth.form.password")}
           type="password"
@@ -48,7 +48,7 @@ export const StudentRegisterPage = () => {
           error={errors.password?.message}
           {...register("password")}
         />
-        <AuthField
+        <FormField
           id="name"
           label={t("auth.form.name")}
           autoComplete="name"

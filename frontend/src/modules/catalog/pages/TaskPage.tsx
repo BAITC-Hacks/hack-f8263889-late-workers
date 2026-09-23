@@ -1,17 +1,19 @@
 import { Page, Stack } from "@/common/components/layout";
-import { Button } from "@/common/components/ui";
+import { Button, ErrorState } from "@/common/components/ui";
 import { inlineLink, pageTitle, prose } from "@/common/styles";
-import { ArrowLeft } from "lucide-react";
+import { useAuthStore } from "@/modules/auth";
+import { TaskProposalsBlock } from "@/modules/proposals";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useParams } from "react-router-dom";
 
-import { ErrorState } from "../components/ErrorState";
 import { SaveTaskButton } from "../components/SaveTaskButton";
 import { TaskBadges } from "../components/TaskBadges";
 import { TaskFields } from "../components/TaskFields";
 import { TaskPageSkeleton } from "../components/TaskPageSkeleton";
 import {
   backToCatalogHref,
+  builderPath,
   formatPublishedDate,
   isNotFound,
   parseTaskId,
@@ -24,6 +26,7 @@ export const TaskPage = () => {
   const id = parseTaskId(useParams().id);
   const task = useTask(id);
   const backHref = backToCatalogHref(location.state);
+  const isStudent = useAuthStore((state) => state.user?.role === "student");
 
   const notFound = id === null || (task.isError && isNotFound(task.error));
 
@@ -66,10 +69,19 @@ export const TaskPage = () => {
                 : data.status.name}
             </span>
           </div>
-          <div>
+          <div className="flex flex-wrap gap-2">
             <SaveTaskButton taskId={data.id} isSaved={data.isSaved} />
+            {data.isOwner && (
+              <Button asChild variant="outline" size="sm">
+                <Link to={builderPath(data.id)}>
+                  <Pencil aria-hidden="true" />
+                  {t("task.edit")}
+                </Link>
+              </Button>
+            )}
           </div>
         </Stack>
+        {isStudent && <TaskProposalsBlock taskId={data.id} />}
         <TaskFields fields={data.fields} />
       </Stack>
     );

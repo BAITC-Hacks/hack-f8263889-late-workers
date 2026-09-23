@@ -1,6 +1,6 @@
+import { FormField } from "@/common/components/ui";
 import { useTranslation } from "react-i18next";
 
-import { AuthField } from "../components/AuthField";
 import { AuthForm } from "../components/AuthForm";
 import { AuthFormShell } from "../components/AuthFormShell";
 import { RegistrationLinks } from "../components/RegistrationLinks";
@@ -25,7 +25,7 @@ export const BusinessRegisterPage = () => {
         error={errors.root?.message}
         action="register"
       >
-        <AuthField
+        <FormField
           id="email"
           label={t("auth.form.email")}
           type="email"
@@ -33,7 +33,7 @@ export const BusinessRegisterPage = () => {
           error={errors.email?.message}
           {...register("email")}
         />
-        <AuthField
+        <FormField
           id="password"
           label={t("auth.form.password")}
           type="password"
@@ -41,21 +41,21 @@ export const BusinessRegisterPage = () => {
           error={errors.password?.message}
           {...register("password")}
         />
-        <AuthField
+        <FormField
           id="companyName"
           label={t("auth.form.companyName")}
           autoComplete="organization"
           error={errors.companyName?.message}
           {...register("companyName")}
         />
-        <AuthField
+        <FormField
           id="contactName"
           label={t("auth.form.contactName")}
           autoComplete="name"
           error={errors.contactName?.message}
           {...register("contactName")}
         />
-        <AuthField
+        <FormField
           id="contactPhone"
           label={t("auth.form.contactPhone")}
           type="tel"

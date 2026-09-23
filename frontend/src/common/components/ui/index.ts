@@ -3,6 +3,7 @@ export { Badge, badgeVariants, type BadgeProps } from "./badge";
 export { Select, type SelectProps } from "./select";
 export { Pagination } from "./pagination";
 export { Toaster } from "./toaster";
+export { Tooltip } from "./tooltip";
 export {
   Card,
   CardContent,
@@ -11,3 +12,9 @@ export {
   CardHeader,
   CardTitle,
 } from "./card";
+export { ErrorState } from "./error-state";
+export { ConfirmDialog } from "./confirm-dialog";
+export { FormField } from "./form-field";
+export { FormError } from "./form-error";
+export { TextareaField } from "./textarea-field";
+export { PendingButton } from "./pending-button";

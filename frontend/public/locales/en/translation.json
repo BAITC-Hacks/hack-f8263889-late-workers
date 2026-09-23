@@ -182,12 +182,17 @@
     "sections": "Sections",
     "catalog": "Catalog",
     "saved": "Saved",
-    "myTasks": "My tasks"
+    "myTasks": "My tasks",
+    "teams": "Teams",
+    "proposals": "My proposals",
+    "profile": "Profile"
   },
   "common": {
     "close": "Close",
     "retry": "Try again",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "catalog": {
     "title": "Task catalog",
@@ -242,7 +247,8 @@
       "updatedAt": "Updated"
     },
     "empty": "You have no tasks yet",
-    "error": "Could not load your tasks"
+    "error": "Could not load your tasks",
+    "create": "Create task"
   },
   "task": {
     "back": "Catalog",
@@ -261,11 +267,272 @@
       "successCriteria": "Success criteria",
       "contact": "Contact",
       "interactionFormat": "Interaction format"
-    }
+    },
+    "edit": "Edit"
   },
   "save": {
     "add": "Save",
     "saved": "Saved",
     "error": "Could not save your changes"
+  },
+  "profile": {
+    "title": "Profile",
+    "saved": "Profile saved",
+    "saveFailed": "Couldn't save the profile. Please try again"
+  },
+  "teams": {
+    "title": "My teams",
+    "create": "Create team",
+    "empty": "You're not in any team yet",
+    "loadFailed": "Couldn't load teams",
+    "loadOneFailed": "Couldn't load the team",
+    "notFound": "Team not found",
+    "myTeams": "My teams",
+    "newTitle": "New team",
+    "createFailed": "Couldn't create the team. Please try again",
+    "saveFailed": "Couldn't save the team. Please try again",
+    "edit": "Edit",
+    "editTitle": "Team profile",
+    "leave": "Leave team",
+    "leaveConfirm": "Leave team {{name}}?",
+    "actionFailed": "Couldn't complete the action. Please try again",
+    "none": "Not specified",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "roles": {
+      "captain": "Captain",
+      "member": "Member"
+    },
+    "card": {
+      "tags": "Skills and technologies",
+      "membersLabel": "Members: {{count}} of {{limit}}"
+    },
+    "form": {
+      "name": "Name",
+      "interests": "Interests",
+      "ownSkills": "Team skills",
+      "ownTechnologies": "Team technologies",
+      "skillsHint": "Members' skills are added automatically",
+      "create": "Create"
+    },
+    "fields": {
+      "interests": "Interests",
+      "skills": "Skills",
+      "technologies": "Technologies"
+    },
+    "members": {
+      "title": "Members",
+      "email": "Student email",
+      "add": "Add",
+      "addFailed": "Couldn't add the member. Please try again",
+      "full": "The team already has {{limit}} members",
+      "remove": "Remove",
+      "removeConfirm": "Remove {{name}} from the team?",
+      "tags": "Skills and technologies: {{name}}"
+    },
+    "errors": {
+      "nameInvalid": "Name: 2 to 60 characters"
+    }
+  },
+  "proposals": {
+    "title": "My proposals",
+    "empty": "Your teams haven't sent any proposals yet",
+    "loadFailed": "Couldn't load proposals",
+    "open": "Open",
+    "respond": "Send a proposal",
+    "captainOnly": "Proposals are sent by a team captain",
+    "taskBlockTitle": "Your teams' proposals",
+    "notFound": "Proposal not found",
+    "withdrawConfirm": "Withdraw the proposal for {{title}}?",
+    "withdrawFailed": "Couldn't withdraw the proposal. Please try again",
+    "filter": {
+      "label": "Team",
+      "all": "All teams"
+    },
+    "card": {
+      "expand": "Show more",
+      "collapse": "Show less",
+      "weeks": "{{count}} wk",
+      "sentAt": "Sent {{date}}",
+      "edit": "Edit",
+      "withdraw": "Withdraw",
+      "businessComment": "Business comment:"
+    },
+    "form": {
+      "team": "Team",
+      "chooseTeam": "Choose a team",
+      "idea": "Solution idea",
+      "plan": "Plan",
+      "durationWeeks": "Duration in weeks",
+      "prototypeUrl": "Prototype link (optional)",
+      "submit": "Send proposal",
+      "failed": "Couldn't send the proposal. Please try again",
+      "exists": "The team already has an active proposal for this task.",
+      "lowRating": "This task needs clarification: the business may ask extra questions before work starts",
+      "backToTask": "Back to task",
+      "loadFailed": "Couldn't load the proposal data",
+      "allTeamsResponded": "All your teams already have an active proposal for this task",
+      "sent": "Proposal sent",
+      "saved": "Changes saved",
+      "locked": "This proposal can't be changed: it has been reviewed or withdrawn"
+    },
+    "errors": {
+      "teamId": "Choose a team you captain",
+      "idea": "Idea: 20 to 2000 characters",
+      "plan": "Plan: 20 to 3000 characters",
+      "durationWeeks": "Duration: a whole number of weeks from 1 to 52",
+      "prototypeUrl": "The link must start with http:// or https://",
+      "prototypeUrlLong": "Link: up to 500 characters"
+    }
+  },
+  "builder": {
+    "title": "Task builder",
+    "back": "My tasks",
+    "notFound": "Task not found",
+    "error": "Could not load the task",
+    "fallback": "AI is unavailable — this result was produced in fallback mode",
+    "draftText": {
+      "title": "Original description",
+      "empty": "No description saved"
+    },
+    "steps": {
+      "label": "Builder steps",
+      "description": "Description",
+      "clarification": "Clarification",
+      "card": "Card",
+      "publication": "Publication"
+    },
+    "blocks": {
+      "context_need": "Context and need",
+      "data": "Data and materials",
+      "result": "Expected result",
+      "success_criteria": "Success criteria",
+      "constraints": "Constraints",
+      "users": "Users",
+      "business_link": "Link with the business"
+    },
+    "quality": {
+      "missing": "Empty",
+      "formal": "Formal",
+      "partial": "Incomplete",
+      "specific": "Specific"
+    },
+    "new": {
+      "title": "New task",
+      "description": "Describe the task — AI will ask clarifying questions and build the card only from your answers.",
+      "draftText": "Describe the task in your own words",
+      "industry": "Industry",
+      "industryPlaceholder": "Choose an industry",
+      "industriesError": "Could not load industries",
+      "submit": "Continue",
+      "saving": "Saving the description…",
+      "analyzing": "Analyzing the description and preparing questions…",
+      "error": "Could not save the description. Please try again",
+      "errors": {
+        "draftLength": "Description: 50 to 3000 characters",
+        "industryRequired": "Choose an industry"
+      }
+    },
+    "analyze": {
+      "hint": "The description is saved. Run the analysis to get clarifying questions.",
+      "submit": "Analyze the description",
+      "pending": "Analyzing the description and preparing questions…",
+      "error": "Could not analyze the description. Please try again"
+    },
+    "assessment": {
+      "title": "Description completeness"
+    },
+    "questions": {
+      "title": "Clarifying questions",
+      "roundTitle": "Round {{number}}",
+      "skip": "Skip",
+      "answer": "Answer",
+      "skipped": "Question skipped",
+      "noAnswer": "Skipped",
+      "more": "More questions ({{left}} left)",
+      "build": "Build the card",
+      "saving": "Saving the answers…",
+      "preparing": "Preparing new questions…",
+      "building": "Building the card…",
+      "error": "Could not send the answers. Please try again"
+    },
+    "card": {
+      "title": "Task card",
+      "titleField": "Title",
+      "titlePlaceholder": "Name the task briefly",
+      "industry": "Industry",
+      "empty": "Not specified — fill it in to raise the rating",
+      "marks": {
+        "ai": "AI",
+        "human": "You",
+        "profile": "From profile",
+        "changed": "Changed"
+      },
+      "confirmed": "Confirmed",
+      "sourcesTitle": "Taken from:",
+      "sourceDraft": "description: \"{{text}}\"",
+      "sourceAnswer": "answer to the question \"{{text}}\"",
+      "confirm": "Confirm the card",
+      "confirming": "Confirming and rating…",
+      "confirmError": "Could not confirm the card. Please try again",
+      "leave": "You have unconfirmed changes. Leave the page?"
+    },
+    "rating": {
+      "title": "Rating",
+      "pending": "The rating appears after confirmation",
+      "stale": "The rating will update after confirmation",
+      "heuristic": "rated by heuristics",
+      "hintsTitle": "What to add",
+      "complete": "All the information is complete",
+      "hint": "{{hint}}: up to +{{gain}}"
+    },
+    "hints": {
+      "context_need": {
+        "missing": "Describe what happens now and what needs to change",
+        "improve": "Clarify the situation and the goal: add numbers or examples"
+      },
+      "data": {
+        "missing": "Specify the data, examples or sources you will give the team",
+        "improve": "Clarify the data: volume, period, format"
+      },
+      "result": {
+        "missing": "Describe what the team should hand over at the end",
+        "improve": "Clarify the result: format and contents"
+      },
+      "success_criteria": {
+        "missing": "Add measurable success criteria",
+        "improve": "Make the criteria measurable: a metric and a target value"
+      },
+      "constraints": {
+        "missing": "Specify deadlines, technologies or access",
+        "improve": "Clarify the constraints: deadline, platform, access"
+      },
+      "users": {
+        "missing": "Specify who the solution is for",
+        "improve": "Clarify the users: who they are and how often they will use the solution"
+      },
+      "business_link": {
+        "missing": "Specify the format of consultations and feedback",
+        "improve": "Clarify how you keep in touch: how often and through which channel"
+      }
+    },
+    "publish": {
+      "submit": "Publish",
+      "republish": "Publish again",
+      "blocked": {
+        "confirm": "Confirm the card before publishing",
+        "required": "Fill in the title and the need"
+      },
+      "error": "Could not publish. Please try again",
+      "published": "The task is published",
+      "openInCatalog": "Open in the catalog",
+      "unpublishedNotice": "The task is unpublished",
+      "unpublish": "Unpublish",
+      "dialogTitle": "Unpublish the task?",
+      "dialogText": "The task will disappear from the catalog. Responses will be kept.",
+      "dialogConfirm": "Unpublish",
+      "dialogCancel": "Cancel",
+      "actionError": "Could not complete the action. Please try again"
+    }
   }
 }

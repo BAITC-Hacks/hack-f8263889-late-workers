@@ -1,7 +1,9 @@
 import type { BadgeProps } from "@/common/components/ui";
-import { formatDateTime, isApiError } from "@/core/api";
+import { parseId } from "@/common/lib/query";
+import { formatDateTime } from "@/core/api";
 
 import {
+  type BusinessTask,
   TASK_LEVELS,
   TASK_SORTS,
   type TaskLevelCode,
@@ -10,6 +12,8 @@ import {
   type TasksPage,
   type TasksQuery,
 } from "./types";
+
+export { isNotFound, retryUnlessClientError } from "@/common/lib/query";
 
 export const DEFAULT_SORT: TaskSort = "rating";
 
@@ -79,14 +83,6 @@ export const toggleValue = <T>(values: T[], value: T): T[] =>
     ? values.filter((item) => item !== value)
     : [...values, value];
 
-/** A 4xx will not change on a second attempt, so only other failures retry. */
-export const retryUnlessClientError = (failureCount: number, error: unknown) =>
-  !(isApiError(error) && error.status >= 400 && error.status < 500) &&
-  failureCount < 1;
-
-export const isNotFound = (error: unknown) =>
-  isApiError(error) && error.status === 404;
-
 export const levelLabelKey = (level: TaskLevelCode) =>
   `catalog.levels.${level}`;
 
@@ -102,8 +98,17 @@ export const levelBadgeVariant = (level: TaskLevelCode) => LEVEL_BADGE[level];
 export const isInProgress = (status: { code: string }) =>
   status.code === "in_progress";
 
-export const parseTaskId = (raw: string | undefined): number | null =>
-  raw && /^[1-9]\d*$/.test(raw) ? Number(raw) : null;
+export const parseTaskId = parseId;
+
+export const builderPath = (id: number) => `/business/tasks/${id}/builder`;
+
+/** Statuses finished in the builder; a task past them opens its catalog page. */
+const BUILDER_STATUSES = new Set(["draft", "clarifying", "review"]);
+
+export const businessTaskHref = (task: BusinessTask) =>
+  BUILDER_STATUSES.has(task.status.code)
+    ? builderPath(task.id)
+    : `/catalog/${task.id}`;
 
 export type CatalogLinkState = { catalogSearch: string };
 

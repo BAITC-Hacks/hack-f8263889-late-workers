@@ -16,6 +16,8 @@ export type ApiErrorBody = {
     message: string;
     fields?: Record<string, string>;
     details?: unknown;
+    /** `PROPOSAL_EXISTS` names the team's active proposal. */
+    proposalId?: number;
   };
 };
 
@@ -26,5 +28,6 @@ export type ApiError = {
   message: string;
   fields?: Record<string, string>;
   details?: unknown;
+  proposalId?: number;
   requestId?: string;
 };

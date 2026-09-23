@@ -4,7 +4,7 @@ Guidance for coding agents (Codex, Claude Code, etc.) working in this repository
 
 ## What this is
 
-A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*` and the task catalog (`/api/tasks`, `/api/industries`, saved tasks, business tasks). Development uses the FastAPI backend and PostgreSQL by default; the Vite mock server is opt-in. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
+A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*`, the task catalog (`/api/tasks`, `/api/industries`, saved tasks, business tasks) and the business task builder (`/api/business/tasks/*`). Development uses the FastAPI backend and PostgreSQL by default; the Vite mock server is opt-in. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
 
 ## Commands
 
@@ -30,8 +30,10 @@ Run `lint` and `typecheck` before finishing any task. Both must pass. For authen
 src/
   common/
     components/layout/   Page, Section, Stack, Footer — layout primitives (barrel index.ts)
-    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster) via @radix-ui/react-slot + cva (barrel index.ts)
-    lib/utils.ts          cn() — clsx + tailwind-merge; pageNumbers()
+    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster, tooltip, form-field, form-error, textarea-field, pending-button, error-state, confirm-dialog on native <dialog>) via @radix-ui/react-slot + cva (barrel index.ts)
+    lib/utils.ts          cn() — clsx + tailwind-merge; pageNumbers(); describedBy()
+    lib/query.ts          retryUnlessClientError, isNotFound, parseId — shared by module queries
+    lib/forms.ts          applyFieldErrors (422 `fields` → react-hook-form), translatedResolver
     lib/toast.ts          zustand toast queue + showToast(); rendered by <Toaster /> in core/App.tsx
     styles/classes.ts      shared className constants (pageTitle, sectionTitle, field, fieldLabel, ...)
 
@@ -47,8 +49,11 @@ src/
     i18n.ts                     i18next + http-backend + languagedetector
 
   modules/                 feature modules
-    auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, section links
+    auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, section links, student profile page
     catalog/      contract types, tasks/industries API, URL-state hook, catalog/task/saved/business-tasks pages, save button
+    builder/      builder contract types and API, new-task page, builder page (analysis, clarification rounds, card editor, rating, publication)
+    teams/        teams API, my teams / create / team page, members (add by email, remove, leave)
+    proposals/    proposals API, task-page block, create/edit form, my proposals (filter, withdraw)
     notes/        api/notes.ts (CRUD), hooks/useNotes* , components/{NoteForm,NoteList,Pagination}, pages/NotesPage
     ai/           api/chat.ts, hooks/{useChat,useChatStream}, components/ChatPanel.tsx, pages/ChatPage.tsx
     system/       api/health.ts, hooks/useHealth.ts, components/ApiStatus.tsx
@@ -64,7 +69,7 @@ e2e/real/                  mock-free acceptance against FastAPI; global setup ch
 playwright.config.ts       isolated mock dev server and Chromium configuration
 ```
 
-Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks") and `/student` (student "Saved"). A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
+Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks"), `/business/tasks/new` and `/business/tasks/:id/builder` (business only) and `/student` (student "Saved"). Student-only: `/student/profile`, `/student/teams`, `/student/teams/new`, `/student/teams/:id`, `/student/proposals`, `/student/proposals/:id/edit`, `/catalog/:id/proposal`. A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
 
 Each module follows the same internal layout: `api/<resource>.ts` (typed fetch fns over `apiClient`) → `queryKeys.ts` (key factory: `.all/.lists()/.list(filters)/.details()/.detail(id)`) → `hooks/use<Thing>.ts` (TanStack Query wrappers) → `components/` + `pages/` → public barrel `index.ts`.
 
@@ -111,7 +116,7 @@ Localized strings are stored in sentence case; casing is never baked into a tran
 
 ### Color
 
-Every color goes through a token in `core/index.css`; there are no raw Tailwind palette classes anywhere in `src`. Status has its own tokens (`success`, `warning`) next to `destructive`.
+Every color goes through a token in `core/index.css`; there are no raw Tailwind palette classes anywhere in `src`. Status has its own tokens (`success`, `warning`, `caution`) next to `destructive`. `caution` is the yellow step between `warning` (orange) and `success`; the builder's four quality labels need all four.
 
 The token set is contrast-checked **as a whole** — 24 pairs against WCAG AA. When you change a color token, re-check every pair it takes part in: text on its background, foreground on its fill, border against its surface, status dots at 3:1 or better.
 
@@ -168,11 +173,29 @@ Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border an
 - A page past the end (a shared `?page=2` after the list shrank, or the 6-task demo seed) shows "На этой странице задач нет" with a way back to page 1 instead of an empty grid.
 - FastAPI implements these endpoints against PostgreSQL. Its seed has 7 tasks (6 visible and an owner-only draft), with database-generated IDs; real-API tests must locate tasks by title/response rather than hardcode mock IDs (`e2e/real/helpers.ts` keeps the seed titles and compares the UI with the `/api/tasks` response). The seed command deletes existing accounts and their related data; use it only for disposable or intentionally reset demo databases.
 
+## Builder API
+
+- Endpoints: `POST /api/business/tasks`, `GET /api/business/tasks/:id`, `POST …/rounds`, `PUT …/rounds/:number/answers`, `POST …/card/build`, `PUT …/card`, `POST …/publish`, `POST …/unpublish`. Every response is `{ task }` in one shape, unwrapped by `modules/builder/api/builder.ts`; `useTaskCache().apply` writes it over the page state as is and marks the catalog's business list, lists and detail stale.
+- `createRound`, `buildCard` and `confirmCard` wait for the AI: their timeout is 45 s (the server allows 30 s per AI call) and a timeout rejects with `code: "TIMEOUT"`. The rest keep the client's 15 s.
+- The page picks its screen from `status`: `draft` → analyze the draft, `clarifying` → the last round's questions, anything later → the card editor. Steps map `draft`/`clarifying` → Clarification, `review` → Card, `published`/`in_progress`/`unpublished` → Publication.
+- The answers form is mounted per round (`key={round.number}`) and the card editor per task; the editor resets only from a confirmation's response, so refetches never wipe edits. Unconfirmed edits arm `useLeaveGuard`: `beforeunload` for the tab and a capture-phase click guard for in-app links (the app uses `BrowserRouter`, so `useBlocker` is unavailable).
+- Tasks created before the builder (the seed) have `card: null`; `useCardDefaults` fills the editor from `GET /api/tasks/:id` instead.
+- 404 for someone else's task is by design on the server. There is no builder mock: with `AUTH_MOCKS=true` the builder routes have no API.
+
+## Teams and proposals API
+
+- Endpoints: `PUT /api/student/profile`; `POST /api/teams`, `GET /api/teams/my`, `GET|PATCH /api/teams/:id`, `POST /api/teams/:id/members`, `DELETE /api/teams/:id/members/:studentId`; `POST /api/tasks/:id/proposals`, `GET /api/tasks/:id/my-proposals`, `GET /api/me/proposals`, `GET|PATCH /api/proposals/:id`, `POST /api/proposals/:id/withdraw`. `modules/teams/api` and `modules/proposals/api` unwrap `{ team }`, `{ proposal }`, `{ items }`.
+- Module dependencies go one way: `catalog` → `proposals` → `teams` → `auth`. `proposals` fetches its own task header (`GET /api/tasks/:id`) instead of importing `catalog`.
+- `ApiError.proposalId` carries the active proposal from a 409 `PROPOSAL_EXISTS`.
+- Candidate teams for a proposal are teams the user captains without a `sent`/`reviewing`/`selected` proposal on the task (`candidateTeams` in `proposals/helpers.ts`). Status badge colours come from the code, status names from the server.
+- Profile saves, roster changes and proposal changes invalidate every non-auth query: team skills are merged from member profiles, and a proposal changes the catalog's response count.
+- Mocks: only `GET /api/teams/my` and `GET /api/tasks/:id/my-proposals` are stubbed (empty lists) so the mock task page renders; everything else in this feature needs FastAPI.
+
 ## ~~Don'ts~~
 
 - Don't reintroduce Bearer tokens, `tokenStorage`, or authentication persistence in localStorage/sessionStorage. Startup removes the old `authToken` key.
 - Don't import a module's internal files from outside it — use the module's `index.ts` barrel.
-- Don't restore demo routes or technical API-status navigation as part of authentication work. Password recovery, email verification, profile editing and teams remain out of scope.
+- Don't restore demo routes or technical API-status navigation as part of authentication work. Password recovery and email verification remain out of scope.
 - Don't build on `modules/dashboard/stores/useAppStore.ts` — it's an unused starter-kit leftover (a demo counter), not real app state.
 
 Visual rules — the reasoning for each is in **Design system** above:
