@@ -29,3 +29,6 @@ export const iconButton =
 
 export const inlineLink =
   "inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary";
+
+export const cardGrid =
+  "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";

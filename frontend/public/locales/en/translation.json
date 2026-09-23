@@ -186,10 +186,39 @@
   },
   "common": {
     "close": "Close",
-    "retry": "Try again"
+    "retry": "Try again",
+    "loading": "Loading…"
   },
   "catalog": {
-    "title": "Task catalog"
+    "title": "Task catalog",
+    "sort": {
+      "label": "Sort by",
+      "rating": "Rating",
+      "date": "Newest first",
+      "responses": "Most responses"
+    },
+    "levels": {
+      "needs_clarification": "Needs clarification",
+      "working": "Working",
+      "ready": "Ready",
+      "priority": "Priority"
+    },
+    "status": {
+      "inProgress": "In progress"
+    },
+    "card": {
+      "rating": "Rating",
+      "ratingValue": "{{rating}} / 100",
+      "responses_one": "{{count}} response",
+      "responses_other": "{{count}} responses"
+    },
+    "filters": {
+      "reset": "Reset filters"
+    },
+    "empty": "No published tasks yet",
+    "emptyFiltered": "No tasks match the selected filters",
+    "error": "Could not load the catalog",
+    "pagination": "Catalog pages"
   },
   "saved": {
     "title": "Saved"

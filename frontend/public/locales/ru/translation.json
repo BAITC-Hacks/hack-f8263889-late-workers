@@ -186,10 +186,41 @@
   },
   "common": {
     "close": "Закрыть",
-    "retry": "Повторить"
+    "retry": "Повторить",
+    "loading": "Загрузка…"
   },
   "catalog": {
-    "title": "Каталог задач"
+    "title": "Каталог задач",
+    "sort": {
+      "label": "Сортировка",
+      "rating": "По рейтингу",
+      "date": "Сначала новые",
+      "responses": "По числу откликов"
+    },
+    "levels": {
+      "needs_clarification": "Требует уточнения",
+      "working": "Рабочая",
+      "ready": "Готовая",
+      "priority": "Приоритетная"
+    },
+    "status": {
+      "inProgress": "В работе"
+    },
+    "card": {
+      "rating": "Рейтинг",
+      "ratingValue": "{{rating}} / 100",
+      "responses_one": "{{count}} отклик",
+      "responses_few": "{{count}} отклика",
+      "responses_many": "{{count}} откликов",
+      "responses_other": "{{count}} отклика"
+    },
+    "filters": {
+      "reset": "Сбросить фильтры"
+    },
+    "empty": "Опубликованных задач пока нет",
+    "emptyFiltered": "По выбранным фильтрам задач нет",
+    "error": "Не удалось загрузить каталог",
+    "pagination": "Страницы каталога"
   },
   "saved": {
     "title": "Интересное"

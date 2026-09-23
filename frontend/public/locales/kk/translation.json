@@ -186,10 +186,39 @@
   },
   "common": {
     "close": "Жабу",
-    "retry": "Қайталау"
+    "retry": "Қайталау",
+    "loading": "Жүктелуде…"
   },
   "catalog": {
-    "title": "Тапсырмалар каталогы"
+    "title": "Тапсырмалар каталогы",
+    "sort": {
+      "label": "Сұрыптау",
+      "rating": "Рейтинг бойынша",
+      "date": "Алдымен жаңалары",
+      "responses": "Өтінімдер саны бойынша"
+    },
+    "levels": {
+      "needs_clarification": "Нақтылауды қажет етеді",
+      "working": "Жұмыс",
+      "ready": "Дайын",
+      "priority": "Басым"
+    },
+    "status": {
+      "inProgress": "Орындалуда"
+    },
+    "card": {
+      "rating": "Рейтинг",
+      "ratingValue": "{{rating}} / 100",
+      "responses_one": "{{count}} өтінім",
+      "responses_other": "{{count}} өтінім"
+    },
+    "filters": {
+      "reset": "Сүзгілерді тазалау"
+    },
+    "empty": "Жарияланған тапсырмалар әзірге жоқ",
+    "emptyFiltered": "Таңдалған сүзгілер бойынша тапсырма жоқ",
+    "error": "Каталогты жүктеу мүмкін болмады",
+    "pagination": "Каталог беттері"
   },
   "saved": {
     "title": "Таңдаулылар"
