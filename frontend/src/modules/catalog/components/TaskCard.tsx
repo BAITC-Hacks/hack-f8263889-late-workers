@@ -4,6 +4,7 @@ import { type ReactNode, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
+import type { CatalogLinkState } from "../helpers";
 import type { TaskListItem } from "../types";
 import { TaskBadges } from "./TaskBadges";
 
@@ -36,7 +37,11 @@ export const TaskCard = ({ task, catalogSearch, action }: TaskCardProps) => {
         <h2 id={titleId} className="text-base leading-snug font-semibold">
           <Link
             to={`/catalog/${task.id}`}
-            state={catalogSearch === undefined ? undefined : { catalogSearch }}
+            state={
+              catalogSearch === undefined
+                ? undefined
+                : ({ catalogSearch } satisfies CatalogLinkState)
+            }
             className="focus-visible:after:ring-ring after:absolute after:inset-0 after:rounded-lg focus-visible:outline-hidden focus-visible:after:ring-2"
           >
             {task.title}

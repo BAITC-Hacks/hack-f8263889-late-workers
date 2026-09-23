@@ -32,3 +32,7 @@ export const inlineLink =
 
 export const cardGrid =
   "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+
+/** Label/value row of a definition list; the label column collapses on phones. */
+export const definitionRow =
+  "grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-6";

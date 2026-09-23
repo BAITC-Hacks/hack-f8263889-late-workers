@@ -228,5 +228,24 @@
   },
   "myTasks": {
     "title": "My tasks"
+  },
+  "task": {
+    "back": "Catalog",
+    "toCatalog": "Go to catalog",
+    "notFound": "Task not found",
+    "error": "Could not load the task",
+    "notSpecified": "Not specified",
+    "published": "Published {{date}}",
+    "fields": {
+      "context": "Context",
+      "need": "Need",
+      "targetUsers": "Users",
+      "dataMaterials": "Data and materials",
+      "constraints": "Constraints",
+      "expectedResult": "Expected result",
+      "successCriteria": "Success criteria",
+      "contact": "Contact",
+      "interactionFormat": "Interaction format"
+    }
   }
 }

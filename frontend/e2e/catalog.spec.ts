@@ -342,3 +342,139 @@ test("industries loading disables the list; an error keeps level filters working
     page.getByText("Не удалось загрузить отрасли", { exact: true })
   ).toHaveCount(0);
 });
+
+const isTaskDetail = (url: URL) => /^\/api\/tasks\/\d+$/.test(url.pathname);
+const FIELD_LABELS = [
+  "Контекст",
+  "Потребность",
+  "Пользователи",
+  "Данные и материалы",
+  "Ограничения",
+  "Ожидаемый результат",
+  "Критерии успеха",
+  "Контакт",
+  "Формат взаимодействия",
+];
+
+test("task page shows the header and all nine labelled fields", async ({
+  page,
+}) => {
+  await signIn(page, "student");
+  await page.goto("/catalog?industry=horeca&level=ready");
+  await page
+    .getByRole("article", { name: "Прогноз спроса на выпечку", exact: true })
+    .click();
+  await expect(page).toHaveURL("/catalog/12");
+  const main = page.getByRole("main");
+  await expect(
+    main.getByRole("heading", {
+      level: 1,
+      name: "Прогноз спроса на выпечку",
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(main).toContainText("Кофейня «Зерно» · HoReCa");
+  await expect(main).toContainText("78 / 100");
+  await expect(main).toContainText("Готовая");
+  await expect(main).toContainText("3 отклика");
+  await expect(main).toContainText("Опубликована 20 сентября 2026 г.");
+  await expect(main.getByRole("term")).toHaveText(FIELD_LABELS);
+  await expect(main.getByRole("definition").nth(1)).toHaveText(
+    "Каждый день списываем до 15% выпечки. Нужна модель, которая по продажам прошлых недель подскажет, сколько печь на завтра."
+  );
+  const format = main.getByRole("definition").last();
+  await expect(format).toHaveText("Не указано");
+  await expect(format).toHaveCSS(
+    "color",
+    await main
+      .getByText("Кофейня «Зерно» · HoReCa")
+      .evaluate((node) => getComputedStyle(node).color)
+  );
+});
+
+test("task page shows the in-progress label", async ({ page }) => {
+  await signIn(page, "student");
+  await page.goto("/catalog/3");
+  await expect(page.getByRole("main")).toContainText("В работе");
+  await expect(page.getByRole("main")).toContainText("Приоритетная");
+});
+
+test("back link restores sort, filters and page", async ({ page }) => {
+  await signIn(page, "student");
+  await page.goto(
+    "/catalog?sort=responses&level=working,ready,priority&page=2"
+  );
+  const title = await cards(page).first().getByRole("heading").textContent();
+  await cards(page).first().getByRole("link").click();
+  await expect(page).toHaveURL(/\/catalog\/\d+$/);
+  await expect(
+    page.getByRole("heading", { level: 1, name: title!, exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("main")
+    .getByRole("link", { name: "Каталог", exact: true })
+    .click();
+  await expect(page).toHaveURL(
+    "/catalog?sort=responses&level=working,ready,priority&page=2"
+  );
+  await expect(
+    page.getByRole("button", { name: "2", exact: true })
+  ).toHaveAttribute("aria-current", "page");
+  await expect(cards(page).first()).toHaveAccessibleName(title!);
+});
+
+test("unknown and malformed task ids show not found", async ({ page }) => {
+  await signIn(page, "student");
+  await page.goto("/catalog/99999");
+  await expect(
+    page.getByRole("heading", { name: "Задача не найдена", exact: true })
+  ).toBeVisible();
+  await page.getByRole("link", { name: "В каталог", exact: true }).click();
+  await expect(page).toHaveURL("/catalog");
+
+  let detailRequests = 0;
+  page.on("request", (request) => {
+    if (isTaskDetail(new URL(request.url()))) detailRequests += 1;
+  });
+  await page.goto("/catalog/abc");
+  await expect(
+    page.getByRole("heading", { name: "Задача не найдена", exact: true })
+  ).toBeVisible();
+  expect(detailRequests).toBe(0);
+});
+
+test("task page loading placeholder and error retry", async ({ page }) => {
+  await signIn(page, "student");
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let fail = true;
+  await page.route(isTaskDetail, async (route) => {
+    await ready;
+    if (fail)
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error: { code: "INTERNAL_ERROR", message: "Ошибка сервера" },
+        }),
+      });
+    else await route.continue();
+  });
+  await page.goto("/catalog/12");
+  await expect(page.getByTestId("task-skeleton")).toBeVisible();
+  release();
+  await expect(
+    page.getByText("Не удалось загрузить задачу", { exact: true })
+  ).toBeVisible();
+  fail = false;
+  await page.getByRole("button", { name: "Повторить", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Прогноз спроса на выпечку",
+      exact: true,
+    })
+  ).toBeVisible();
+});

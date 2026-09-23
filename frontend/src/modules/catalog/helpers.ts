@@ -1,5 +1,5 @@
 import type { BadgeProps } from "@/common/components/ui";
-import { isApiError } from "@/core/api";
+import { formatDateTime, isApiError } from "@/core/api";
 
 import {
   TASK_LEVELS,
@@ -99,3 +99,21 @@ export const levelBadgeVariant = (level: TaskLevelCode) => LEVEL_BADGE[level];
 
 export const isInProgress = (status: { code: string }) =>
   status.code === "in_progress";
+
+export const parseTaskId = (raw: string | undefined): number | null =>
+  raw && /^[1-9]\d*$/.test(raw) ? Number(raw) : null;
+
+export type CatalogLinkState = { catalogSearch: string };
+
+/** The card passes the list's search along, so "back" restores sort, filters and page. */
+export const backToCatalogHref = (state: unknown): string => {
+  const search = (state as Partial<CatalogLinkState> | null)?.catalogSearch;
+  return typeof search === "string" && (search === "" || search.startsWith("?"))
+    ? `/catalog${search}`
+    : "/catalog";
+};
+
+export const isBlank = (value: string | null) => !value?.trim();
+
+export const formatPublishedDate = (iso: string, locale: string) =>
+  formatDateTime(iso, locale, { dateStyle: "long" });

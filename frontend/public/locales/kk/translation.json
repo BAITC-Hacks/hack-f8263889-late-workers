@@ -228,5 +228,24 @@
   },
   "myTasks": {
     "title": "Менің тапсырмаларым"
+  },
+  "task": {
+    "back": "Каталог",
+    "toCatalog": "Каталогқа өту",
+    "notFound": "Тапсырма табылмады",
+    "error": "Тапсырманы жүктеу мүмкін болмады",
+    "notSpecified": "Көрсетілмеген",
+    "published": "Жарияланды: {{date}}",
+    "fields": {
+      "context": "Контекст",
+      "need": "Қажеттілік",
+      "targetUsers": "Пайдаланушылар",
+      "dataMaterials": "Деректер мен материалдар",
+      "constraints": "Шектеулер",
+      "expectedResult": "Күтілетін нәтиже",
+      "successCriteria": "Табыс критерийлері",
+      "contact": "Байланыс",
+      "interactionFormat": "Өзара әрекеттесу форматы"
+    }
   }
 }

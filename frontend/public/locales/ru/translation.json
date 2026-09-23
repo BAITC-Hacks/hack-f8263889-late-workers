@@ -230,5 +230,24 @@
   },
   "myTasks": {
     "title": "Мои задачи"
+  },
+  "task": {
+    "back": "Каталог",
+    "toCatalog": "В каталог",
+    "notFound": "Задача не найдена",
+    "error": "Не удалось загрузить задачу",
+    "notSpecified": "Не указано",
+    "published": "Опубликована {{date}}",
+    "fields": {
+      "context": "Контекст",
+      "need": "Потребность",
+      "targetUsers": "Пользователи",
+      "dataMaterials": "Данные и материалы",
+      "constraints": "Ограничения",
+      "expectedResult": "Ожидаемый результат",
+      "successCriteria": "Критерии успеха",
+      "contact": "Контакт",
+      "interactionFormat": "Формат взаимодействия"
+    }
   }
 }
