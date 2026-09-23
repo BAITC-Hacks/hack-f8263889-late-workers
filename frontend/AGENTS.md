@@ -18,10 +18,11 @@ npm run lint                         # ESLint src, dev, e2e and TS configs
 npm run typecheck                    # TypeScript app, Node and E2E configs
 npx playwright install chromium     # install the E2E browser once
 npm run test:e2e                     # Playwright Chromium; starts Vite on :5180
+API_PROXY_TARGET=http://127.0.0.1:8001 npm run test:e2e:real   # e2e/real against a running FastAPI with the demo seed; Vite on :5181
 npm run format                       # Prettier src files
 ```
 
-Run `lint` and `typecheck` before finishing any task. Both must pass. For authentication or catalog changes, also run `build` and the relevant Playwright tests. E2E tests cover cookie/session lifecycle, role guards, error states, validation, tags, the catalog (sort, filters, address state, pagination, task page, saving, business tasks), themes, locales and responsive widths; the suite uses mocks, not the real backend.
+Run `lint` and `typecheck` before finishing any task. Both must pass. For authentication or catalog changes, also run `build` and the relevant Playwright tests. E2E tests cover cookie/session lifecycle, role guards, error states, validation, tags, the catalog (sort, filters, address state, pagination, task page, saving, business tasks), themes, locales and responsive widths; that suite uses mocks. `e2e/real` (`test:e2e:real`, `playwright.real.config.ts`) repeats the auth and catalog acceptance against FastAPI: run it after backend-facing changes, on a disposable seeded database, because it registers accounts.
 
 ## Architecture
 
@@ -58,7 +59,8 @@ dev/authMock.ts            Vite-only middleware; accounts and HttpOnly sessions 
 dev/catalogMock.ts         catalog endpoints over the auth mock's sessions; saved tasks in memory
 dev/catalogData.ts         seed industries and tasks
 dev/http.ts                JSON/error/cookie helpers shared by the mocks
-e2e/                       Playwright browser scenarios
+e2e/                       Playwright browser scenarios (mock API)
+e2e/real/                  mock-free acceptance against FastAPI; global setup checks /health and demo logins
 playwright.config.ts       isolated mock dev server and Chromium configuration
 ```
 
@@ -163,7 +165,8 @@ Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border an
 - Saving is not optimistic: the button is disabled until the 204, then `useToggleSave` patches every cached copy (catalog lists, task detail, saved list). Failures keep the old state and show a toast. The button renders only for students.
 - Catalog queries do not retry 4xx (`retryUnlessClientError`). Level and the in-progress label are translated by `code`; industry and business-task status names come from the server.
 - The catalog mock runs inside the auth mock plugin, so `AUTH_MOCKS` switches both. It validates query parameters (422 with `fields`), returns 401/403/404 per the contract, shows only `published`/`in_progress` tasks in the catalog and lets an owner open its draft. Seed: 26 tasks, 25 visible; Кофейня «Зерно» (the seed business) owns tasks 12 (published), 15 (draft) and 21 (in progress). Saved tasks are kept per user in memory until Vite restarts.
-- FastAPI implements these endpoints against PostgreSQL. Its seed has 7 tasks (6 visible and an owner-only draft), with database-generated IDs; real-API tests must locate tasks by title/response rather than hardcode mock IDs. The seed command deletes existing accounts and their related data; use it only for disposable or intentionally reset demo databases.
+- A page past the end (a shared `?page=2` after the list shrank, or the 6-task demo seed) shows "На этой странице задач нет" with a way back to page 1 instead of an empty grid.
+- FastAPI implements these endpoints against PostgreSQL. Its seed has 7 tasks (6 visible and an owner-only draft), with database-generated IDs; real-API tests must locate tasks by title/response rather than hardcode mock IDs (`e2e/real/helpers.ts` keeps the seed titles and compares the UI with the `/api/tasks` response). The seed command deletes existing accounts and their related data; use it only for disposable or intentionally reset demo databases.
 
 ## ~~Don'ts~~
 
