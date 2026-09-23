@@ -11,7 +11,7 @@ export default defineConfig(({ command, mode, isPreview }) => {
     command === "serve" &&
     !isPreview &&
     mode === "development" &&
-    (env.AUTH_MOCKS ?? "true") === "true";
+    env.AUTH_MOCKS === "true";
 
   return {
     plugins: [react(), tailwindcss(), useAuthMocks && authMock()],
@@ -23,7 +23,7 @@ export default defineConfig(({ command, mode, isPreview }) => {
     server: {
       proxy: {
         "/api": {
-          target: env.API_PROXY_TARGET || "http://localhost:8000",
+          target: env.API_PROXY_TARGET || "http://127.0.0.1:8000",
           changeOrigin: true,
         },
       },

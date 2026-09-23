@@ -59,7 +59,7 @@ services:
   web:
     build: ./frontend
     environment:
-      AUTH_MOCKS: "${AUTH_MOCKS:-true}"
+      AUTH_MOCKS: "${AUTH_MOCKS:-false}"
       API_PROXY_TARGET: http://api:8000
     volumes:
       - ./frontend:/app
