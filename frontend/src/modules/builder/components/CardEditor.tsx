@@ -2,6 +2,7 @@ import { Section, Stack } from "@/common/components/layout";
 import { cn } from "@/common/lib/utils";
 import { skeleton } from "@/common/styles";
 import { TASK_FIELDS } from "@/modules/catalog";
+import { MarketPanel } from "@/modules/gamification";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -25,61 +26,73 @@ const CardEditor = ({ task, defaults }: CardEditorProps) => {
   const { dirtyFields, errors } = editor.form.formState;
 
   return (
-    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,48rem)_24rem]">
-      <form noValidate onSubmit={editor.confirm} className="min-w-0 space-y-6">
-        <PublicationNotice task={task} />
-        <Section title={t("builder.card.title")} divider={false}>
-          <Stack gap="lg">
-            <CardInputField
-              form={editor.form}
-              name="title"
-              id={cardFieldId("title")}
-              label={t("builder.card.titleField")}
-              max={TITLE_MAX}
-              placeholder={t("builder.card.titlePlaceholder")}
-              meta={task.card?.title ?? null}
-              changed={!!dirtyFields.title}
-              error={errors.title?.message}
-              task={task}
-            />
-            <IndustryField
-              form={editor.form}
-              current={task.industry}
-              changed={!!dirtyFields.industryCode}
-              error={errors.industryCode?.message}
-            />
-            {TASK_FIELDS.map((key) => (
+    <Stack gap="lg">
+      <MarketPanel
+        taskId={task.id}
+        status={task.status.code}
+        onHint={editor.focusMarketHint}
+      />
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,48rem)_24rem]">
+        <form
+          noValidate
+          onSubmit={editor.confirm}
+          className="min-w-0 space-y-6"
+        >
+          <PublicationNotice task={task} />
+          <Section title={t("builder.card.title")} divider={false}>
+            <Stack gap="lg">
               <CardInputField
-                key={key}
                 form={editor.form}
-                name={`fields.${key}`}
-                id={cardFieldId(key)}
-                label={t(`task.fields.${key}`)}
-                max={FIELD_MAX}
-                multiline
-                placeholder={t("builder.card.empty")}
-                meta={task.card?.fields[key] ?? null}
-                changed={!!dirtyFields.fields?.[key]}
-                error={errors.fields?.[key]?.message}
+                name="title"
+                id={cardFieldId("title")}
+                label={t("builder.card.titleField")}
+                max={TITLE_MAX}
+                placeholder={t("builder.card.titlePlaceholder")}
+                meta={task.card?.title ?? null}
+                changed={!!dirtyFields.title}
+                error={errors.title?.message}
                 task={task}
               />
-            ))}
-          </Stack>
-        </Section>
-        <CardActions task={task} editor={editor} />
-      </form>
-      <RatingPanel
-        task={task}
-        stale={editor.isDirty}
-        onHint={editor.focusHint}
-      />
-      <UnpublishDialog
-        open={editor.unpublishOpen}
-        pending={editor.pending === "unpublish"}
-        onConfirm={() => void editor.unpublish()}
-        onClose={() => editor.setUnpublishOpen(false)}
-      />
-    </div>
+              <IndustryField
+                form={editor.form}
+                current={task.industry}
+                changed={!!dirtyFields.industryCode}
+                error={errors.industryCode?.message}
+              />
+              {TASK_FIELDS.map((key) => (
+                <CardInputField
+                  key={key}
+                  form={editor.form}
+                  name={`fields.${key}`}
+                  id={cardFieldId(key)}
+                  label={t(`task.fields.${key}`)}
+                  max={FIELD_MAX}
+                  multiline
+                  placeholder={t("builder.card.empty")}
+                  meta={task.card?.fields[key] ?? null}
+                  changed={!!dirtyFields.fields?.[key]}
+                  error={errors.fields?.[key]?.message}
+                  task={task}
+                />
+              ))}
+            </Stack>
+          </Section>
+          <CardActions task={task} editor={editor} />
+        </form>
+        <RatingPanel
+          task={task}
+          stale={editor.isDirty}
+          onHint={editor.focusHint}
+          onAllHints={editor.focusAllHints}
+        />
+        <UnpublishDialog
+          open={editor.unpublishOpen}
+          pending={editor.pending === "unpublish"}
+          onConfirm={() => void editor.unpublish()}
+          onClose={() => editor.setUnpublishOpen(false)}
+        />
+      </div>
+    </Stack>
   );
 };
 

@@ -534,5 +534,73 @@
       "dialogCancel": "Cancel",
       "actionError": "Could not complete the action. Please try again"
     }
+  },
+  "gamification": {
+    "filter": {
+      "title": "Badges",
+      "allSelected": "Showing tasks with all selected badges",
+      "error": "Could not load badges"
+    },
+    "badges": {
+      "complete": {
+        "name": "All filled in",
+        "condition": "All 7 card sections are at least 70% complete"
+      },
+      "has_data": {
+        "name": "Data available",
+        "condition": "The Data and materials section specifies the data, its volume and format"
+      },
+      "measurable": {
+        "name": "Measurable result",
+        "condition": "The success criteria include a metric and a target value"
+      },
+      "clear_scope": {
+        "name": "Clear scope",
+        "condition": "The Constraints section is at least 70% complete and includes a deadline"
+      },
+      "open_dialog": {
+        "name": "Open to dialogue",
+        "condition": "Contact details and the format for consultations and feedback are provided"
+      }
+    },
+    "badgeMore": "+{{count}}",
+    "badgeMoreLabel": "More badges: {{count}}",
+    "progress": {
+      "title": "Task readiness",
+      "remaining_one": "{{count}} more point to reach the {{level}} level",
+      "remaining_other": "{{count}} more points to reach the {{level}} level",
+      "ready": "The task is fully ready for work",
+      "allHints": "All suggestions",
+      "up": "Task level increased: {{level}}",
+      "down": "Task level decreased: {{level}}"
+    },
+    "builderBadges": {
+      "title": "Badges",
+      "pending": "Badges will appear after you confirm the card",
+      "how": "How to earn it: {{condition}}",
+      "error": "Could not load badges",
+      "new": "New badge: {{name}}",
+      "earned": "Earned"
+    },
+    "market": {
+      "title": "Market response",
+      "refresh": "Refresh",
+      "views": "Views",
+      "saves": "Saves",
+      "responses": "Responses",
+      "conversion": "Conversion",
+      "medianResponses": "Industry median: {{value}}",
+      "medianConversion": "Industry median: {{value}}%",
+      "noIndustryData": "No industry data",
+      "since": "Since the card was updated ({{date}}): +{{views}}, +{{responses}}",
+      "viewsAdded_one": "{{count}} view",
+      "viewsAdded_other": "{{count}} views",
+      "responsesAdded_one": "{{count}} response",
+      "responsesAdded_other": "{{count}} responses",
+      "hint": "Students view this task but respond less often than the industry average. Add details to the {{block}} section",
+      "improve": "Add details",
+      "error": "Could not load market response",
+      "emptyValue": "—"
+    }
   }
 }

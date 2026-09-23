@@ -1,5 +1,7 @@
+import { useTooltip } from "@/common/hooks/useTooltip";
 import { cn } from "@/common/lib/utils";
-import { type ReactNode, useId } from "react";
+import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 type TooltipProps = {
   content: ReactNode;
@@ -12,24 +14,38 @@ type TooltipProps = {
  * trigger can be plain text; keep interactive elements out of `children`.
  */
 export const Tooltip = ({ content, children, className }: TooltipProps) => {
-  const id = useId();
+  const tooltip = useTooltip();
   return (
-    <span
-      tabIndex={0}
-      aria-describedby={id}
-      className={cn(
-        "group/tooltip focus-visible:ring-ring relative inline-flex rounded-md outline-hidden focus-visible:ring-1",
-        className
-      )}
-    >
-      {children}
+    <>
       <span
-        role="tooltip"
-        id={id}
-        className="bg-popover text-popover-foreground pointer-events-none invisible absolute bottom-full left-0 z-30 mb-2 w-max max-w-72 rounded-md border px-3 py-2 text-left text-xs font-normal opacity-0 transition-opacity group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-visible/tooltip:visible group-focus-visible/tooltip:opacity-100"
+        ref={tooltip.triggerRef}
+        tabIndex={0}
+        aria-describedby={tooltip.id}
+        onMouseEnter={tooltip.onMouseEnter}
+        onMouseLeave={tooltip.onMouseLeave}
+        onFocus={tooltip.onFocus}
+        onBlur={tooltip.onBlur}
+        className={cn(
+          "focus-visible:ring-ring inline-flex min-w-0 rounded-md outline-hidden focus-visible:ring-1",
+          className
+        )}
       >
-        {content}
+        {children}
       </span>
-    </span>
+      {createPortal(
+        <span
+          ref={tooltip.tooltipRef}
+          role="tooltip"
+          id={tooltip.id}
+          hidden={!tooltip.open}
+          onMouseEnter={tooltip.onMouseEnter}
+          onMouseLeave={tooltip.onMouseLeave}
+          className="bg-popover text-popover-foreground invisible fixed top-0 left-0 z-50 w-max max-w-72 overflow-auto rounded-md border px-3 py-2 text-left text-xs font-normal break-words whitespace-normal"
+        >
+          {content}
+        </span>,
+        document.body
+      )}
+    </>
   );
 };

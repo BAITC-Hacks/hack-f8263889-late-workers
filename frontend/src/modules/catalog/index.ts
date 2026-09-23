@@ -10,6 +10,8 @@ export {
   builderPath,
   isBlank,
   isNotFound,
+  levelLabelKey,
+  levelProgressClass,
   parseTaskId,
   retryUnlessClientError,
   statusBadgeVariant,

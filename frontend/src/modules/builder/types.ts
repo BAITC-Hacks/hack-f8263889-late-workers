@@ -4,6 +4,7 @@ import type {
   TaskFieldKey,
   TaskLevelCode,
 } from "@/modules/catalog";
+import type { EarnedBadge } from "@/modules/gamification";
 
 export const BLOCK_CODES = [
   "context_need",
@@ -101,6 +102,7 @@ export type BuilderTask = {
   rating: number | null;
   level: Coded<TaskLevelCode> | null;
   ratingBreakdown: RatingEntry[] | null;
+  badges: EarnedBadge[];
   confirmedAt: string | null;
   publishedAt: string | null;
   createdAt: string;
