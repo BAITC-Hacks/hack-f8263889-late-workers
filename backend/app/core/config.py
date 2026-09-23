@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import field_validator, model_validator
+from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "xhigh", "max"]
@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
     API_V1_PREFIX: str = "/api/v1"
+    # Unversioned surface for the accounts contract: /api/auth/*.
+    API_PREFIX: str = "/api"
     # Comma-separated list in env: CORS_ORIGINS=http://localhost:3000,https://app.example.com
     CORS_ORIGINS: Annotated[list[str], NoDecode] = [
         "http://localhost:3000",
@@ -35,9 +37,19 @@ class Settings(BaseSettings):
     AI_RATE_LIMIT_PER_MINUTE: int = 20
 
     # --- Auth ---
-    SECRET_KEY: str = "change-me-to-a-random-64-char-hex-string-see-env-example"
+    # The accounts spec calls this JWT_SECRET; both env names set the same secret.
+    SECRET_KEY: str = Field(
+        default="change-me-to-a-random-64-char-hex-string-see-env-example",
+        validation_alias=AliasChoices("SECRET_KEY", "JWT_SECRET"),
+    )
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
+    # Drives both the JWT `exp` and the auth cookie's Max-Age — one number, so a
+    # cookie can never outlive its token and strand the user in a 401 loop.
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    AUTH_COOKIE_NAME: str = "access_token"
+    # "Lax" is right while the API and the web app share a host (ports don't count).
+    # Different domains in production need "None", which browsers only accept with Secure.
+    AUTH_COOKIE_SAMESITE: Literal["Lax", "Strict", "None"] = "Lax"
 
     # --- AI (OpenAI Responses API) ---
     OPENAI_API_KEY: str | None = None
@@ -70,6 +82,15 @@ class Settings(BaseSettings):
     @property
     def is_sqlite(self) -> bool:
         return self.DATABASE_URL.startswith("sqlite")
+
+    @property
+    def auth_cookie_max_age(self) -> int:
+        return self.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+
+    @property
+    def auth_cookie_secure(self) -> bool:
+        """Derived, not configured: a Secure cookie is dropped over plain http in dev."""
+        return self.ENV == "prod"
 
 
 settings = Settings()
