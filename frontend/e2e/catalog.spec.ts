@@ -679,3 +679,85 @@ test("business sees no save buttons", async ({ page }) => {
     0
   );
 });
+
+test("saved tasks appear on the saved page and disappear when unsaved", async ({
+  page,
+}) => {
+  await registerStudent(page);
+  await page.goto("/catalog?industry=horeca");
+  await bakery(page)
+    .getByRole("button", { name: "В интересное", exact: true })
+    .click();
+  await expect(
+    bakery(page).getByRole("button", { name: "В интересном", exact: true })
+  ).toBeVisible();
+  const loyalty = page.getByRole("article", {
+    name: "Программа лояльности без пластиковых карт",
+    exact: true,
+  });
+  await loyalty
+    .getByRole("button", { name: "В интересное", exact: true })
+    .click();
+  await expect(
+    loyalty.getByRole("button", { name: "В интересном", exact: true })
+  ).toBeVisible();
+
+  await sections(page).getByRole("link", { name: "Интересное" }).click();
+  await expect(page).toHaveURL("/student");
+  await expect(cards(page)).toHaveCount(2);
+  await expect(bakery(page)).toContainText("78 / 100");
+
+  await bakery(page)
+    .getByRole("button", { name: "В интересном", exact: true })
+    .click();
+  await expect(bakery(page)).toHaveCount(0);
+  await expect(cards(page)).toHaveCount(1);
+  await loyalty
+    .getByRole("button", { name: "В интересном", exact: true })
+    .click();
+  await expect(cards(page)).toHaveCount(0);
+  await expect(
+    page.getByText("Вы пока ничего не сохранили", { exact: true })
+  ).toBeVisible();
+
+  await page
+    .getByRole("link", { name: "Перейти в каталог", exact: true })
+    .click();
+  await expect(page).toHaveURL("/catalog");
+  await page.goto("/catalog?industry=horeca");
+  await expect(
+    bakery(page).getByRole("button", { name: "В интересное", exact: true })
+  ).toBeVisible();
+});
+
+test("saved page loading placeholders and error retry", async ({ page }) => {
+  await registerStudent(page);
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let fail = true;
+  await page.route("**/api/me/saved-tasks", async (route) => {
+    await ready;
+    if (fail)
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error: { code: "INTERNAL_ERROR", message: "Ошибка сервера" },
+        }),
+      });
+    else await route.continue();
+  });
+  await sections(page).getByRole("link", { name: "Интересное" }).click();
+  await expect(page.getByTestId("task-card-skeleton")).toHaveCount(3);
+  release();
+  await expect(
+    page.getByText("Не удалось загрузить список", { exact: true })
+  ).toBeVisible();
+  fail = false;
+  await page.getByRole("button", { name: "Повторить", exact: true }).click();
+  await expect(
+    page.getByText("Вы пока ничего не сохранили", { exact: true })
+  ).toBeVisible();
+});

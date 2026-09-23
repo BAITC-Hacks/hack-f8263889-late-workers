@@ -224,7 +224,10 @@
     "pagination": "Catalog pages"
   },
   "saved": {
-    "title": "Saved"
+    "title": "Saved",
+    "empty": "You haven't saved anything yet",
+    "goCatalog": "Go to catalog",
+    "error": "Could not load the list"
   },
   "myTasks": {
     "title": "My tasks",
