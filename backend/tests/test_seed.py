@@ -35,7 +35,7 @@ async def test_seed_loads_the_demo_dataset(seeded: None, db: AsyncSession) -> No
     assert await db.scalar(select(func.count()).select_from(Student)) == 12
     assert await db.scalar(select(func.count()).select_from(Task)) == 7
     assert await db.scalar(select(func.count()).select_from(Team)) == 5
-    assert await db.scalar(select(func.count()).select_from(Proposal)) == 6
+    assert await db.scalar(select(func.count()).select_from(Proposal)) == 7
 
 
 async def test_seed_is_idempotent(seeded: None, db: AsyncSession) -> None:
@@ -45,7 +45,7 @@ async def test_seed_is_idempotent(seeded: None, db: AsyncSession) -> None:
     assert await db.scalar(select(func.count()).select_from(Student)) == 12
     assert await db.scalar(select(func.count()).select_from(Task)) == 7
     assert await db.scalar(select(func.count()).select_from(Team)) == 5
-    assert await db.scalar(select(func.count()).select_from(Proposal)) == 6
+    assert await db.scalar(select(func.count()).select_from(Proposal)) == 7
 
 
 async def test_the_catalogue_shows_six_of_the_seven_seeded_tasks(
@@ -89,3 +89,21 @@ async def test_seeded_response_counts_match_the_live_proposals(
             .where(Proposal.task_id == task.id, Proposal.status != "withdrawn")
         )
         assert task.responses_count == live, task.title
+
+
+async def test_seeded_selection_and_points(
+    seeded: None, client: AsyncClient, db: AsyncSession
+) -> None:
+    from app.models import Team
+
+    selected_team_points = await db.scalar(select(Team.points).where(Team.name == "Mobile First"))
+    assert selected_team_points == 10
+
+    login = await client.post(
+        "/api/auth/login", json={"email": "timur@student.kz", "password": DEMO_PASSWORD}
+    )
+    assert login.status_code == 200, login.text
+    mine = (await client.get("/api/me/proposals")).json()["items"]
+    chosen = next(p for p in mine if p["status"]["code"] == "selected")
+    assert chosen["businessComment"] is not None
+    assert [m["confirmed"] for m in chosen["milestones"]] == [True, False]
