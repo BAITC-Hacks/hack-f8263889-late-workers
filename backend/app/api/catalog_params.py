@@ -13,6 +13,7 @@ from sqlalchemy import select
 
 from app.api.deps import DbSession
 from app.core import messages
+from app.core.badges import BADGE_CODES
 from app.core.catalog import LEVEL_CODES, SORT_OPTIONS
 from app.core.exceptions import ValidationError
 from app.models import Industry
@@ -26,6 +27,7 @@ class CatalogueQuery:
     sort: str = "rating"
     industries: list[str] = field(default_factory=list)
     levels: list[str] = field(default_factory=list)
+    badges: list[str] = field(default_factory=list)
     page: int = 1
 
 
@@ -61,6 +63,7 @@ async def catalogue_query(
     sort: Annotated[str | None, Query()] = None,
     industry: Annotated[str | None, Query()] = None,
     level: Annotated[str | None, Query()] = None,
+    badge: Annotated[str | None, Query()] = None,
     page: Annotated[str | None, Query()] = None,
 ) -> CatalogueQuery:
     fields: dict[str, str] = {}
@@ -81,6 +84,11 @@ async def catalogue_query(
     if unknown_levels:
         fields["level"] = messages.unknown_level(_clip(unknown_levels[0]))
 
+    badges = split_codes(badge)
+    unknown_badges = [code for code in badges if code not in BADGE_CODES]
+    if unknown_badges:
+        fields["badge"] = messages.unknown_badge(_clip(unknown_badges[0]))
+
     resolved_page = parse_page(page)
     if resolved_page is None:
         fields["page"] = messages.PAGE
@@ -89,7 +97,11 @@ async def catalogue_query(
         raise ValidationError(fields, message=messages.VALIDATION_QUERY)
 
     return CatalogueQuery(
-        sort=resolved_sort, industries=industries, levels=levels, page=resolved_page or 1
+        sort=resolved_sort,
+        industries=industries,
+        levels=levels,
+        badges=badges,
+        page=resolved_page or 1,
     )
 
 

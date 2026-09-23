@@ -5,10 +5,12 @@ from sqlalchemy import select
 
 from app.api.catalog_params import CatalogueQueryDep
 from app.api.deps import BusinessUser, CurrentUser, DbSession, StudentUser
+from app.core.badges import BADGES
 from app.core.catalog import PAGE_SIZE
 from app.models import Industry
 from app.schemas.proposal import ProposalList, ProposalRequest, ProposalResponse
 from app.schemas.task import (
+    BadgeList,
     BusinessTaskList,
     IndustryList,
     TaskDetailResponse,
@@ -19,6 +21,7 @@ from app.services import proposals as proposals_service
 from app.services import tasks as tasks_service
 
 industries_router = APIRouter(prefix="/industries", tags=["catalog"])
+badges_router = APIRouter(prefix="/badges", tags=["catalog"])
 tasks_router = APIRouter(prefix="/tasks", tags=["catalog"])
 me_router = APIRouter(prefix="/me", tags=["catalog"])
 business_router = APIRouter(prefix="/business", tags=["catalog"])
@@ -28,6 +31,15 @@ business_router = APIRouter(prefix="/business", tags=["catalog"])
 async def list_industries(user: CurrentUser, db: DbSession):
     items = await db.scalars(select(Industry))
     return {"items": list(items)}
+
+
+@badges_router.get("", response_model=BadgeList)
+async def list_badges(user: CurrentUser):
+    return {
+        "items": [
+            {"code": code, "name": name, "condition": condition} for code, name, condition in BADGES
+        ]
+    }
 
 
 @tasks_router.get("", response_model=TaskPage)

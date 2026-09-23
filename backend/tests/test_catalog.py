@@ -103,6 +103,7 @@ async def test_card_shape(client: AsyncClient, student: dict, catalogue: list[Ta
         "responsesCount",
         "publishedAt",
         "isSaved",
+        "badges",
     }
     assert item["level"] == {"code": "priority", "name": "Приоритетная"}
     assert item["status"] == {"code": "published", "name": "Опубликована"}

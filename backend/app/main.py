@@ -11,6 +11,7 @@ from fastapi.responses import RedirectResponse
 from app.api.auth import router as accounts_router
 from app.api.builder import router as builder_router
 from app.api.catalog import (
+    badges_router,
     business_router,
     industries_router,
     me_router,
@@ -76,6 +77,7 @@ def create_app() -> FastAPI:
     app.include_router(accounts_router, prefix=settings.API_PREFIX)
     for catalog_router in (
         industries_router,
+        badges_router,
         tasks_router,
         me_router,
         business_router,

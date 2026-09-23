@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import messages
+from app.core.badges import badge_name, recalc_badges
 from app.core.blocks import CARD_FIELDS, FIELD_COLUMNS, MAX_ROUNDS
 from app.core.catalog import CATALOGUE_STATUSES, status_name
 from app.core.exceptions import (
@@ -154,6 +155,7 @@ def serialize(task: Task) -> dict[str, Any]:
             for fragment in all_fragments(task)
         ],
         "card": serialize_card(task),
+        "badges": [{"code": code, "name": badge_name(code)} for code in task.badges or []],
         "rating": task.rating if confirmed else None,
         "level": rating_service.level_of(task.rating) if confirmed else None,
         "rating_breakdown": rating_service.public_breakdown(task.rating_breakdown)
@@ -422,6 +424,8 @@ async def _recalculate(task: Task, business_id: int) -> None:
         )
         carried.update(graded)
     task.rating, task.rating_breakdown = rating_service.build_breakdown(texts, carried)
+    # Badges follow the rating everywhere: confirmation and post-publication edits alike.
+    task.badges = recalc_badges(True, task.rating_breakdown, task.constraints)
 
 
 # --- Publication ---------------------------------------------------------------

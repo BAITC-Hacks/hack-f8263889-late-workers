@@ -87,6 +87,7 @@ class BuilderTask(ContractModel):
     rounds_left: int
     fragments: list[Fragment]
     card: Card | None = None
+    badges: list[CodeName] = []
     rating: int | None = None
     level: CodeName | None = None
     rating_breakdown: list[RatingEntry] | None = None

@@ -1,5 +1,6 @@
 """Catalogue queries: browsing, the task page, and a student's saved tasks."""
 
+import json
 from typing import Any
 
 from sqlalchemy import Select, and_, func, or_, select
@@ -8,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.catalog_params import CatalogueQuery
 from app.core import messages
+from app.core.badges import badge_name
 from app.core.catalog import (
     CATALOGUE_STATUSES,
     LEVEL_RANGES,
@@ -38,6 +40,7 @@ def _card(task: Task, *, is_saved: bool) -> dict[str, Any]:
         "responses_count": task.responses_count,
         "published_at": task.published_at,
         "is_saved": is_saved,
+        "badges": [_code_name(code, badge_name(code)) for code in task.badges or []],
     }
 
 
@@ -79,6 +82,10 @@ def _catalogue_filters(query: CatalogueQuery) -> list[Any]:
             for code in query.levels
         ]
         filters.append(or_(*ranges))
+    # A task qualifies only when it carries every requested badge: one JSONB
+    # containment per code, ANDed together.
+    for code in query.badges:
+        filters.append(Task.badges.op("@>")(json.dumps([code])))
     return filters
 
 

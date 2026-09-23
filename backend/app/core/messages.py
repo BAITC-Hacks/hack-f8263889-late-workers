@@ -82,3 +82,7 @@ DECISION_TAKEN = "Решение по отклику уже принято ил�
 MILESTONES_ONLY_SELECTED = "Этапы доступны только для выбранной команды"
 COMMENT_LONG = "Комментарий: до 1000 символов"
 MILESTONE_TITLE = "Название этапа: от 3 до 200 символов"
+
+
+def unknown_badge(code: str) -> str:
+    return f"Неизвестный бейдж: {code}"

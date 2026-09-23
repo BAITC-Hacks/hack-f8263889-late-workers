@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base, JsonColumn, TimestampMixin
+from app.db.base import Base, JsonColumn, TagList, TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.business import Business
@@ -36,6 +36,8 @@ class Task(TimestampMixin, Base):
     interaction_format: Mapped[str | None] = mapped_column(Text)
 
     rating: Mapped[int] = mapped_column(Integer, default=0, server_default="0", index=True)
+    # Badge codes in reference order; recomputed with the rating, never edited by hand.
+    badges: Mapped[list[str]] = mapped_column(TagList, default=list, server_default="[]")
     responses_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
