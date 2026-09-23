@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, func
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TagList
@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 class Team(Base):
     __tablename__ = "teams"
     # Names are unique regardless of case, which plain unique=True cannot express.
-    __table_args__ = (Index("uq_teams_name_lower", func.lower("name"), unique=True),)
+    # text(), not func.lower("name"): a bare string is a literal, and the index
+    # would then be on the constant 'name' rather than on the column.
+    __table_args__ = (Index("uq_teams_name_lower", text("lower(name)"), unique=True),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(60))

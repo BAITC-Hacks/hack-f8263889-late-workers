@@ -17,7 +17,8 @@ from sqlalchemy import delete, func, select
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models import Business, Student, Task, User
+from app.models import Business, Proposal, Student, Task, Team, TeamMember, User
+from app.services.proposals import recalc_responses_count
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +35,21 @@ def _timestamp(value: str | None) -> datetime | None:
     return datetime.fromisoformat(value.replace("Z", "+00:00")) if value else None
 
 
-async def seed() -> tuple[int, int, int]:
+async def seed() -> tuple[int, int, int, int, int]:
     if settings.ENV == "prod":
         raise SystemExit("Refusing to seed: ENV=prod")
 
     businesses = _load("businesses")
     students = _load("students")
     tasks = _load("tasks")
+    teams = _load("teams")
+    proposals = _load("proposals")
 
     async with SessionLocal() as db:
-        # Cascades to businesses, students, tasks and saved_tasks.
+        # Teams are not owned by a user, so deleting users does not reach them;
+        # proposals go with either side.
+        await db.execute(delete(Team))
+        # Cascades to businesses, students, tasks, saved_tasks and proposals.
         await db.execute(delete(User))
         await db.flush()
 
@@ -63,57 +69,109 @@ async def seed() -> tuple[int, int, int]:
             db.add(user)
             by_email[entry["email"]] = user.business
 
+        students_by_email: dict[str, Student] = {}
         for entry in students:
+            student = Student(
+                name=entry["name"],
+                skills=entry["skills"],
+                technologies=entry["technologies"],
+            )
+            students_by_email[entry["email"]] = student
             db.add(
                 User(
                     email=entry["email"],
                     hashed_password=hash_password(DEMO_PASSWORD),
                     full_name=entry["name"],
                     role="student",
-                    student=Student(
-                        name=entry["name"],
-                        skills=entry["skills"],
-                        technologies=entry["technologies"],
-                    ),
+                    student=student,
                 )
             )
 
         await db.flush()
 
+        tasks_by_title: dict[str, Task] = {}
         for entry in tasks:
+            task = Task(
+                business_id=by_email[entry["businessEmail"]].id,
+                industry_code=entry["industryCode"],
+                status=entry["status"],
+                title=entry["title"],
+                context=entry["context"],
+                need=entry["need"],
+                target_users=entry["targetUsers"],
+                data_materials=entry["dataMaterials"],
+                constraints=entry["constraints"],
+                expected_result=entry["expectedResult"],
+                success_criteria=entry["successCriteria"],
+                contact=entry["contact"],
+                interaction_format=entry["interactionFormat"],
+                rating=entry["rating"],
+                responses_count=entry["responsesCount"],
+                published_at=_timestamp(entry["publishedAt"]),
+            )
+            tasks_by_title[entry["title"]] = task
+            db.add(task)
+
+        teams_by_name: dict[str, Team] = {}
+        for entry in teams:
+            team = Team(
+                name=entry["name"],
+                interests=entry["interests"],
+                own_skills=entry["ownSkills"],
+                own_technologies=entry["ownTechnologies"],
+                created_at=_timestamp(entry["createdAt"]),
+                members=[TeamMember(student=students_by_email[entry["captain"]], role="captain")]
+                + [
+                    TeamMember(student=students_by_email[email], role="member")
+                    for email in entry["members"]
+                ],
+            )
+            teams_by_name[entry["name"]] = team
+            db.add(team)
+
+        await db.flush()
+
+        for entry in proposals:
             db.add(
-                Task(
-                    business_id=by_email[entry["businessEmail"]].id,
-                    industry_code=entry["industryCode"],
+                Proposal(
+                    task_id=tasks_by_title[entry["taskTitle"]].id,
+                    team_id=teams_by_name[entry["team"]].id,
+                    author_student_id=students_by_email[entry["author"]].id,
+                    idea=entry["idea"],
+                    plan=entry["plan"],
+                    duration_weeks=entry["durationWeeks"],
+                    prototype_url=entry["prototypeUrl"],
                     status=entry["status"],
-                    title=entry["title"],
-                    context=entry["context"],
-                    need=entry["need"],
-                    target_users=entry["targetUsers"],
-                    data_materials=entry["dataMaterials"],
-                    constraints=entry["constraints"],
-                    expected_result=entry["expectedResult"],
-                    success_criteria=entry["successCriteria"],
-                    contact=entry["contact"],
-                    interaction_format=entry["interactionFormat"],
-                    rating=entry["rating"],
-                    responses_count=entry["responsesCount"],
-                    published_at=_timestamp(entry["publishedAt"]),
+                    business_comment=entry.get("businessComment"),
+                    created_at=_timestamp(entry["createdAt"]),
+                    decided_at=_timestamp(entry.get("decidedAt")),
                 )
             )
 
+        await db.flush()
+        # The JSON carries a starting responses_count; make it match reality.
+        for task in tasks_by_title.values():
+            await recalc_responses_count(db, task.id)
+
         await db.commit()
         counts: list[int] = []
-        for model in (Business, Student, Task):
+        for model in (Business, Student, Task, Team, Proposal):
             counts.append(await db.scalar(select(func.count()).select_from(model)) or 0)
-    return counts[0], counts[1], counts[2]
+    return counts[0], counts[1], counts[2], counts[3], counts[4]
 
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger.info("Seeding %s", settings.DATABASE_URL)
-    businesses, students, tasks = asyncio.run(seed())
-    logger.info("Done: %d businesses, %d students, %d tasks", businesses, students, tasks)
+    businesses, students, tasks, teams, proposals = asyncio.run(seed())
+    logger.info(
+        "Done: %d businesses, %d students, %d tasks, %d teams, %d proposals",
+        businesses,
+        students,
+        tasks,
+        teams,
+        proposals,
+    )
 
 
 if __name__ == "__main__":

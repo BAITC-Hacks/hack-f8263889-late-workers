@@ -2,37 +2,138 @@
   {
     "email": "arman@student.kz",
     "name": "Арман Сейтказы",
-    "skills": ["Анализ данных", "Машинное обучение"],
-    "technologies": ["Python", "Pandas"]
+    "skills": [
+      "Анализ данных",
+      "Машинное обучение"
+    ],
+    "technologies": [
+      "Python",
+      "Pandas"
+    ]
   },
   {
     "email": "aisha@student.kz",
     "name": "Айша Калиева",
-    "skills": ["Дизайн интерфейсов", "Прототипирование"],
-    "technologies": ["Figma", "React"]
+    "skills": [
+      "Дизайн интерфейсов",
+      "Прототипирование"
+    ],
+    "technologies": [
+      "Figma",
+      "React"
+    ]
   },
   {
     "email": "daniyar@student.kz",
     "name": "Данияр Оспанов",
-    "skills": ["Веб-разработка"],
-    "technologies": ["TypeScript", "React", "Node.js"]
+    "skills": [
+      "Веб-разработка"
+    ],
+    "technologies": [
+      "TypeScript",
+      "React",
+      "Node.js"
+    ]
   },
   {
     "email": "madina@student.kz",
     "name": "Мадина Ахметова",
-    "skills": ["Бизнес-анализ", "Продуктовая аналитика"],
-    "technologies": ["SQL", "Power BI"]
+    "skills": [
+      "Бизнес-анализ",
+      "Продуктовая аналитика"
+    ],
+    "technologies": [
+      "SQL",
+      "Power BI"
+    ]
   },
   {
     "email": "timur@student.kz",
     "name": "Тимур Жаксылык",
-    "skills": ["Мобильная разработка"],
-    "technologies": ["Kotlin", "Swift"]
+    "skills": [
+      "Мобильная разработка"
+    ],
+    "technologies": [
+      "Kotlin",
+      "Swift"
+    ]
   },
   {
     "email": "kamila@student.kz",
     "name": "Камила Сагинтаева",
-    "skills": ["Тестирование", "Автоматизация"],
-    "technologies": ["Python", "Playwright"]
+    "skills": [
+      "Тестирование",
+      "Автоматизация"
+    ],
+    "technologies": [
+      "Python",
+      "Playwright"
+    ]
+  },
+  {
+    "email": "dina@student.kz",
+    "name": "Дина Ахметова",
+    "skills": [
+      "Backend"
+    ],
+    "technologies": [
+      "FastAPI",
+      "PostgreSQL"
+    ]
+  },
+  {
+    "email": "nurlan@student.kz",
+    "name": "Нурлан Сериков",
+    "skills": [
+      "DevOps"
+    ],
+    "technologies": [
+      "Docker",
+      "Kubernetes"
+    ]
+  },
+  {
+    "email": "aliya@student.kz",
+    "name": "Алия Жумабек",
+    "skills": [
+      "Аналитика данных"
+    ],
+    "technologies": [
+      "SQL",
+      "Tableau"
+    ]
+  },
+  {
+    "email": "ruslan@student.kz",
+    "name": "Руслан Ким",
+    "skills": [
+      "Frontend"
+    ],
+    "technologies": [
+      "React",
+      "TypeScript"
+    ]
+  },
+  {
+    "email": "saule@student.kz",
+    "name": "Сауле Бекова",
+    "skills": [
+      "UX-исследования"
+    ],
+    "technologies": [
+      "Figma",
+      "Miro"
+    ]
+  },
+  {
+    "email": "olzhas@student.kz",
+    "name": "Олжас Турар",
+    "skills": [
+      "Машинное обучение"
+    ],
+    "technologies": [
+      "PyTorch",
+      "Python"
+    ]
   }
 ]

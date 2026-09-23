@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Data Hawks",
+    "interests": [
+      "Ритейл",
+      "HoReCa",
+      "Прогнозирование"
+    ],
+    "ownSkills": [
+      "Машинное обучение"
+    ],
+    "ownTechnologies": [
+      "Pandas"
+    ],
+    "captain": "arman@student.kz",
+    "members": [
+      "aisha@student.kz",
+      "dina@student.kz"
+    ],
+    "createdAt": "2026-09-21T11:00:00Z"
+  },
+  {
+    "name": "Code Nomads",
+    "interests": [
+      "IT",
+      "Образование"
+    ],
+    "ownSkills": [
+      "Веб-разработка"
+    ],
+    "ownTechnologies": [
+      "TypeScript"
+    ],
+    "captain": "daniyar@student.kz",
+    "members": [
+      "ruslan@student.kz",
+      "arman@student.kz"
+    ],
+    "createdAt": "2026-09-21T12:00:00Z"
+  },
+  {
+    "name": "Astana Analytics",
+    "interests": [
+      "Логистика",
+      "Финансы"
+    ],
+    "ownSkills": [
+      "Бизнес-анализ"
+    ],
+    "ownTechnologies": [
+      "Power BI"
+    ],
+    "captain": "madina@student.kz",
+    "members": [
+      "aliya@student.kz",
+      "nurlan@student.kz"
+    ],
+    "createdAt": "2026-09-21T13:00:00Z"
+  },
+  {
+    "name": "Mobile First",
+    "interests": [
+      "Здравоохранение",
+      "HoReCa"
+    ],
+    "ownSkills": [
+      "Мобильная разработка"
+    ],
+    "ownTechnologies": [
+      "Kotlin"
+    ],
+    "captain": "timur@student.kz",
+    "members": [
+      "saule@student.kz",
+      "olzhas@student.kz"
+    ],
+    "createdAt": "2026-09-21T14:00:00Z"
+  },
+  {
+    "name": "QA Guild",
+    "interests": [
+      "Производство",
+      "IT"
+    ],
+    "ownSkills": [
+      "Тестирование"
+    ],
+    "ownTechnologies": [
+      "Playwright"
+    ],
+    "captain": "kamila@student.kz",
+    "members": [
+      "ruslan@student.kz",
+      "dina@student.kz"
+    ],
+    "createdAt": "2026-09-21T15:00:00Z"
+  }
+]
