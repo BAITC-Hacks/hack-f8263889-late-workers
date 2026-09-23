@@ -19,7 +19,7 @@ from app.core.catalog import (
     status_name,
 )
 from app.core.exceptions import NotFoundError
-from app.models import SavedTask, Task, User
+from app.models import SavedTask, Task, TaskView, User
 
 
 def _code_name(code: str, name: str) -> dict[str, str]:
@@ -134,6 +134,7 @@ async def get_task(db: AsyncSession, task_id: int, viewer: User) -> dict[str, An
     if task is None or (task.status not in CATALOGUE_STATUSES and not is_owner):
         raise NotFoundError(messages.TASK_NOT_FOUND)
 
+    await _record_view(db, task, viewer)
     saved = await _saved_ids(db, viewer, [task.id])
     card = _card(task, is_saved=task.id in saved)
     card.pop("need_excerpt")
@@ -150,6 +151,18 @@ async def get_task(db: AsyncSession, task_id: int, viewer: User) -> dict[str, An
         "interaction_format": task.interaction_format,
     }
     return card
+
+
+async def _record_view(db: AsyncSession, task: Task, viewer: User) -> None:
+    """First-open bookkeeping: students only, catalogue statuses only, once ever."""
+    if viewer.student is None or task.status not in CATALOGUE_STATUSES:
+        return
+    await db.execute(
+        pg_insert(TaskView)
+        .values(task_id=task.id, student_id=viewer.student.id)
+        .on_conflict_do_nothing(index_elements=["task_id", "student_id"])
+    )
+    await db.commit()
 
 
 async def save_task(db: AsyncSession, task_id: int, student_id: int) -> None:
