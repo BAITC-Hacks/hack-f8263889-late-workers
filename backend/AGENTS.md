@@ -99,6 +99,29 @@ Three things that will bite if forgotten:
 
 Run `uv run python scripts/check_openai.py` to verify the key and model.
 
+## Teams and proposals (`/api/teams`, `/api/proposals`)
+
+Students form teams of up to five; the captain sends a proposal to a task from the
+catalogue. `app/services/teams.py` and `app/services/proposals.py` hold the logic,
+`app/api/teams.py` the routes (the proposal routes that hang off a task live on the
+catalogue's `tasks_router`).
+
+- `tasks.responses_count` is **recomputed**, never incremented:
+  `recalc_responses_count` counts every proposal that was not withdrawn, and runs on
+  send, on withdraw, and at the end of the seed.
+- Three constraints are index expressions, not `unique=True`: case-insensitive team
+  names, one captain per team, and one live proposal per (task, team). The last one
+  is partial — that is what lets a team apply again after withdrawing.
+  In a model index, write `text("lower(name)")`: `func.lower("name")` indexes the
+  literal string, not the column, and only `create_all` would show it.
+- Visibility: a student outside a team gets **404** for it, not 403, so team and
+  proposal ids cannot be probed; a member who is not the captain gets 403 on writes.
+  `GET /api/teams/{id}` is the one endpoint open to businesses, and it hides member
+  emails from everyone outside the team.
+
+Tag handling is shared, not copied: `dedupe_tags` and `validate_tag_fields` in
+`app/core/validation.py` back registration, the student profile and team tags alike.
+
 ## Conventions
 
 - Routers are thin: parse input, call a service, return. No SQL in routers.
