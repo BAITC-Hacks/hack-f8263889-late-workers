@@ -80,7 +80,7 @@ for (const language of ["ru", "en", "kk"] as const) {
               exact: true,
             })
             .click();
-          await expect(page).toHaveURL(`/${role}`);
+          await expect(page).toHaveURL(accounts[role].home);
           await expect(
             page
               .getByRole("banner")

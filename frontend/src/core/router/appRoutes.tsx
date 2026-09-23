@@ -1,12 +1,17 @@
 import {
   BusinessRegisterPage,
-  CabinetPage,
   GuestOnly,
   LoginPage,
   RequireAuth,
   SessionRedirect,
   StudentRegisterPage,
 } from "@/modules/auth";
+import {
+  BusinessTasksPage,
+  CatalogPage,
+  SavedTasksPage,
+  TaskPage,
+} from "@/modules/catalog";
 import { Navigate, type RouteObject } from "react-router-dom";
 
 export const appRoutes: RouteObject[] = [
@@ -21,12 +26,19 @@ export const appRoutes: RouteObject[] = [
     ],
   },
   {
+    element: <RequireAuth />,
+    children: [
+      { path: "/catalog", element: <CatalogPage /> },
+      { path: "/catalog/:id", element: <TaskPage /> },
+    ],
+  },
+  {
     element: <RequireAuth role="business" />,
-    children: [{ path: "/business/*", element: <CabinetPage /> }],
+    children: [{ path: "/business", element: <BusinessTasksPage /> }],
   },
   {
     element: <RequireAuth role="student" />,
-    children: [{ path: "/student/*", element: <CabinetPage /> }],
+    children: [{ path: "/student", element: <SavedTasksPage /> }],
   },
   { path: "*", element: <Navigate to="/" replace /> },
 ];

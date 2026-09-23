@@ -1,10 +1,10 @@
 import { Button } from "@/common/components/ui";
 import { fieldError } from "@/common/styles";
-import { useAuthStore, useLogout } from "@/modules/auth";
+import { sectionLinks, useAuthStore, useLogout } from "@/modules/auth";
 import { ThemeToggle } from "@/modules/theme";
 import { LoaderCircle, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 const LANGS = ["en", "ru", "kk"] as const;
 
@@ -16,12 +16,7 @@ export const TopBar = () => {
   return (
     <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
       <div className="flex min-h-14 w-full flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3 sm:px-10">
-        <div
-          className={
-            "flex min-w-0 flex-1 items-center gap-4 " +
-            (user ? "basis-full sm:basis-auto" : "")
-          }
-        >
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-6 gap-y-2">
           <Link
             to="/"
             className="hover:text-primary shrink-0 text-sm font-semibold tracking-tight"
@@ -29,14 +24,27 @@ export const TopBar = () => {
             rsk<span className="text-primary">/</span>
           </Link>
           {user && (
-            <span className="min-w-0 text-sm font-medium break-words">
+            <nav aria-label={t("nav.sections")} className="flex gap-4">
+              {sectionLinks(user.role).map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className="text-muted-foreground hover:text-foreground aria-[current=page]:border-primary aria-[current=page]:text-foreground border-b-2 border-transparent py-1 text-sm font-medium transition-colors"
+                >
+                  {t(link.labelKey)}
+                </NavLink>
+              ))}
+            </nav>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {user && (
+            <span className="text-muted-foreground mr-2 min-w-0 text-sm break-words">
               {user.role === "business"
                 ? user.business.companyName
                 : user.student.name}
             </span>
           )}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
           {user && (
             <Button
               type="button"

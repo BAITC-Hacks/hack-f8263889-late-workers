@@ -110,12 +110,6 @@
       "loading": "Loading…",
       "error": "Could not load your account",
       "retry": "Try again"
-    },
-    "business": {
-      "title": "Business dashboard"
-    },
-    "student": {
-      "title": "Student dashboard"
     }
   },
   "notes": {
@@ -184,10 +178,23 @@
     "notes": "Notes",
     "chat": "AI chat",
     "login": "Sign in",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "sections": "Sections",
+    "catalog": "Catalog",
+    "saved": "Saved",
+    "myTasks": "My tasks"
   },
   "common": {
     "close": "Close",
     "retry": "Try again"
+  },
+  "catalog": {
+    "title": "Task catalog"
+  },
+  "saved": {
+    "title": "Saved"
+  },
+  "myTasks": {
+    "title": "My tasks"
   }
 }

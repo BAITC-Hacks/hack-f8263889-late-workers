@@ -7,13 +7,15 @@ export const accounts = {
   business: {
     email: "owner@zerno.kz",
     password: "coffee2026",
-    heading: "Кабинет бизнеса",
+    home: "/business",
+    heading: "Мои задачи",
     name: "Кофейня «Зерно»",
   },
   student: {
     email: "arman@student.kz",
     password: "arman2026",
-    heading: "Кабинет студента",
+    home: "/catalog",
+    heading: "Каталог задач",
     name: "Арман Сейтказы",
   },
 };
@@ -49,7 +51,7 @@ export async function signIn(page: Page, role: Role) {
     .getByLabel("Пароль", { exact: true })
     .fill(accounts[role].password);
   await page.getByRole("button", { name: "Войти", exact: true }).click();
-  await expect(page).toHaveURL(`/${role}`);
+  await expect(page).toHaveURL(accounts[role].home);
   await expect(
     page.getByRole("heading", { name: accounts[role].heading, exact: true })
   ).toBeVisible();

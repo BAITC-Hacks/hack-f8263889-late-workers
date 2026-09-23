@@ -49,7 +49,7 @@ for (const role of ["business", "student"] as const) {
       expect(submitted.skills).toEqual([]);
       expect(submitted.technologies).toEqual([]);
     }
-    await expect(page).toHaveURL(`/${role}`);
+    await expect(page).toHaveURL(accounts[role].home);
     await expect(
       page.getByRole("heading", { name: accounts[role].heading, exact: true })
     ).toBeVisible();
@@ -105,7 +105,7 @@ for (const role of ["business", "student"] as const) {
       .getByLabel("Пароль", { exact: true })
       .fill(role === "business" ? "coffee2026" : "arman2026");
     await page.getByRole("button", { name: "Войти", exact: true }).click();
-    await expect(page).toHaveURL(`/${role}`);
+    await expect(page).toHaveURL(accounts[role].home);
   });
 
   test(`${role}: demo account and role guards`, async ({ page }) => {
@@ -126,7 +126,7 @@ for (const role of ["business", "student"] as const) {
       "/unknown-page",
     ]) {
       await page.goto(path);
-      await expect(page).toHaveURL(`/${role}`);
+      await expect(page).toHaveURL(accounts[role].home);
       await expect(
         page.getByRole("heading", { name: accounts[role].heading, exact: true })
       ).toBeVisible();
@@ -141,6 +141,8 @@ test("guest guards and removed demo routes lead to login", async ({ page }) => {
     "/business/private/nested",
     "/student",
     "/student/private",
+    "/catalog",
+    "/catalog/12",
     "/register",
     "/contact",
     "/notes",
@@ -344,12 +346,12 @@ test("registration preserves password whitespace", async ({ page }) => {
     .getByRole("button", { name: "Зарегистрироваться", exact: true })
     .click();
   expect((await request).postDataJSON().password).toBe("  abc123  ");
-  await expect(page).toHaveURL("/student");
+  await expect(page).toHaveURL(accounts.student.home);
   await page.getByRole("button", { name: "Выйти", exact: true }).click();
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Пароль", { exact: true }).fill("  abc123  ");
   await page.getByRole("button", { name: "Войти", exact: true }).click();
-  await expect(page).toHaveURL("/student");
+  await expect(page).toHaveURL(accounts.student.home);
 });
 
 test("bootstrap 500 shows a retry screen and a second request restores guest state", async ({
@@ -404,7 +406,7 @@ test("authenticated bootstrap holds the current URL and never flashes login", as
   await expect(page).toHaveURL("/business");
   release();
   await expect(
-    page.getByRole("heading", { name: "Кабинет бизнеса", exact: true })
+    page.getByRole("heading", { name: accounts.business.heading, exact: true })
   ).toBeVisible();
 });
 
@@ -432,7 +434,7 @@ for (const error of [
     await expect(
       page.getByText("Не удалось выйти. Попробуйте ещё раз", { exact: true })
     ).toBeVisible();
-    await expect(page).toHaveURL("/student");
+    await expect(page).toHaveURL(accounts.student.home);
     expect(
       (await context.cookies()).some((cookie) => cookie.name === "access_token")
     ).toBe(true);

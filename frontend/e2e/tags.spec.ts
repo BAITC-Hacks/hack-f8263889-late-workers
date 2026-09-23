@@ -35,7 +35,7 @@ test("tags ignore blanks and case-insensitive duplicates; pending input is inclu
     skills: ["Анализ данных"],
     technologies: ["React", "TypeScript"],
   });
-  await expect(page).toHaveURL("/student");
+  await expect(page).toHaveURL("/catalog");
 });
 
 test("tags enforce 20 items and 50 characters, and deletion re-enables entry", async ({
@@ -76,7 +76,7 @@ test("tags enforce 20 items and 50 characters, and deletion re-enables entry", a
   expect(data.skills).toContain("Новый навык");
   expect(data.skills).not.toContain("Навык 1");
   expect(data.technologies).toEqual([]);
-  await expect(page).toHaveURL("/student");
+  await expect(page).toHaveURL("/catalog");
 });
 
 test("an oversized pending tag prevents submission until corrected", async ({
@@ -106,6 +106,6 @@ test("an oversized pending tag prevents submission until corrected", async ({
   await page
     .getByRole("button", { name: "Зарегистрироваться", exact: true })
     .click();
-  await expect(page).toHaveURL("/student");
+  await expect(page).toHaveURL("/catalog");
   expect(registrationRequests).toBe(1);
 });
