@@ -1,9 +1,9 @@
 """Catalogue queries: browsing, the task page, and a student's saved tasks."""
 
-import json
 from typing import Any
 
-from sqlalchemy import Select, and_, func, or_, select
+from sqlalchemy import Select, and_, func, literal, or_, select
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -83,9 +83,11 @@ def _catalogue_filters(query: CatalogueQuery) -> list[Any]:
         ]
         filters.append(or_(*ranges))
     # A task qualifies only when it carries every requested badge: one JSONB
-    # containment per code, ANDed together.
+    # containment per code, ANDed. The operand must be a typed *Python list* —
+    # a pre-dumped JSON string binds as text and asyncpg then re-serialises it
+    # into a JSONB string, which never contains an array.
     for code in query.badges:
-        filters.append(Task.badges.op("@>")(json.dumps([code])))
+        filters.append(Task.badges.op("@>")(literal([code], JSONB)))
     return filters
 
 
