@@ -2,6 +2,7 @@ import type {
   LoginInput,
   RegisterBusinessInput,
   RegisterStudentInput,
+  UpdateProfileInput,
 } from "./types.ts";
 
 export const validationMessages = {
@@ -78,6 +79,24 @@ export const validateStudent = (
   if (!validTags(input.technologies)) errors.technologies = "tagsInvalid";
   return errors;
 };
+
+export const validateProfile = (
+  input: UpdateProfileInput
+): ValidationErrors<UpdateProfileInput> => {
+  const errors: ValidationErrors<UpdateProfileInput> = {};
+  if (!validLength(input.name, 2, 100)) errors.name = "nameInvalid";
+  if (!validTags(input.skills)) errors.skills = "tagsInvalid";
+  if (!validTags(input.technologies)) errors.technologies = "tagsInvalid";
+  return errors;
+};
+
+export const normalizeProfileInput = (
+  input: UpdateProfileInput
+): UpdateProfileInput => ({
+  name: input.name.trim(),
+  skills: input.skills.map((tag) => tag.trim()),
+  technologies: input.technologies.map((tag) => tag.trim()),
+});
 
 export const normalizeBusinessInput = (
   input: RegisterBusinessInput

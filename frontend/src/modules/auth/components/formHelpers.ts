@@ -1,4 +1,5 @@
-import { getFieldErrors, isApiError } from "@/core/api";
+import { applyFieldErrors } from "@/common/lib/forms";
+import { isApiError } from "@/core/api";
 import type { TFunction } from "i18next";
 import type {
   FieldErrors,
@@ -38,19 +39,6 @@ export const showFormError = <T extends FieldValues>(
     return;
   }
 
-  if (isApiError(error) && error.status === 422) {
-    const fields = Object.entries(getFieldErrors(error));
-    let unknownField = fields.length === 0;
-    for (const [name, message] of fields) {
-      if (Object.hasOwn(values, name)) {
-        setError(name as Path<T>, { type: "server", message });
-      } else {
-        unknownField = true;
-      }
-    }
-    if (unknownField) setError("root", { type: "server", message: fallback });
-    return;
-  }
-
-  setError("root", { type: "server", message: fallback });
+  if (!applyFieldErrors(error, setError, values))
+    setError("root", { type: "server", message: fallback });
 };

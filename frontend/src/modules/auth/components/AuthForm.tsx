@@ -1,6 +1,6 @@
+import { FormError } from "@/common/components/ui";
 import type { FormEventHandler, ReactNode } from "react";
 
-import { AuthFormError } from "./AuthFormError";
 import { AuthSubmit } from "./AuthSubmit";
 
 type AuthFormProps = {
@@ -24,7 +24,7 @@ export const AuthForm = ({
     className="space-y-5"
     aria-busy={pending}
   >
-    <AuthFormError message={error} />
+    <FormError message={error} />
     <fieldset disabled={pending} className="min-w-0 space-y-5">
       {children}
       <AuthSubmit pending={pending} action={action} />

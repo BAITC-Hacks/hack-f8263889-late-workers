@@ -4,6 +4,7 @@ import type {
   LoginInput,
   RegisterBusinessInput,
   RegisterStudentInput,
+  UpdateProfileInput,
   User,
   UserResponse,
 } from "../types";
@@ -48,5 +49,12 @@ export const getMe = async (
     signal,
     skipAuth: bootstrap,
   });
+  return data.user;
+};
+
+export const updateProfile = async (
+  input: UpdateProfileInput
+): Promise<User> => {
+  const { data } = await apiClient.put<UserResponse>("/student/profile", input);
   return data.user;
 };

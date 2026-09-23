@@ -1,4 +1,5 @@
 import { Page, Stack } from "@/common/components/layout";
+import { ErrorState } from "@/common/components/ui";
 import { pageTitle } from "@/common/styles";
 import { useTranslation } from "react-i18next";
 
@@ -6,7 +7,6 @@ import {
   BusinessTasksTable,
   BusinessTasksTableSkeleton,
 } from "../components/BusinessTasksTable";
-import { ErrorState } from "../components/ErrorState";
 import { useBusinessTasks } from "../hooks/useBusinessTasks";
 
 const SKELETON_ROWS = 3;

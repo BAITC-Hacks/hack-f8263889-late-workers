@@ -30,8 +30,10 @@ Run `lint` and `typecheck` before finishing any task. Both must pass. For authen
 src/
   common/
     components/layout/   Page, Section, Stack, Footer — layout primitives (barrel index.ts)
-    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster) via @radix-ui/react-slot + cva (barrel index.ts)
-    lib/utils.ts          cn() — clsx + tailwind-merge; pageNumbers()
+    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster, form-field, form-error, textarea-field, pending-button, error-state, confirm-dialog on native <dialog>) via @radix-ui/react-slot + cva (barrel index.ts)
+    lib/utils.ts          cn() — clsx + tailwind-merge; pageNumbers(); describedBy()
+    lib/query.ts          retryUnlessClientError, isNotFound, parseId — shared by module queries
+    lib/forms.ts          applyFieldErrors (422 `fields` → react-hook-form), translatedResolver
     lib/toast.ts          zustand toast queue + showToast(); rendered by <Toaster /> in core/App.tsx
     styles/classes.ts      shared className constants (pageTitle, sectionTitle, field, fieldLabel, ...)
 
@@ -47,8 +49,10 @@ src/
     i18n.ts                     i18next + http-backend + languagedetector
 
   modules/                 feature modules
-    auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, section links
+    auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, section links, student profile page
     catalog/      contract types, tasks/industries API, URL-state hook, catalog/task/saved/business-tasks pages, save button
+    teams/        teams API, my teams / create / team page, members (add by email, remove, leave)
+    proposals/    proposals API, task-page block, create/edit form, my proposals (filter, withdraw)
     notes/        api/notes.ts (CRUD), hooks/useNotes* , components/{NoteForm,NoteList,Pagination}, pages/NotesPage
     ai/           api/chat.ts, hooks/{useChat,useChatStream}, components/ChatPanel.tsx, pages/ChatPage.tsx
     system/       api/health.ts, hooks/useHealth.ts, components/ApiStatus.tsx
@@ -64,7 +68,7 @@ e2e/real/                  mock-free acceptance against FastAPI; global setup ch
 playwright.config.ts       isolated mock dev server and Chromium configuration
 ```
 
-Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks") and `/student` (student "Saved"). A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
+Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks") and `/student` (student "Saved"). Student-only: `/student/profile`, `/student/teams`, `/student/teams/new`, `/student/teams/:id`, `/student/proposals`, `/student/proposals/:id/edit`, `/catalog/:id/proposal`. A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
 
 Each module follows the same internal layout: `api/<resource>.ts` (typed fetch fns over `apiClient`) → `queryKeys.ts` (key factory: `.all/.lists()/.list(filters)/.details()/.detail(id)`) → `hooks/use<Thing>.ts` (TanStack Query wrappers) → `components/` + `pages/` → public barrel `index.ts`.
 
@@ -168,11 +172,20 @@ Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border an
 - A page past the end (a shared `?page=2` after the list shrank, or the 6-task demo seed) shows "На этой странице задач нет" with a way back to page 1 instead of an empty grid.
 - FastAPI implements these endpoints against PostgreSQL. Its seed has 7 tasks (6 visible and an owner-only draft), with database-generated IDs; real-API tests must locate tasks by title/response rather than hardcode mock IDs (`e2e/real/helpers.ts` keeps the seed titles and compares the UI with the `/api/tasks` response). The seed command deletes existing accounts and their related data; use it only for disposable or intentionally reset demo databases.
 
+## Teams and proposals API
+
+- Endpoints: `PUT /api/student/profile`; `POST /api/teams`, `GET /api/teams/my`, `GET|PATCH /api/teams/:id`, `POST /api/teams/:id/members`, `DELETE /api/teams/:id/members/:studentId`; `POST /api/tasks/:id/proposals`, `GET /api/tasks/:id/my-proposals`, `GET /api/me/proposals`, `GET|PATCH /api/proposals/:id`, `POST /api/proposals/:id/withdraw`. `modules/teams/api` and `modules/proposals/api` unwrap `{ team }`, `{ proposal }`, `{ items }`.
+- Module dependencies go one way: `catalog` → `proposals` → `teams` → `auth`. `proposals` fetches its own task header (`GET /api/tasks/:id`) instead of importing `catalog`.
+- `ApiError.proposalId` carries the active proposal from a 409 `PROPOSAL_EXISTS`.
+- Candidate teams for a proposal are teams the user captains without a `sent`/`reviewing`/`selected` proposal on the task (`candidateTeams` in `proposals/helpers.ts`). Status badge colours come from the code, status names from the server.
+- Profile saves, roster changes and proposal changes invalidate every non-auth query: team skills are merged from member profiles, and a proposal changes the catalog's response count.
+- Mocks: only `GET /api/teams/my` and `GET /api/tasks/:id/my-proposals` are stubbed (empty lists) so the mock task page renders; everything else in this feature needs FastAPI.
+
 ## ~~Don'ts~~
 
 - Don't reintroduce Bearer tokens, `tokenStorage`, or authentication persistence in localStorage/sessionStorage. Startup removes the old `authToken` key.
 - Don't import a module's internal files from outside it — use the module's `index.ts` barrel.
-- Don't restore demo routes or technical API-status navigation as part of authentication work. Password recovery, email verification, profile editing and teams remain out of scope.
+- Don't restore demo routes or technical API-status navigation as part of authentication work. Password recovery and email verification remain out of scope.
 - Don't build on `modules/dashboard/stores/useAppStore.ts` — it's an unused starter-kit leftover (a demo counter), not real app state.
 
 Visual rules — the reasoning for each is in **Design system** above:

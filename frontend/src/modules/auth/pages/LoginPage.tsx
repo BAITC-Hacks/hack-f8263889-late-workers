@@ -1,8 +1,8 @@
+import { FormField } from "@/common/components/ui";
 import { inlineLink } from "@/common/styles";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import { AuthField } from "../components/AuthField";
 import { AuthForm } from "../components/AuthForm";
 import { AuthFormShell } from "../components/AuthFormShell";
 import { useLoginForm } from "../hooks/useLoginForm";
@@ -26,7 +26,7 @@ export const LoginPage = () => {
         error={errors.root?.message}
         action="login"
       >
-        <AuthField
+        <FormField
           id="email"
           label={t("auth.form.email")}
           type="email"
@@ -34,7 +34,7 @@ export const LoginPage = () => {
           error={errors.email?.message}
           {...register("email")}
         />
-        <AuthField
+        <FormField
           id="password"
           label={t("auth.form.password")}
           type="password"

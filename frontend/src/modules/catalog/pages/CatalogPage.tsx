@@ -1,10 +1,9 @@
 import { Page, Stack } from "@/common/components/layout";
-import { Button, Card, Pagination } from "@/common/components/ui";
+import { Button, Card, ErrorState, Pagination } from "@/common/components/ui";
 import { cardGrid, pageTitle } from "@/common/styles";
 import { useTranslation } from "react-i18next";
 
 import { CatalogFilters } from "../components/CatalogFilters";
-import { ErrorState } from "../components/ErrorState";
 import { SortSelect } from "../components/SortSelect";
 import { TaskCard } from "../components/TaskCard";
 import { TaskCardSkeletons } from "../components/TaskCardSkeletons";

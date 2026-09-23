@@ -37,3 +37,8 @@ export type RegisterStudentInput = LoginInput & {
   skills: string[];
   technologies: string[];
 };
+export type UpdateProfileInput = {
+  name: string;
+  skills: string[];
+  technologies: string[];
+};

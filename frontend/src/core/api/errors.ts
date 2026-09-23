@@ -26,8 +26,16 @@ export const toApiError = (
   requestId?: string
 ): ApiError => {
   if (hasErrorBody(body)) {
-    const { code, message, fields, details } = body.error;
-    return { status, code, message, fields, details, requestId };
+    const { code, message, fields, details, proposalId } = body.error;
+    return {
+      status,
+      code,
+      message,
+      fields,
+      details,
+      ...(typeof proposalId === "number" && { proposalId }),
+      requestId,
+    };
   }
   return {
     status,
