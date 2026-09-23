@@ -4,7 +4,7 @@ Guidance for coding agents (Codex, Claude Code, etc.) working in this repository
 
 ## What this is
 
-A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*`. Development uses a Vite mock server; the existing FastAPI backend does not yet implement this contract. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
+A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*` and the task catalog (`/api/tasks`, `/api/industries`, saved tasks, business tasks). Development uses a Vite mock server; the existing FastAPI backend does not yet implement either contract. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
 
 ## Commands
 
@@ -20,7 +20,7 @@ npm run test:e2e                     # Playwright Chromium; starts Vite on :5180
 npm run format                       # Prettier src files
 ```
 
-Run `lint` and `typecheck` before finishing any task. Both must pass. For authentication changes, also run `build` and the relevant Playwright tests. E2E tests cover cookie/session lifecycle, role guards, error states, validation, tags, themes, locales and responsive widths; the suite uses mocks, not the real backend.
+Run `lint` and `typecheck` before finishing any task. Both must pass. For authentication or catalog changes, also run `build` and the relevant Playwright tests. E2E tests cover cookie/session lifecycle, role guards, error states, validation, tags, the catalog (sort, filters, address state, pagination, task page, saving, business tasks), themes, locales and responsive widths; the suite uses mocks, not the real backend.
 
 ## Architecture
 
@@ -28,8 +28,9 @@ Run `lint` and `typecheck` before finishing any task. Both must pass. For authen
 src/
   common/
     components/layout/   Page, Section, Stack, Footer — layout primitives (barrel index.ts)
-    components/ui/       shadcn-style primitives (button.tsx, card.tsx) via @radix-ui/react-slot + cva (barrel index.ts)
-    lib/utils.ts          cn() — clsx + tailwind-merge
+    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster) via @radix-ui/react-slot + cva (barrel index.ts)
+    lib/utils.ts          cn() — clsx + tailwind-merge; pageNumbers()
+    lib/toast.ts          zustand toast queue + showToast(); rendered by <Toaster /> in core/App.tsx
     styles/classes.ts      shared className constants (pageTitle, sectionTitle, field, fieldLabel, ...)
 
   core/                   app infrastructure, not feature-specific
@@ -44,19 +45,23 @@ src/
     i18n.ts                     i18next + http-backend + languagedetector
 
   modules/                 feature modules
-    auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, cabinets
+    auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, section links
+    catalog/      contract types, tasks/industries API, URL-state hook, catalog/task/saved/business-tasks pages, save button
     notes/        api/notes.ts (CRUD), hooks/useNotes* , components/{NoteForm,NoteList,Pagination}, pages/NotesPage
     ai/           api/chat.ts, hooks/{useChat,useChatStream}, components/ChatPanel.tsx, pages/ChatPage.tsx
     system/       api/health.ts, hooks/useHealth.ts, components/ApiStatus.tsx
     dashboard/    pages/{HomePage,ContactFormPage}, stores/useAppStore.ts
     theme/        ThemeProvider.tsx, components/ThemeToggle.tsx, stores/useThemeStore.ts
 
-dev/authMock.ts            Vite-only middleware; accounts and HttpOnly sessions in memory
+dev/authMock.ts            Vite-only middleware; accounts and HttpOnly sessions in memory; mounts the catalog mock
+dev/catalogMock.ts         catalog endpoints over the auth mock's sessions; saved tasks in memory
+dev/catalogData.ts         seed industries and tasks
+dev/http.ts                JSON/error/cookie helpers shared by the mocks
 e2e/                       Playwright browser scenarios
 playwright.config.ts       isolated mock dev server and Chromium configuration
 ```
 
-Only `/login`, `/register/business`, `/register/student`, `/business/*` and `/student/*` are active product routes. `/` routes to login or the user's cabinet; unknown and former demo routes redirect through `/`. Demo source modules remain in the repo but are absent from routing and navigation.
+Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks") and `/student` (student "Saved"). A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
 
 Each module follows the same internal layout: `api/<resource>.ts` (typed fetch fns over `apiClient`) → `queryKeys.ts` (key factory: `.all/.lists()/.list(filters)/.details()/.detail(id)`) → `hooks/use<Thing>.ts` (TanStack Query wrappers) → `components/` + `pages/` → public barrel `index.ts`.
 
@@ -69,7 +74,7 @@ Each module follows the same internal layout: `api/<resource>.ts` (typed fetch f
 - `skipAuth: true` suppresses global session-expiry handling for the initial `getMe` request; it does not disable cookies. Login failures with `INVALID_CREDENTIALS` belong to the form. A current-session `401 UNAUTHORIZED` from Axios or SSE emits a shared expiry event; 403 does not log out.
 - Login/registration use the returned user without a second login or `me` request. Session transitions advance a request version, cancel outstanding queries, clear cross-user cache and synchronize the `me` cache/store. Stale responses must not restore a previous user or expire a newer session.
 - Authentication mutations share a global transition lock so navigation between guest forms cannot send competing cookie-setting requests. Keep the lock until the mutation settles and use its pending state to disable submission across forms.
-- Pure validation and contract types live in `modules/auth/validation.ts` and `types.ts`. The Node mock imports these files directly by relative path, avoiding the React module barrel; keep them independent of React, browser globals and application runtime code.
+- Pure validation and contract types live in `modules/auth/validation.ts`, `modules/auth/types.ts` and `modules/catalog/types.ts`. The Node mocks import these files directly by relative path, avoiding the React module barrel; keep them independent of React, browser globals and application runtime code.
 - Comments: only for non-obvious _why_ (a workaround, a subtle invariant, a constraint) — never restate _what_ the code already says. Default to no comment.
 - Components hold only rendering/JSX logic; hooks hold only hook logic (state, effects, query/store wiring). Pull every pure function (formatting, calculations, mapping, validation) out into a `helpers.ts`/`utils.ts` inside the module (or `common/lib` if it's shared across modules) and import it in — don't inline that logic in a component or a hook body.
 
@@ -148,6 +153,16 @@ Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border an
 - `AUTH_MOCKS=false` sends `/api` to `API_PROXY_TARGET` without rewriting the path. Local default: `http://localhost:8000`; Docker Compose: `http://api:8000`. These variables are Vite server settings without the `VITE_` prefix; authentication never uses `VITE_API_URL`.
 - The current FastAPI backend uses a different contract. Keep real-API acceptance open until a compatible backend exists; then disable mocks and repeat registration, login, reload, guards and logout against it. Do not adapt the backend as part of this frontend scope.
 - Production hosting must route `/api` to the compatible backend and serve SPA fallback routes. Build and preview do not provide an authentication mock server.
+
+## Catalog API and mocks
+
+- Endpoints: `GET /api/industries`, `GET /api/tasks?sort&industry&level&page`, `GET /api/tasks/:id`, `POST|DELETE /api/tasks/:id/save`, `GET /api/me/saved-tasks`, `GET /api/business/tasks`. `modules/catalog/api/*` unwraps `{ items }` and `{ task }`; save/unsave return 204.
+- Catalog sort, filters and page live in the address, parsed and built by pure helpers in `modules/catalog/helpers.ts`. `buildCatalogSearch` joins lists with a literal comma (`URLSearchParams` would write `%2C`) and omits defaults (`sort=rating`, `page=1`); the API always receives `sort` and `page`. Sort and filter changes return to page 1.
+- Cards pass `{ catalogSearch }` as router state; the task page's back link rebuilds `/catalog<search>` from it and falls back to `/catalog`.
+- Saving is not optimistic: the button is disabled until the 204, then `useToggleSave` patches every cached copy (catalog lists, task detail, saved list). Failures keep the old state and show a toast. The button renders only for students.
+- Catalog queries do not retry 4xx (`retryUnlessClientError`). Level and the in-progress label are translated by `code`; industry and business-task status names come from the server.
+- The catalog mock runs inside the auth mock plugin, so `AUTH_MOCKS` switches both. It validates query parameters (422 with `fields`), returns 401/403/404 per the contract, shows only `published`/`in_progress` tasks in the catalog and lets an owner open its draft. Seed: 26 tasks, 25 visible; Кофейня «Зерно» (the seed business) owns tasks 12 (published), 15 (draft) and 21 (in progress). Saved tasks are kept per user in memory until Vite restarts.
+- Real-API acceptance stays open until a compatible backend exists; then run the catalog scenarios with `AUTH_MOCKS=false`.
 
 ## ~~Don'ts~~
 

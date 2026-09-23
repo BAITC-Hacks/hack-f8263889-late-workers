@@ -18,6 +18,9 @@ async function capturePage(page: Page, testInfo: TestInfo, name: string) {
   await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
     "auth."
   );
+  await expect(page.locator("body")).not.toContainText(
+    /\b(auth|nav|common|catalog|task|saved|myTasks|save)\.[a-z]/
+  );
   expect(
     await page.evaluate(
       () =>
@@ -87,6 +90,9 @@ for (const language of ["ru", "en", "kk"] as const) {
               .getByText(accounts[role].name, { exact: true })
           ).toBeVisible();
           await capturePage(page, testInfo, role);
+          await page.goto("/catalog/12");
+          await expect(page.getByRole("term")).toHaveCount(9);
+          await capturePage(page, testInfo, `${role}-task`);
           await page
             .getByRole("button", {
               name: languages[language].logout,
