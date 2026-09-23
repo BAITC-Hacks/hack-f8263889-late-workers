@@ -24,7 +24,7 @@ async def test_notes_crud(client: AsyncClient, auth_headers: dict[str, str]) -> 
 
     response = await client.get(f"/api/v1/notes/{note['id']}", headers=auth_headers)
     assert response.status_code == 404
-    assert response.json()["error"]["code"] == "not_found"
+    assert response.json()["error"]["code"] == "NOT_FOUND"
 
 
 async def test_notes_pagination(client: AsyncClient, auth_headers: dict[str, str]) -> None:
@@ -43,10 +43,10 @@ async def test_notes_are_scoped_to_owner(client: AsyncClient, auth_headers: dict
     response = await client.post("/api/v1/notes", json={"title": "mine"}, headers=auth_headers)
     note_id = response.json()["id"]
 
-    other = {"email": "bob@example.com", "password": "password123"}
-    await client.post("/api/v1/auth/register", json=other)
-    response = await client.post("/api/v1/auth/login/json", json=other)
-    other_headers = {"Authorization": f"Bearer {response.json()['access_token']}"}
+    other = {"email": "bob@example.com", "password": "password123", "name": "Bob"}
+    response = await client.post("/api/auth/register/student", json=other)
+    assert response.status_code == 201, response.text
+    other_headers = {"Authorization": f"Bearer {response.cookies['access_token']}"}
 
     response = await client.get(f"/api/v1/notes/{note_id}", headers=other_headers)
     assert response.status_code == 404

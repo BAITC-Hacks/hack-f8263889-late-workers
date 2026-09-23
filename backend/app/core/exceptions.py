@@ -1,7 +1,11 @@
 """Application errors and handlers that produce one consistent JSON error shape.
 
 Every error response looks like:
-    {"error": {"code": "not_found", "message": "Note not found", "details": ...}}
+    {"error": {"code": "NOT_FOUND", "message": "Note not found"}}
+
+`fields` is added for validation errors only — a flat {field: message} map the
+frontend can drop straight into a form:
+    {"error": {"code": "VALIDATION_ERROR", "message": "...", "fields": {"email": "..."}}}
 """
 
 import logging
@@ -13,14 +17,18 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.core import messages
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# `loc` entries that name the request part, not the field the user filled in.
+_LOC_PREFIXES = {"body", "query", "path", "header", "cookie"}
+
 
 class AppError(Exception):
     status_code: int = 400
-    code: str = "bad_request"
+    code: str = "BAD_REQUEST"
 
     def __init__(
         self,
@@ -29,6 +37,7 @@ class AppError(Exception):
         status_code: int | None = None,
         code: str | None = None,
         details: Any = None,
+        fields: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(message)
@@ -38,43 +47,73 @@ class AppError(Exception):
         if code is not None:
             self.code = code
         self.details = details
+        self.fields = fields
         self.headers = headers
 
 
 class NotFoundError(AppError):
     status_code = 404
-    code = "not_found"
+    code = "NOT_FOUND"
 
 
 class UnauthorizedError(AppError):
     status_code = 401
-    code = "unauthorized"
+    code = "UNAUTHORIZED"
 
-    def __init__(self, message: str = "Not authenticated", **kwargs: Any) -> None:
+    def __init__(self, message: str = messages.UNAUTHORIZED, **kwargs: Any) -> None:
         kwargs.setdefault("headers", {"WWW-Authenticate": "Bearer"})
         super().__init__(message, **kwargs)
 
 
 class ForbiddenError(AppError):
     status_code = 403
-    code = "forbidden"
+    code = "FORBIDDEN"
+
+    def __init__(self, message: str = messages.FORBIDDEN, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
 
 
 class ConflictError(AppError):
     status_code = 409
-    code = "conflict"
+    code = "CONFLICT"
 
 
 class RateLimitedError(AppError):
     status_code = 429
-    code = "rate_limited"
+    code = "RATE_LIMITED"
 
 
 class UpstreamError(AppError):
     """A third-party service (e.g. the AI provider) failed."""
 
     status_code = 502
-    code = "upstream_error"
+    code = "UPSTREAM_ERROR"
+
+
+class ValidationError(AppError):
+    """Every failing field at once, each with the message the contract specifies."""
+
+    status_code = 422
+    code = "VALIDATION_ERROR"
+
+    def __init__(
+        self, fields: dict[str, str], message: str = messages.VALIDATION, **kwargs: Any
+    ) -> None:
+        super().__init__(message, fields=fields, **kwargs)
+
+
+class EmailTakenError(ConflictError):
+    code = "EMAIL_TAKEN"
+
+    def __init__(self, message: str = messages.EMAIL_TAKEN, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
+
+
+class InvalidCredentialsError(UnauthorizedError):
+    code = "INVALID_CREDENTIALS"
+
+    def __init__(self, message: str = messages.INVALID_CREDENTIALS, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
 
 
 def error_response(
@@ -82,36 +121,63 @@ def error_response(
     code: str,
     message: str,
     details: Any = None,
+    fields: dict[str, str] | None = None,
     headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     body: dict[str, Any] = {"error": {"code": code, "message": message}}
+    if fields is not None:
+        body["error"]["fields"] = fields
     if details is not None:
         body["error"]["details"] = jsonable_encoder(details)
     return JSONResponse(status_code=status_code, content=body, headers=headers)
 
 
+def fields_from_request_errors(exc: RequestValidationError) -> dict[str, str] | None:
+    """Flatten pydantic's error list into {field: message}.
+
+    Safety net only: request schemas default every field, so their own validators
+    report the contract's messages first. This catches what pydantic rejects before
+    them — a body that is not a JSON object, or a bad query parameter. Such an error
+    has `loc == ("body",)` with no field name, hence the emptiness check.
+    """
+    fields: dict[str, str] = {}
+    for err in exc.errors():
+        loc = [str(part) for part in err.get("loc", ()) if part not in _LOC_PREFIXES]
+        if loc:
+            fields.setdefault(".".join(loc), err.get("msg", messages.VALIDATION))
+    return fields or None
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def _app_error(_: Request, exc: AppError) -> JSONResponse:
-        return error_response(exc.status_code, exc.code, exc.message, exc.details, exc.headers)
+        return error_response(
+            exc.status_code,
+            exc.code,
+            exc.message,
+            details=exc.details,
+            fields=exc.fields,
+            headers=exc.headers,
+        )
 
     @app.exception_handler(RequestValidationError)
     async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
-        return error_response(422, "validation_error", "Request validation failed", exc.errors())
+        return error_response(
+            422, "VALIDATION_ERROR", messages.VALIDATION, fields=fields_from_request_errors(exc)
+        )
 
     @app.exception_handler(StarletteHTTPException)
     async def _http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
-        code = {401: "unauthorized", 403: "forbidden", 404: "not_found", 405: "method_not_allowed"}
+        code = {401: "UNAUTHORIZED", 403: "FORBIDDEN", 404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED"}
         return error_response(
             exc.status_code,
-            code.get(exc.status_code, "http_error"),
+            code.get(exc.status_code, "HTTP_ERROR"),
             str(exc.detail),
-            None,
-            exc.headers,
+            headers=exc.headers,
         )
 
     @app.exception_handler(Exception)
     async def _unhandled(_: Request, exc: Exception) -> JSONResponse:
         logger.exception("Unhandled error: %s", exc)
         message = f"{type(exc).__name__}: {exc}" if settings.DEBUG else "Internal server error"
-        return error_response(500, "internal_error", message)
+        return error_response(500, "INTERNAL_ERROR", message)

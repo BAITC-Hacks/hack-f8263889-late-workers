@@ -1,56 +1,43 @@
+"""The legacy /api/v1 auth surface.
+
+Registration lives in the accounts contract now (`tests/test_accounts_*.py`);
+what remains here is the form login that backs Swagger's Authorize button, and
+the guarantee that a cookie token is also accepted as a bearer token.
+"""
+
 from httpx import AsyncClient
 
-from tests.conftest import USER
+from tests.conftest import STUDENT
 
 
-async def test_register_and_login_flow(client: AsyncClient) -> None:
-    response = await client.post("/api/v1/auth/register", json=USER)
-    assert response.status_code == 201
-    body = response.json()
-    assert body["email"] == USER["email"]
-    assert "hashed_password" not in body
-
+async def test_form_login_returns_a_usable_bearer_token(client: AsyncClient, student: dict) -> None:
     response = await client.post(
-        "/api/v1/auth/login/json", json={"email": USER["email"], "password": USER["password"]}
+        "/api/v1/auth/login",
+        data={"username": STUDENT["email"], "password": STUDENT["password"]},
     )
     assert response.status_code == 200
     token = response.json()["access_token"]
 
     response = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
-    assert response.json()["email"] == USER["email"]
+    assert response.json()["email"] == STUDENT["email"]
 
 
-async def test_register_duplicate_email_conflicts(client: AsyncClient) -> None:
-    await client.post("/api/v1/auth/register", json=USER)
-    response = await client.post("/api/v1/auth/register", json=USER)
-    assert response.status_code == 409
-    assert response.json()["error"]["code"] == "conflict"
-
-
-async def test_register_validation_error_shape(client: AsyncClient) -> None:
-    response = await client.post("/api/v1/auth/register", json={"email": "nope", "password": "x"})
-    assert response.status_code == 422
-    error = response.json()["error"]
-    assert error["code"] == "validation_error"
-    assert isinstance(error["details"], list)
-
-
-async def test_login_wrong_password(client: AsyncClient) -> None:
-    await client.post("/api/v1/auth/register", json=USER)
+async def test_form_login_wrong_password(client: AsyncClient, student: dict) -> None:
     response = await client.post(
-        "/api/v1/auth/login", data={"username": USER["email"], "password": "wrong-password"}
+        "/api/v1/auth/login",
+        data={"username": STUDENT["email"], "password": "wrong-password"},
     )
     assert response.status_code == 401
-    assert response.json()["error"]["code"] == "unauthorized"
+    assert response.json()["error"]["code"] == "INVALID_CREDENTIALS"
 
 
-async def test_me_without_token(client: AsyncClient) -> None:
+async def test_legacy_me_without_token(client: AsyncClient) -> None:
     response = await client.get("/api/v1/users/me")
     assert response.status_code == 401
-    assert response.json()["error"]["code"] == "unauthorized"
+    assert response.json()["error"]["code"] == "UNAUTHORIZED"
 
 
-async def test_me_with_garbage_token(client: AsyncClient) -> None:
+async def test_legacy_me_with_garbage_token(client: AsyncClient) -> None:
     response = await client.get("/api/v1/users/me", headers={"Authorization": "Bearer nope"})
     assert response.status_code == 401

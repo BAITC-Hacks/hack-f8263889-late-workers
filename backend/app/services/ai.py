@@ -112,7 +112,7 @@ def _raise_for_outcome(outcome: Outcome) -> None:
         raise AppError(
             "The model declined this request",
             status_code=422,
-            code="ai_refusal",
+            code="AI_REFUSAL",
             details={"reason": reason or "refusal", "refusal": refusal or None},
         )
 
@@ -123,7 +123,7 @@ def _translate_error(exc: openai.OpenAIError) -> AppError:
     if isinstance(exc, openai.RateLimitError):
         return RateLimitedError("AI provider rate limit reached, retry later")
     if isinstance(exc, openai.BadRequestError):
-        return AppError(f"AI provider rejected the request: {exc.message}", code="ai_bad_request")
+        return AppError(f"AI provider rejected the request: {exc.message}", code="AI_BAD_REQUEST")
     if isinstance(exc, openai.APIStatusError):
         return UpstreamError(f"AI provider error ({exc.status_code})")
     if isinstance(exc, openai.APIConnectionError):

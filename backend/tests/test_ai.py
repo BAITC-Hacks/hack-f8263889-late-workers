@@ -51,7 +51,7 @@ async def test_chat_refusal(client: AsyncClient, auth_headers: dict[str, str], f
     response = await client.post("/api/v1/ai/chat", json=PAYLOAD, headers=auth_headers)
     assert response.status_code == 422
     error = response.json()["error"]
-    assert error["code"] == "ai_refusal"
+    assert error["code"] == "AI_REFUSAL"
     assert error["details"]["refusal"] == "I can't help with that."
 
 
@@ -92,7 +92,7 @@ async def test_chat_provider_auth_error(
 
     response = await client.post("/api/v1/ai/chat", json=PAYLOAD, headers=auth_headers)
     assert response.status_code == 502
-    assert response.json()["error"]["code"] == "upstream_error"
+    assert response.json()["error"]["code"] == "UPSTREAM_ERROR"
 
 
 async def test_chat_failed_response(
@@ -139,7 +139,7 @@ async def test_chat_stream_error_event(
 
     assert events[0] == "event: delta"
     assert events[2] == "event: error"
-    assert '"code": "upstream_error"' in events[3]
+    assert '"code": "UPSTREAM_ERROR"' in events[3]
     assert "boom" in events[3]
 
 
