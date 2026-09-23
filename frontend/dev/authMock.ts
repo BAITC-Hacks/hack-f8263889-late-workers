@@ -16,6 +16,8 @@ import {
   validateStudent,
   validationMessages,
 } from "../src/modules/auth/validation.ts";
+import { catalogMock } from "./catalogMock.ts";
+import { type Fields, error, json, sessionToken } from "./http.ts";
 
 const SESSION_SECONDS = 604800;
 const MAX_BODY_BYTES = 64 * 1024;
@@ -23,7 +25,6 @@ const COOKIE_ATTRIBUTES = "HttpOnly; SameSite=Lax; Path=/";
 
 type Account = { user: User; password: string };
 type Session = { email: string; expiresAt: number };
-type Fields = Record<string, string>;
 
 const seededAccounts = (): Account[] => [
   {
@@ -59,25 +60,6 @@ const seededAccounts = (): Account[] => [
     },
   },
 ];
-
-function json(res: ServerResponse, status: number, body: unknown) {
-  res.statusCode = status;
-  res.setHeader("Content-Type", "application/json; charset=utf-8");
-  res.setHeader("Cache-Control", "no-store");
-  res.end(JSON.stringify(body));
-}
-
-function error(
-  res: ServerResponse,
-  status: number,
-  code: string,
-  message: string,
-  fields?: Fields
-) {
-  json(res, status, {
-    error: { code, message, ...(fields ? { fields } : {}) },
-  });
-}
 
 function validationError(res: ServerResponse, fields: Fields) {
   error(res, 422, "VALIDATION_ERROR", "Проверьте поля формы", fields);
@@ -124,14 +106,6 @@ function russianFields(
   );
 }
 
-function sessionToken(req: IncomingMessage): string | undefined {
-  return req.headers.cookie
-    ?.split(";")
-    .map((cookie) => cookie.trim())
-    .find((cookie) => cookie.startsWith("access_token="))
-    ?.slice("access_token=".length);
-}
-
 const emailKey = (email: string) => email.trim().toLowerCase();
 
 export function authMock(): Plugin {
@@ -170,6 +144,13 @@ export function authMock(): Plugin {
           "Set-Cookie",
           `access_token=${token}; ${COOKIE_ATTRIBUTES}; Max-Age=${SESSION_SECONDS}`
         );
+      }
+
+      function currentUser(req: IncomingMessage): User | null {
+        const token = sessionToken(req);
+        const session = token ? sessions.get(token) : undefined;
+        if (!session || session.expiresAt <= Date.now()) return null;
+        return accounts.get(session.email)?.user ?? null;
       }
 
       async function handle(
@@ -336,6 +317,7 @@ export function authMock(): Plugin {
           else res.end();
         });
       });
+      server.middlewares.use(catalogMock(currentUser));
     },
   };
 }

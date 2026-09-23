@@ -185,5 +185,9 @@
     "chat": "AI chat",
     "login": "Sign in",
     "logout": "Sign out"
+  },
+  "common": {
+    "close": "Close",
+    "retry": "Try again"
   }
 }
