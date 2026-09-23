@@ -9,6 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from app.api.auth import router as accounts_router
+from app.api.catalog import (
+    business_router,
+    industries_router,
+    me_router,
+    tasks_router,
+)
 from app.api.router import api_router
 from app.api.v1.health import router as health_router
 from app.core.config import settings
@@ -59,6 +65,8 @@ def create_app() -> FastAPI:
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
     # The accounts contract is unversioned: /api/auth/*
     app.include_router(accounts_router, prefix=settings.API_PREFIX)
+    for catalog_router in (industries_router, tasks_router, me_router, business_router):
+        app.include_router(catalog_router, prefix=settings.API_PREFIX)
 
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:
