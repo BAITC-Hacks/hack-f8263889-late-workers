@@ -28,6 +28,7 @@ type TaskBase = {
   /** Null for a draft, which only its owner can open. */
   publishedAt: string | null;
   isSaved: boolean;
+  badges: Coded[];
 };
 
 export type TaskListItem = TaskBase & { needExcerpt: string };
@@ -67,6 +68,8 @@ export type TasksQuery = {
   industry?: string;
   /** Comma-separated level codes. */
   level?: string;
+  /** Comma-separated badge codes; tasks must have all selected badges. */
+  badge?: string;
 };
 
 export type TasksPage = {

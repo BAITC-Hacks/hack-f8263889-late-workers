@@ -192,7 +192,9 @@
     "retry": "Try again",
     "loading": "Loading…",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "catalog": {
     "title": "Task catalog",
@@ -248,7 +250,9 @@
     },
     "empty": "You have no tasks yet",
     "error": "Could not load your tasks",
-    "create": "Create task"
+    "create": "Create task",
+    "responsesLink_one": "{{count}} proposal",
+    "responsesLink_other": "{{count}} proposals"
   },
   "task": {
     "back": "Catalog",
@@ -268,7 +272,8 @@
       "contact": "Contact",
       "interactionFormat": "Interaction format"
     },
-    "edit": "Edit"
+    "edit": "Edit",
+    "proposals": "Proposals ({{count}})"
   },
   "save": {
     "add": "Save",
@@ -350,8 +355,6 @@
       "all": "All teams"
     },
     "card": {
-      "expand": "Show more",
-      "collapse": "Show less",
       "weeks": "{{count}} wk",
       "sentAt": "Sent {{date}}",
       "edit": "Edit",
@@ -383,6 +386,13 @@
       "durationWeeks": "Duration: a whole number of weeks from 1 to 52",
       "prototypeUrl": "The link must start with http:// or https://",
       "prototypeUrlLong": "Link: up to 500 characters"
+    },
+    "milestones": {
+      "title": "Milestones",
+      "empty": "The business hasn't added milestones yet",
+      "confirmed": "Confirmed · +{{points}}",
+      "inProgress": "In progress",
+      "earned": "Points for this task: {{points}}"
     }
   },
   "builder": {
@@ -533,6 +543,149 @@
       "dialogConfirm": "Unpublish",
       "dialogCancel": "Cancel",
       "actionError": "Could not complete the action. Please try again"
+    }
+  },
+  "selection": {
+    "subtitle": "Team proposals for the task",
+    "notice": "A decision on a proposal can't be changed. You can select several teams or none",
+    "empty": "No proposals for this task yet",
+    "emptyTab": "No proposals in this tab",
+    "loadFailed": "Couldn't load proposals",
+    "tabs": {
+      "label": "Filter proposals",
+      "all": "All",
+      "pending": "Under review",
+      "selected": "Selected",
+      "rejected": "Rejected"
+    },
+    "card": {
+      "idea": "Idea",
+      "plan": "Plan",
+      "prototype": "Prototype",
+      "comment": "Comment for the team:",
+      "compare": "Compare",
+      "roster": "Team members",
+      "hideRoster": "Hide members",
+      "rosterFailed": "Couldn't load the team members",
+      "select": "Select",
+      "reject": "Reject"
+    },
+    "decision": {
+      "selectTitle": "Select team {{team}}?",
+      "rejectTitle": "Reject the proposal from {{team}}?",
+      "comment": "Comment for the team (optional)",
+      "confirm": "Confirm",
+      "failed": "Couldn't save the decision. Please try again"
+    },
+    "milestones": {
+      "title": "Milestones",
+      "empty": "No milestones yet. Add the team's first milestone",
+      "confirmed": "Confirmed · +{{points}}",
+      "notConfirmed": "Not confirmed",
+      "newLabel": "New milestone",
+      "add": "Add",
+      "confirm": "Confirm",
+      "delete": "Delete",
+      "confirmTitle": "Confirm the milestone?",
+      "confirmDescription_one": "The team will get {{count}} point. This can't be undone",
+      "confirmDescription_other": "The team will get {{count}} points. This can't be undone",
+      "deleteTitle": "Delete milestone {{title}}?",
+      "failed": "Couldn't complete the action. Please try again"
+    },
+    "compare": {
+      "marked": "Marked: {{count}} of {{max}}",
+      "open": "Compare ({{count}})",
+      "clear": "Clear",
+      "title": "Compare proposals",
+      "close": "Close",
+      "shortest": "Shortest",
+      "noPrototype": "None",
+      "decided": "Decided",
+      "rows": {
+        "team": "Team",
+        "members": "Members",
+        "points": "Team points",
+        "skills": "Skills",
+        "technologies": "Technologies",
+        "duration": "Duration",
+        "idea": "Idea",
+        "plan": "Plan",
+        "prototype": "Prototype",
+        "status": "Status",
+        "decision": "Decision"
+      }
+    },
+    "errors": {
+      "comment": "Comment: up to 1000 characters",
+      "milestoneTitle": "Milestone name: 3 to 200 characters"
+    }
+  },
+  "gamification": {
+    "filter": {
+      "title": "Badges",
+      "allSelected": "Showing tasks with all selected badges",
+      "error": "Could not load badges"
+    },
+    "badges": {
+      "complete": {
+        "name": "All filled in",
+        "condition": "All 7 card sections are at least 70% complete"
+      },
+      "has_data": {
+        "name": "Data available",
+        "condition": "The Data and materials section specifies the data, its volume and format"
+      },
+      "measurable": {
+        "name": "Measurable result",
+        "condition": "The success criteria include a metric and a target value"
+      },
+      "clear_scope": {
+        "name": "Clear scope",
+        "condition": "The Constraints section is at least 70% complete and includes a deadline"
+      },
+      "open_dialog": {
+        "name": "Open to dialogue",
+        "condition": "Contact details and the format for consultations and feedback are provided"
+      }
+    },
+    "badgeMore": "+{{count}}",
+    "badgeMoreLabel": "More badges: {{count}}",
+    "progress": {
+      "title": "Task readiness",
+      "remaining_one": "{{count}} more point to reach the {{level}} level",
+      "remaining_other": "{{count}} more points to reach the {{level}} level",
+      "ready": "The task is fully ready for work",
+      "allHints": "All suggestions",
+      "up": "Task level increased: {{level}}",
+      "down": "Task level decreased: {{level}}"
+    },
+    "builderBadges": {
+      "title": "Badges",
+      "pending": "Badges will appear after you confirm the card",
+      "how": "How to earn it: {{condition}}",
+      "error": "Could not load badges",
+      "new": "New badge: {{name}}",
+      "earned": "Earned"
+    },
+    "market": {
+      "title": "Market response",
+      "refresh": "Refresh",
+      "views": "Views",
+      "saves": "Saves",
+      "responses": "Responses",
+      "conversion": "Conversion",
+      "medianResponses": "Industry median: {{value}}",
+      "medianConversion": "Industry median: {{value}}%",
+      "noIndustryData": "No industry data",
+      "since": "Since the card was updated ({{date}}): +{{views}}, +{{responses}}",
+      "viewsAdded_one": "{{count}} view",
+      "viewsAdded_other": "{{count}} views",
+      "responsesAdded_one": "{{count}} response",
+      "responsesAdded_other": "{{count}} responses",
+      "hint": "Students view this task but respond less often than the industry average. Add details to the {{block}} section",
+      "improve": "Add details",
+      "error": "Could not load market response",
+      "emptyValue": "—"
     }
   }
 }

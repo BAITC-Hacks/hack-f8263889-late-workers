@@ -9,6 +9,7 @@ import {
   businessTaskHref,
   formatUpdatedDate,
   statusBadgeVariant,
+  taskProposalsPath,
 } from "../helpers";
 import type { BusinessTask } from "../types";
 import { LevelBadge } from "./TaskBadges";
@@ -77,7 +78,20 @@ export const BusinessTasksTable = ({ tasks }: { tasks: BusinessTask[] }) => {
             <LevelBadge level={task.level.code} />
           </td>
           <td className={cn(tableCell, "tabular-nums")}>
-            {task.responsesCount}
+            {task.responsesCount > 0 ? (
+              <Link
+                to={taskProposalsPath(task.id)}
+                onClick={(event) => event.stopPropagation()}
+                aria-label={t("myTasks.responsesLink", {
+                  count: task.responsesCount,
+                })}
+                className="text-primary font-medium hover:underline"
+              >
+                {task.responsesCount}
+              </Link>
+            ) : (
+              task.responsesCount
+            )}
           </td>
           <td className={cn(tableCell, "whitespace-nowrap tabular-nums")}>
             {formatUpdatedDate(task.updatedAt, i18n.language)}

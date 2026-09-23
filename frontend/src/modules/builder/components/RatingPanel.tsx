@@ -1,11 +1,18 @@
 import { Section, Stack } from "@/common/components/layout";
 import { Card } from "@/common/components/ui";
-import { LevelBadge } from "@/modules/catalog";
 import { useTranslation } from "react-i18next";
 
-import { blockNameKey, formatGain, ratingHints, ratingShare } from "../helpers";
+import {
+  blockNameKey,
+  ratingHints,
+  ratingHintsId,
+  ratingShare,
+} from "../helpers";
 import type { BlockCode, BuilderTask, RatingEntry } from "../types";
 import { QualityBadge } from "./AssessmentPanel";
+import { BuilderBadges } from "./BuilderBadges";
+import { RatingHintList } from "./RatingHintList";
+import { ReadinessProgress } from "./ReadinessProgress";
 
 const RatingBreakdown = ({ entries }: { entries: RatingEntry[] }) => {
   const { t } = useTranslation();
@@ -46,17 +53,22 @@ const RatingBreakdown = ({ entries }: { entries: RatingEntry[] }) => {
 };
 
 type RatingHintsProps = {
+  taskId: number;
   entries: RatingEntry[];
   onHint: (block: BlockCode) => void;
 };
 
-const RatingHints = ({ entries, onHint }: RatingHintsProps) => {
-  const { t, i18n } = useTranslation();
+const RatingHints = ({ taskId, entries, onHint }: RatingHintsProps) => {
+  const { t } = useTranslation();
   const hints = ratingHints(entries);
 
   return (
     <Stack gap="sm" className="border-t pt-4">
-      <h3 className="text-sm font-semibold">
+      <h3
+        id={ratingHintsId(taskId)}
+        tabIndex={-1}
+        className="focus-visible:ring-ring scroll-mt-6 rounded-xs text-sm font-semibold outline-hidden focus-visible:ring-1"
+      >
         {t("builder.rating.hintsTitle")}
       </h3>
       {hints.length === 0 ? (
@@ -64,22 +76,7 @@ const RatingHints = ({ entries, onHint }: RatingHintsProps) => {
           {t("builder.rating.complete")}
         </p>
       ) : (
-        <ul className="space-y-2">
-          {hints.map((hint) => (
-            <li key={hint.block}>
-              <button
-                type="button"
-                onClick={() => onHint(hint.block)}
-                className="text-primary focus-visible:ring-ring rounded-xs text-left text-sm outline-hidden hover:underline focus-visible:ring-1"
-              >
-                {t("builder.rating.hint", {
-                  hint: t(hint.textKey),
-                  gain: formatGain(hint.gain, i18n.language),
-                })}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <RatingHintList hints={hints} onHint={onHint} />
       )}
     </Stack>
   );
@@ -90,26 +87,27 @@ type RatingPanelProps = {
   /** The form holds edits the rating does not reflect yet. */
   stale: boolean;
   onHint: (block: BlockCode) => void;
+  onAllHints: () => void;
 };
 
-export const RatingPanel = ({ task, stale, onHint }: RatingPanelProps) => {
+export const RatingPanel = ({
+  task,
+  stale,
+  onHint,
+  onAllHints,
+}: RatingPanelProps) => {
   const { t } = useTranslation();
 
   return (
-    <Card className="p-5">
+    <Card className="space-y-8 p-5">
+      <ReadinessProgress task={task} onHint={onHint} onAllHints={onAllHints} />
+      <BuilderBadges task={task} />
       <Section title={t("builder.rating.title")} divider={false}>
         <Stack gap="lg">
-          {task.rating === null || task.level === null ? (
+          {task.rating === null && (
             <p className="text-muted-foreground text-sm">
               {t("builder.rating.pending")}
             </p>
-          ) : (
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-3xl font-semibold tabular-nums">
-                {t("catalog.card.ratingValue", { rating: task.rating })}
-              </span>
-              <LevelBadge level={task.level.code} />
-            </div>
           )}
           {task.ratingBreakdown && (
             <>
@@ -119,7 +117,11 @@ export const RatingPanel = ({ task, stale, onHint }: RatingPanelProps) => {
                 </p>
               )}
               <RatingBreakdown entries={task.ratingBreakdown} />
-              <RatingHints entries={task.ratingBreakdown} onHint={onHint} />
+              <RatingHints
+                taskId={task.id}
+                entries={task.ratingBreakdown}
+                onHint={onHint}
+              />
             </>
           )}
         </Stack>

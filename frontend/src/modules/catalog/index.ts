@@ -10,9 +10,12 @@ export {
   builderPath,
   isBlank,
   isNotFound,
+  levelLabelKey,
+  levelProgressClass,
   parseTaskId,
   retryUnlessClientError,
   statusBadgeVariant,
+  taskProposalsPath,
 } from "./helpers";
 export { TASK_FIELDS } from "./types";
 export type {

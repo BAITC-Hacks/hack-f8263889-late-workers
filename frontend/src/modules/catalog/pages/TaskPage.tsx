@@ -2,8 +2,9 @@ import { Page, Stack } from "@/common/components/layout";
 import { Button, ErrorState } from "@/common/components/ui";
 import { inlineLink, pageTitle, prose } from "@/common/styles";
 import { useAuthStore } from "@/modules/auth";
+import { EarnedBadges } from "@/modules/gamification";
 import { TaskProposalsBlock } from "@/modules/proposals";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Inbox, Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useParams } from "react-router-dom";
 
@@ -17,6 +18,7 @@ import {
   formatPublishedDate,
   isNotFound,
   parseTaskId,
+  taskProposalsPath,
 } from "../helpers";
 import { useTask } from "../hooks/useTask";
 
@@ -46,6 +48,7 @@ export const TaskPage = () => {
         <Stack gap="md">
           <TaskBadges level={data.level.code} status={data.status} />
           <h1 className={pageTitle}>{data.title}</h1>
+          <EarnedBadges badges={data.badges} withTooltips />
           <p className="text-muted-foreground">
             {data.companyName} · {data.industry.name}
           </p>
@@ -72,12 +75,20 @@ export const TaskPage = () => {
           <div className="flex flex-wrap gap-2">
             <SaveTaskButton taskId={data.id} isSaved={data.isSaved} />
             {data.isOwner && (
-              <Button asChild variant="outline" size="sm">
-                <Link to={builderPath(data.id)}>
-                  <Pencil aria-hidden="true" />
-                  {t("task.edit")}
-                </Link>
-              </Button>
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <Link to={builderPath(data.id)}>
+                    <Pencil aria-hidden="true" />
+                    {t("task.edit")}
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link to={taskProposalsPath(data.id)}>
+                    <Inbox aria-hidden="true" />
+                    {t("task.proposals", { count: data.responsesCount })}
+                  </Link>
+                </Button>
+              </>
             )}
           </div>
         </Stack>

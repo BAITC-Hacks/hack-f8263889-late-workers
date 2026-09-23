@@ -1,5 +1,6 @@
 import { Stack } from "@/common/components/layout";
 import { Button } from "@/common/components/ui";
+import { useModalDialog } from "@/common/lib/useModalDialog";
 import { formError } from "@/common/styles";
 import { CircleCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -7,7 +8,6 @@ import { Link } from "react-router-dom";
 
 import { isListed } from "../helpers";
 import type { CardEditorState } from "../hooks/useCardEditor";
-import { useModalDialog } from "../hooks/useModalDialog";
 import type { BuilderTask } from "../types";
 import { Spinner } from "./Feedback";
 

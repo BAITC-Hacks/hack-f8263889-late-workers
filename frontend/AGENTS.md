@@ -30,10 +30,12 @@ Run `lint` and `typecheck` before finishing any task. Both must pass. For authen
 src/
   common/
     components/layout/   Page, Section, Stack, Footer — layout primitives (barrel index.ts)
-    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster, tooltip, form-field, form-error, textarea-field, pending-button, error-state, confirm-dialog on native <dialog>) via @radix-ui/react-slot + cva (barrel index.ts)
+    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster, tooltip, form-field, form-error, textarea-field, pending-button, error-state, clamped-text, confirm-dialog on native <dialog> with optional description/children) via @radix-ui/react-slot + cva (barrel index.ts)
     lib/utils.ts          cn() — clsx + tailwind-merge; pageNumbers(); describedBy()
     lib/query.ts          retryUnlessClientError, isNotFound, parseId — shared by module queries
     lib/forms.ts          applyFieldErrors (422 `fields` → react-hook-form), translatedResolver
+    lib/useModalDialog.ts  keeps a native <dialog> modal in step with `open` (ConfirmDialog, compare panel, builder)
+    lib/useIsClamped.ts    whether a line-clamped element hides text; used by ClampedText (ui)
     lib/toast.ts          zustand toast queue + showToast(); rendered by <Toaster /> in core/App.tsx
     styles/classes.ts      shared className constants (pageTitle, sectionTitle, field, fieldLabel, ...)
 
@@ -52,8 +54,10 @@ src/
     auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, section links, student profile page
     catalog/      contract types, tasks/industries API, URL-state hook, catalog/task/saved/business-tasks pages, save button
     builder/      builder contract types and API, new-task page, builder page (analysis, clarification rounds, card editor, rating, publication)
+    gamification/ badge and market contracts, badge dictionary, shared badge rendering and market queries
     teams/        teams API, my teams / create / team page, members (add by email, remove, leave)
-    proposals/    proposals API, task-page block, create/edit form, my proposals (filter, withdraw)
+    proposals/    proposals API, task-page block, create/edit form, my proposals (filter, withdraw, milestones of a selected proposal)
+    selection/    business side of proposals: task proposals page (tabs, compare, select/reject, milestones)
     notes/        api/notes.ts (CRUD), hooks/useNotes* , components/{NoteForm,NoteList,Pagination}, pages/NotesPage
     ai/           api/chat.ts, hooks/{useChat,useChatStream}, components/ChatPanel.tsx, pages/ChatPage.tsx
     system/       api/health.ts, hooks/useHealth.ts, components/ApiStatus.tsx
@@ -69,7 +73,7 @@ e2e/real/                  mock-free acceptance against FastAPI; global setup ch
 playwright.config.ts       isolated mock dev server and Chromium configuration
 ```
 
-Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks"), `/business/tasks/new` and `/business/tasks/:id/builder` (business only) and `/student` (student "Saved"). Student-only: `/student/profile`, `/student/teams`, `/student/teams/new`, `/student/teams/:id`, `/student/proposals`, `/student/proposals/:id/edit`, `/catalog/:id/proposal`. A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
+Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks"), `/business/tasks/new`, `/business/tasks/:id/builder` and `/business/tasks/:id/proposals` (business only) and `/student` (student "Saved"). Student-only: `/student/profile`, `/student/teams`, `/student/teams/new`, `/student/teams/:id`, `/student/proposals`, `/student/proposals/:id/edit`, `/catalog/:id/proposal`. A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
 
 Each module follows the same internal layout: `api/<resource>.ts` (typed fetch fns over `apiClient`) → `queryKeys.ts` (key factory: `.all/.lists()/.list(filters)/.details()/.detail(id)`) → `hooks/use<Thing>.ts` (TanStack Query wrappers) → `components/` + `pages/` → public barrel `index.ts`.
 
@@ -190,6 +194,28 @@ Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border an
 - Candidate teams for a proposal are teams the user captains without a `sent`/`reviewing`/`selected` proposal on the task (`candidateTeams` in `proposals/helpers.ts`). Status badge colours come from the code, status names from the server.
 - Profile saves, roster changes and proposal changes invalidate every non-auth query: team skills are merged from member profiles, and a proposal changes the catalog's response count.
 - Mocks: only `GET /api/teams/my` and `GET /api/tasks/:id/my-proposals` are stubbed (empty lists) so the mock task page renders; everything else in this feature needs FastAPI.
+
+## Selection API
+
+- Endpoints: `GET /api/business/tasks/:id/proposals` (`{ task, items }`), `POST /api/business/proposals/:id/select|reject` (`{ comment }` → `{ proposal, taskStatus }`), `POST /api/business/proposals/:id/milestones` (`{ title }` → 201 `{ proposal }`), `POST /api/business/milestones/:id/confirm` (`{ proposal }`), `DELETE /api/business/milestones/:id` (204). Wrapped by `modules/selection/api/selection.ts`.
+- Opening the list moves the task's `sent` proposals to `reviewing` on the server and leaves out withdrawn ones — never prefetch it.
+- Decisions are final and only for `sent`/`reviewing`; several teams can be selected. Selecting can move the task to `in_progress`, so a decision invalidates `catalogKeys.all`. Milestones exist only on `selected` proposals; each is worth `points` (10). `team.points` is the team's total across tasks and is copied to every item of that team after a confirm; «Баллы за задачу» on the student card is `earnedPoints(milestones)`.
+- Module dependencies: `selection` → `catalog`, `proposals`, `teams`; catalog links to the page only through `taskProposalsPath`.
+- One `DecisionDialog` per page (outside the compare `<dialog>`, so modals stack), fed by a snapshot of the proposal. Errors stay in dialogs and under fields — toasts would be hidden behind a modal backdrop. A 409 shows the server message and refetches the list. After a decision, focus moves to the card or compare-column heading.
+- No mock: with `AUTH_MOCKS=true` the page has no API.
+
+## Gamification API (e7)
+
+- Six features: typed badge/market API, builder readiness progress, catalog/task badges, catalog badge filter, builder earned/pending badges and the owner-only market panel. Use the existing FastAPI; do not add gamification mocks or backend endpoints.
+- `GET /api/badges` returns `{ items }` with `code`, `name`, `condition`; task responses include `badges`. `GET /api/business/tasks/:id/market` returns `{ market }`. Shared contracts, dictionary queries and badge rendering live in `modules/gamification`; use its public barrel across modules.
+- The server owns the rating, level, badge awards, hints, counts, conversion and industry medians. Do not infer awards from card text or recompute market values. Render the authoritative task returned by card confirmation, publication or unpublication.
+- Catalog `badge` is a comma-separated list in API parameters and URL state, combined with AND. Preserve it alongside industry, level and sort, reset pagination on changes and clear it with all filters. A failed badge dictionary disables only badge selection and offers retry.
+- Catalog cards show up to three badges and `+N`; the task page shows all, with dictionary conditions in keyboard-accessible tooltips. Empty arrays hide the block. Localize known codes through `gamification.badges`, with server text as the fallback for unknown codes.
+- Builder readiness has thresholds 40/70/90 and uses catalog level colors. `rating: null` hides progress; zero is valid. Show the first three rating hints and link to the full list; keep field targeting consistent with the rating breakdown. Animate confirmed changes for 0.4 s and respect reduced motion.
+- Builder badges follow dictionary order; unearned badges show their conditions, and `confirmedAt: null` shows a pending message. Level-change and newly earned badge toasts compare the previous task with a successful confirmation response; opening or refetching a task must not announce awards.
+- Show market only for `published`, `in_progress`, `unpublished`. Fetch on opening, manual refresh and after successful card confirmation; no polling. `conversion: null` is an em dash; null industry medians mean no data, while numeric zero is displayed. Format `sinceUpdate` dates locally and pluralize view/response deltas. A missing `sinceUpdate` or hint hides that part.
+- Reading market statistics must not record a view. The backend tracks unique student views from task-detail requests, so never prefetch `GET /api/tasks/:id` on catalog hover or focus. Keep owner access and session errors under the existing guards and API error handling.
+- For this e7 stage, do not add or run automated tests. Run lint, typecheck and build; perform the real-API manual acceptance in `README.md`, including null/zero, thresholds, URL restoration, error/retry, confirmation messages, themes, locales, keyboard use and responsive widths.
 
 ## ~~Don'ts~~
 

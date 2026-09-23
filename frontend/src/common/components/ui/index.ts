@@ -18,3 +18,4 @@ export { FormField } from "./form-field";
 export { FormError } from "./form-error";
 export { TextareaField } from "./textarea-field";
 export { PendingButton } from "./pending-button";
+export { ClampedText } from "./clamped-text";

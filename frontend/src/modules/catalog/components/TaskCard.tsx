@@ -1,5 +1,6 @@
 import { Card } from "@/common/components/ui";
 import { cn } from "@/common/lib/utils";
+import { EarnedBadges } from "@/modules/gamification";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -68,6 +69,7 @@ export const TaskCard = ({ task, catalogSearch }: TaskCardProps) => {
           <SaveTaskButton taskId={task.id} isSaved={task.isSaved} />
         </div>
       </div>
+      <EarnedBadges badges={task.badges} limit={3} />
     </Card>
   );
 };

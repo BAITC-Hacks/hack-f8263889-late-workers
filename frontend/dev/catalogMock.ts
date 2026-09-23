@@ -54,6 +54,7 @@ function taskBase(task: SeedTask, saved: boolean) {
     responsesCount: task.responsesCount,
     publishedAt: task.publishedAt,
     isSaved: saved,
+    badges: [],
   };
 }
 

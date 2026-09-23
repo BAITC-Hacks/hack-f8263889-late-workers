@@ -19,6 +19,7 @@ import {
   ProposalCreatePage,
   ProposalEditPage,
 } from "@/modules/proposals";
+import { BusinessProposalsPage } from "@/modules/selection";
 import { TeamCreatePage, TeamPage, TeamsPage } from "@/modules/teams";
 import { Navigate, type RouteObject } from "react-router-dom";
 
@@ -46,6 +47,10 @@ export const appRoutes: RouteObject[] = [
       { path: "/business", element: <BusinessTasksPage /> },
       { path: "/business/tasks/new", element: <NewTaskPage /> },
       { path: "/business/tasks/:id/builder", element: <BuilderPage /> },
+      {
+        path: "/business/tasks/:id/proposals",
+        element: <BusinessProposalsPage />,
+      },
     ],
   },
   {

@@ -1,6 +1,6 @@
 import type { BadgeProps } from "@/common/components/ui";
 import { parseId } from "@/common/lib/query";
-import { formatDateTime } from "@/core/api";
+import { formatDateTime, getFieldErrors, isApiError } from "@/core/api";
 
 import {
   type BusinessTask,
@@ -21,6 +21,7 @@ export type CatalogSearch = {
   sort: TaskSort;
   industries: string[];
   levels: TaskLevelCode[];
+  badges: string[];
   page: number;
 };
 
@@ -48,6 +49,7 @@ export const parseCatalogSearch = (search: string): CatalogSearch => {
     sort: isTaskSort(sort) ? sort : DEFAULT_SORT,
     industries: listParam(params.get("industry")),
     levels: listParam(params.get("level")).filter(isTaskLevel),
+    badges: listParam(params.get("badge")?.toLowerCase() ?? null),
     page: Number.isInteger(page) && page >= 1 ? page : 1,
   };
 };
@@ -64,6 +66,8 @@ export const buildCatalogSearch = (state: CatalogSearch): string => {
       `industry=${state.industries.map(encodeURIComponent).join(",")}`
     );
   if (state.levels.length) parts.push(`level=${state.levels.join(",")}`);
+  if (state.badges.length)
+    parts.push(`badge=${state.badges.map(encodeURIComponent).join(",")}`);
   if (state.page > 1) parts.push(`page=${state.page}`);
   return parts.length ? `?${parts.join("&")}` : "";
 };
@@ -72,11 +76,19 @@ export const toTasksQuery = (state: CatalogSearch): TasksQuery => {
   const query: TasksQuery = { sort: state.sort, page: state.page };
   if (state.industries.length) query.industry = state.industries.join(",");
   if (state.levels.length) query.level = state.levels.join(",");
+  if (state.badges.length) query.badge = state.badges.join(",");
   return query;
 };
 
 export const hasActiveFilters = (state: CatalogSearch) =>
-  state.industries.length > 0 || state.levels.length > 0;
+  state.industries.length > 0 ||
+  state.levels.length > 0 ||
+  state.badges.length > 0;
+
+export const catalogBadgeError = (error: unknown): string | undefined =>
+  isApiError(error) && error.status === 422
+    ? getFieldErrors(error).badge
+    : undefined;
 
 export const toggleValue = <T>(values: T[], value: T): T[] =>
   values.includes(value)
@@ -95,12 +107,24 @@ const LEVEL_BADGE: Record<TaskLevelCode, BadgeProps["variant"]> = {
 
 export const levelBadgeVariant = (level: TaskLevelCode) => LEVEL_BADGE[level];
 
+const LEVEL_PROGRESS: Record<TaskLevelCode, string> = {
+  needs_clarification: "bg-muted-foreground",
+  working: "bg-primary",
+  ready: "bg-success",
+  priority: "bg-primary",
+};
+
+export const levelProgressClass = (level: TaskLevelCode) =>
+  LEVEL_PROGRESS[level];
+
 export const isInProgress = (status: { code: string }) =>
   status.code === "in_progress";
 
 export const parseTaskId = parseId;
 
 export const builderPath = (id: number) => `/business/tasks/${id}/builder`;
+export const taskProposalsPath = (id: number) =>
+  `/business/tasks/${id}/proposals`;
 
 /** Statuses finished in the builder; a task past them opens its catalog page. */
 const BUILDER_STATUSES = new Set(["draft", "clarifying", "review"]);

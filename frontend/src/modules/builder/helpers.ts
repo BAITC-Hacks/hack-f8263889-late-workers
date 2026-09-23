@@ -4,19 +4,22 @@ import {
   type Industry,
   TASK_FIELDS,
   type TaskDetail,
+  type TaskLevelCode,
   isBlank,
 } from "@/modules/catalog";
+import type { BadgeDefinition, EarnedBadge } from "@/modules/gamification";
 
-import type {
-  AnswerInput,
-  BlockCode,
-  BuilderTask,
-  CardFieldKey,
-  CardInput,
-  FieldSource,
-  QualityCode,
-  RatingEntry,
-  Round,
+import {
+  type AnswerInput,
+  BLOCK_CODES,
+  type BlockCode,
+  type BuilderTask,
+  type CardFieldKey,
+  type CardInput,
+  type FieldSource,
+  type QualityCode,
+  type RatingEntry,
+  type Round,
 } from "./types";
 
 export const DRAFT_MIN = 50;
@@ -252,6 +255,64 @@ export const industryOptions = (
     : [current, ...(industries ?? [])];
 
 // --- Rating -------------------------------------------------------------------
+
+export const RATING_THRESHOLDS = [
+  { points: 40, level: "working" },
+  { points: 70, level: "ready" },
+  { points: 90, level: "priority" },
+] as const;
+
+export const ratingProgress = (rating: number) =>
+  Math.min(100, Math.max(0, rating));
+
+export const nextRatingLevel = (rating: number) => {
+  const threshold = RATING_THRESHOLDS.find(({ points }) => rating < points);
+  return threshold
+    ? { level: threshold.level, remaining: threshold.points - rating }
+    : null;
+};
+
+const LEVEL_ORDER: Record<TaskLevelCode, number> = {
+  needs_clarification: 0,
+  working: 1,
+  ready: 2,
+  priority: 3,
+};
+
+export const levelChange = (
+  previous: BuilderTask["level"],
+  next: BuilderTask["level"]
+): "up" | "down" | null => {
+  if (!previous || !next) return null;
+  const change = LEVEL_ORDER[next.code] - LEVEL_ORDER[previous.code];
+  return change > 0 ? "up" : change < 0 ? "down" : null;
+};
+
+export const newlyEarnedBadges = (
+  previous: EarnedBadge[],
+  next: EarnedBadge[]
+) => {
+  const earned = new Set(previous.map(({ code }) => code));
+  return next.filter(({ code }) => !earned.has(code));
+};
+
+export const builderBadgeStates = (
+  definitions: BadgeDefinition[],
+  badges: EarnedBadge[]
+) => {
+  const earned = new Set(badges.map(({ code }) => code));
+  return definitions.map((badge) => ({
+    ...badge,
+    earned: earned.has(badge.code),
+  }));
+};
+
+export const ratingHintsId = (taskId: number) => `rating-hints-${taskId}`;
+
+export const toBlockCode = (block: string): BlockCode | null =>
+  (BLOCK_CODES as readonly string[]).includes(block)
+    ? (block as BlockCode)
+    : null;
 
 export const ratingShare = (entry: RatingEntry) =>
   entry.maxPoints > 0
