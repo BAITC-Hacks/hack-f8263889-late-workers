@@ -1,6 +1,6 @@
 import { type Page, expect, test } from "@playwright/test";
 
-import { signIn } from "./helpers";
+import { fillBusiness, signIn } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -477,4 +477,89 @@ test("task page loading placeholder and error retry", async ({ page }) => {
       exact: true,
     })
   ).toBeVisible();
+});
+
+const businessTasks = (page: Page) => page.getByRole("main").getByRole("table");
+
+test("business sees its tasks, including a draft, and opens a row", async ({
+  page,
+}) => {
+  await signIn(page, "business");
+  const table = businessTasks(page);
+  await expect(table.getByRole("columnheader")).toHaveText([
+    "Название",
+    "Статус",
+    "Рейтинг",
+    "Уровень",
+    "Отклики",
+    "Обновлена",
+  ]);
+  const draft = table
+    .getByRole("row")
+    .filter({ hasText: "Чат-бот для записи к врачу" });
+  await expect(draft).toContainText("Черновик");
+  await expect(draft).toContainText("Требует уточнения");
+  await expect(table.getByRole("row")).toHaveCount(4);
+  await draft.getByText("Черновик", { exact: true }).click();
+  await expect(page).toHaveURL("/catalog/15");
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Чат-бот для записи к врачу",
+      exact: true,
+    })
+  ).toBeVisible();
+  await page.goBack();
+  await table
+    .getByRole("link", { name: "Прогноз спроса на выпечку", exact: true })
+    .click();
+  await expect(page).toHaveURL("/catalog/12");
+});
+
+test("a business without tasks sees the empty state", async ({ page }) => {
+  await page.goto("/register/business");
+  await fillBusiness(page);
+  await page
+    .getByRole("button", { name: "Зарегистрироваться", exact: true })
+    .click();
+  await expect(page).toHaveURL("/business");
+  await expect(
+    page.getByText("У вас пока нет задач", { exact: true })
+  ).toBeVisible();
+  await expect(businessTasks(page)).toHaveCount(0);
+});
+
+test("business tasks loading rows and error retry", async ({ page }) => {
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let fail = true;
+  await page.route("**/api/business/tasks", async (route) => {
+    await ready;
+    if (fail)
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error: { code: "INTERNAL_ERROR", message: "Ошибка сервера" },
+        }),
+      });
+    else await route.continue();
+  });
+  await signIn(page, "business");
+  await expect(page.getByTestId("business-task-skeleton")).toHaveCount(3);
+  release();
+  await expect(
+    page.getByText("Не удалось загрузить задачи", { exact: true })
+  ).toBeVisible();
+  fail = false;
+  await page.getByRole("button", { name: "Повторить", exact: true }).click();
+  await expect(businessTasks(page).getByRole("row")).toHaveCount(4);
+});
+
+test("student cannot open the business section", async ({ page }) => {
+  await signIn(page, "student");
+  await page.goto("/business");
+  await expect(page).toHaveURL("/catalog");
 });

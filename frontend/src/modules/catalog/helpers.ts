@@ -117,3 +117,14 @@ export const isBlank = (value: string | null) => !value?.trim();
 
 export const formatPublishedDate = (iso: string, locale: string) =>
   formatDateTime(iso, locale, { dateStyle: "long" });
+
+export const formatUpdatedDate = (iso: string, locale: string) =>
+  formatDateTime(iso, locale, { dateStyle: "medium" });
+
+const STATUS_BADGE: Record<string, BadgeProps["variant"]> = {
+  published: "success",
+  in_progress: "warning",
+};
+
+export const statusBadgeVariant = (status: { code: string }) =>
+  STATUS_BADGE[status.code] ?? "muted";

@@ -227,7 +227,17 @@
     "title": "Saved"
   },
   "myTasks": {
-    "title": "My tasks"
+    "title": "My tasks",
+    "columns": {
+      "title": "Title",
+      "status": "Status",
+      "rating": "Rating",
+      "level": "Level",
+      "responses": "Responses",
+      "updatedAt": "Updated"
+    },
+    "empty": "You have no tasks yet",
+    "error": "Could not load your tasks"
   },
   "task": {
     "back": "Catalog",
