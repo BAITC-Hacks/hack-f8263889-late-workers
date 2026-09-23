@@ -10,6 +10,7 @@
     /* Bundler / Vite */
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "types": ["vite/client"],

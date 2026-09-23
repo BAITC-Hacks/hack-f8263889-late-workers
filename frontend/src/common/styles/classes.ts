@@ -1,6 +1,11 @@
 /** Reading measure for prose blocks — the page is full-width, text is not. */
 export const prose = "max-w-3xl";
 
+export const tableCell = "px-4 py-3 text-left";
+export const tableHeadCell =
+  "px-4 py-3 text-left text-sm font-medium text-muted-foreground";
+export const skeleton = "animate-pulse rounded-md bg-muted";
+
 export const pageTitle = "text-3xl font-semibold tracking-tight text-balance";
 
 export const pageDescription = "text-muted-foreground text-base";

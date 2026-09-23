@@ -59,8 +59,8 @@ services:
   web:
     build: ./frontend
     environment:
-      # The browser talks to the API through the host-published port.
-      VITE_API_URL: http://localhost:8000
+      AUTH_MOCKS: "${AUTH_MOCKS:-true}"
+      API_PROXY_TARGET: http://api:8000
     volumes:
       - ./frontend:/app
       - /app/node_modules   # keep the image's node_modules

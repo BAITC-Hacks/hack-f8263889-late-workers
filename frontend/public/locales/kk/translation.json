@@ -55,38 +55,67 @@
     }
   },
   "auth": {
+    "language": "Интерфейс тілі",
     "form": {
       "email": "Email",
-      "emailPlaceholder": "you@example.com",
-      "password": "Құпия сөз",
-      "passwordPlaceholder": "Кемінде 8 таңба",
-      "fullName": "Аты-жөні",
-      "fullNamePlaceholder": "Айгүл Сәрсенова"
+      "password": "Құпиясөз",
+      "companyName": "Компания атауы",
+      "contactName": "Байланыс тұлғасы",
+      "contactPhone": "Телефон",
+      "name": "Аты-жөні",
+      "skills": "Дағдылар",
+      "technologies": "Технологиялар"
     },
     "errors": {
-      "emailRequired": "Email көрсетіңіз",
-      "emailInvalid": "Жарамды email енгізіңіз",
-      "passwordRequired": "Құпия сөзді көрсетіңіз",
-      "passwordTooShort": "Құпия сөз кемінде 8 таңбадан тұруы керек",
-      "generic": "Бірдеңе дұрыс болмады. Қайталап көріңіз."
+      "emailRequired": "Email енгізіңіз",
+      "passwordRequired": "Құпиясөзді енгізіңіз",
+      "emailInvalid": "Email пішімі қате",
+      "passwordInvalid": "Кемінде 8 таңба, кемінде бір әріп және бір сан болуы керек",
+      "companyNameInvalid": "Компания атауы: 2–200 таңба",
+      "contactNameInvalid": "Байланыс тұлғасының аты-жөні: 2–100 таңба",
+      "contactPhoneInvalid": "Телефон: 10–15 сан, басында + болуы мүмкін",
+      "nameInvalid": "Аты-жөні: 2–100 таңба",
+      "tagsInvalid": "20 тегке дейін, әрқайсысы 50 таңбадан аспауы керек",
+      "registerFailed": "Тіркелу мүмкін болмады. Қайталап көріңіз",
+      "loginFailed": "Кіру мүмкін болмады. Қайталап көріңіз",
+      "logoutFailed": "Шығу мүмкін болмады. Қайталап көріңіз",
+      "invalidCredentials": "Email немесе құпиясөз қате"
     },
     "login": {
       "title": "Кіру",
-      "description": "Қайта қош келдіңіз. Жалғастыру үшін деректеріңізді енгізіңіз.",
-      "sectionTitle": "Деректеріңіз",
+      "description": "Жеке кабинетіңізге кіру үшін деректеріңізді енгізіңіз.",
       "submit": "Кіру",
-      "submitting": "Кіруде...",
-      "noAccount": "Әлі аккаунт жоқ па?",
-      "registerCta": "Құру"
+      "submitting": "Кіруде…",
+      "businessLink": "Бизнес ретінде тіркелу",
+      "studentLink": "Студент ретінде тіркелу"
     },
     "register": {
-      "title": "Тіркелу",
-      "description": "Бір минут баптау — жазбалар мен AI-чат сіздікі.",
-      "sectionTitle": "Сіз кімсіз?",
-      "submit": "Аккаунт құру",
-      "submitting": "Құрылуда...",
+      "businessTitle": "Бизнесті тіркеу",
+      "businessDescription": "Студенттермен жұмыс істеу үшін компания аккаунтын жасаңыз.",
+      "studentTitle": "Студентті тіркеу",
+      "studentDescription": "Жұмысты бастау үшін өзіңіз және дағдыларыңыз туралы айтыңыз.",
+      "submit": "Тіркелу",
+      "submitting": "Тіркелуде…",
       "haveAccount": "Аккаунтыңыз бар ма?",
-      "loginCta": "Кіру"
+      "loginCta": "Кіру",
+      "studentLink": "Мен студентпін",
+      "businessLink": "Мен бизнес өкілімін"
+    },
+    "tags": {
+      "placeholder": "Тег қосыңыз",
+      "hint": "Міндетті емес. Тег қосу үшін Enter немесе үтір басыңыз",
+      "remove": "{{tag}} тегін жою"
+    },
+    "session": {
+      "loading": "Жүктелуде…",
+      "error": "Деректерді жүктеу мүмкін болмады",
+      "retry": "Қайталау"
+    },
+    "business": {
+      "title": "Бизнес кабинеті"
+    },
+    "student": {
+      "title": "Студент кабинеті"
     }
   },
   "notes": {

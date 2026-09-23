@@ -4,7 +4,7 @@
  */
 import { API_V1_URL } from "./client";
 import { toApiError } from "./errors";
-import { tokenStorage } from "./token";
+import { sessionEvents } from "./session";
 import type { ApiError } from "./types";
 
 export type SseEvent<T = unknown> = { event: string; data: T };
@@ -52,13 +52,13 @@ export async function* streamSse<T = unknown>(
     "Content-Type": "application/json",
     Accept: "text/event-stream",
   };
-  const token = skipAuth ? null : tokenStorage.get();
-  if (token) headers.Authorization = `Bearer ${token}`;
+  const requestVersion = sessionEvents.version();
 
   let response: Response;
   try {
     response = await fetch(`${API_V1_URL}${path}`, {
       method: "POST",
+      credentials: "include",
       headers,
       body: JSON.stringify(body),
       signal,
@@ -86,7 +86,13 @@ export async function* streamSse<T = unknown>(
       response.statusText || "Request failed",
       response.headers.get("x-request-id") ?? undefined
     );
-    if (apiError.status === 401 && !skipAuth) tokenStorage.clear();
+    if (
+      apiError.status === 401 &&
+      apiError.code === "UNAUTHORIZED" &&
+      !skipAuth
+    ) {
+      sessionEvents.expire(requestVersion);
+    }
     throw apiError;
   }
 

@@ -4,20 +4,23 @@ Guidance for coding agents (Codex, Claude Code, etc.) working in this repository
 
 ## What this is
 
-A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. Talks to the FastAPI backend (see `../backend/AGENTS.md`) over `/api/v1`. Node 20+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
+A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*`. Development uses a Vite mock server; the existing FastAPI backend does not yet implement this contract. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
 
 ## Commands
 
 ```bash
-yarn install --frozen-lockfile      # install deps
-npm run dev                         # run on :5173 (Vite HMR)
-npm run build                       # production build
-npm run lint                        # eslint src/**/*.{ts,tsx}
-npm run typecheck                   # tsc --noEmit -p tsconfig.app.json
-npm run format                      # prettier --write
+yarn install --frozen-lockfile       # install deps
+npm run dev                          # :5173, cookie auth mocks on by default
+npm run build                        # production build; no mock API
+npm run preview                      # preview production assets; no mock API
+npm run lint                         # ESLint src, dev, e2e and TS configs
+npm run typecheck                    # TypeScript app, Node and E2E configs
+npx playwright install chromium     # install the E2E browser once
+npm run test:e2e                     # Playwright Chromium; starts Vite on :5180
+npm run format                       # Prettier src files
 ```
 
-Run `lint` and `typecheck` before finishing any task. Both must pass. There is no test runner configured yet (no vitest/jest, no `test` script).
+Run `lint` and `typecheck` before finishing any task. Both must pass. For authentication changes, also run `build` and the relevant Playwright tests. E2E tests cover cookie/session lifecycle, role guards, error states, validation, tags, themes, locales and responsive widths; the suite uses mocks, not the real backend.
 
 ## Architecture
 
@@ -30,24 +33,30 @@ src/
     styles/classes.ts      shared className constants (pageTitle, sectionTitle, field, fieldLabel, ...)
 
   core/                   app infrastructure, not feature-specific
-    api/client.ts          axios instance: baseURL = `${VITE_API_URL}/api/v1`, injects Bearer token, normalizes errors to ApiError, clears token on 401
-    api/token.ts            tokenStorage — localStorage + in-memory fallback, pub/sub listeners
+    api/client.ts          axios instance: baseURL = `/api`, withCredentials, JSON headers, normalized ApiError
+    api/session.ts         session-expiry pub/sub + request version; removes legacy authToken at startup
     api/sse.ts               streamSse() — fetch-based SSE async generator (axios can't stream in-browser)
     api/errors.ts             toApiError / isApiError / getErrorMessage / getFieldErrors
     api/types.ts               Page<T>, ApiError, ApiErrorBody shared shapes
     query/                     QueryClient (staleTime 60s, gcTime 5m, retry:1) + QueryProvider
     router/appRoutes.tsx        single RouteObject tree, imports pages from module barrels
-    env.ts                      zod-validated env: VITE_API_URL (url, default localhost:8000), VITE_APP_ENV
+    env.ts                      zod-validated VITE_APP_ENV; VITE_API_URL retained for legacy health demo
     i18n.ts                     i18next + http-backend + languagedetector
 
   modules/                 feature modules
-    auth/         api/auth.ts, stores/useAuthStore.ts, hooks/{useLogin,useLogout,useMe,useRegister}, components/RequireAuth.tsx, pages/{Login,Register}Page
+    auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, cabinets
     notes/        api/notes.ts (CRUD), hooks/useNotes* , components/{NoteForm,NoteList,Pagination}, pages/NotesPage
     ai/           api/chat.ts, hooks/{useChat,useChatStream}, components/ChatPanel.tsx, pages/ChatPage.tsx
     system/       api/health.ts, hooks/useHealth.ts, components/ApiStatus.tsx
     dashboard/    pages/{HomePage,ContactFormPage}, stores/useAppStore.ts
     theme/        ThemeProvider.tsx, components/ThemeToggle.tsx, stores/useThemeStore.ts
+
+dev/authMock.ts            Vite-only middleware; accounts and HttpOnly sessions in memory
+e2e/                       Playwright browser scenarios
+playwright.config.ts       isolated mock dev server and Chromium configuration
 ```
+
+Only `/login`, `/register/business`, `/register/student`, `/business/*` and `/student/*` are active product routes. `/` routes to login or the user's cabinet; unknown and former demo routes redirect through `/`. Demo source modules remain in the repo but are absent from routing and navigation.
 
 Each module follows the same internal layout: `api/<resource>.ts` (typed fetch fns over `apiClient`) → `queryKeys.ts` (key factory: `.all/.lists()/.list(filters)/.details()/.detail(id)`) → `hooks/use<Thing>.ts` (TanStack Query wrappers) → `components/` + `pages/` → public barrel `index.ts`.
 
@@ -55,10 +64,12 @@ Each module follows the same internal layout: `api/<resource>.ts` (typed fetch f
 
 - Path alias `@` → `src`, defined separately in `tsconfig.json`/`tsconfig.app.json` and `vite.config.ts` — keep both in sync when adding new alias roots.
 - `no-restricted-imports` (see `eslint.config.js`) blocks `@/modules/*/*` deep imports and `@/common/components/{layout,ui}/*` / `@/common/styles/*` file imports — always go through the module/folder's barrel `index.ts`. Inside a module, use relative imports.
-- `tokenStorage` (`src/core/api/token.ts`) is the source of truth for the auth token. `useAuthStore` (zustand) only mirrors it via subscription — read/write auth state through `tokenStorage`, not the store.
-- Requests that must skip auth (login, register, health) pass `skipAuth: true` in the axios config so a stale token isn't attached and a 401 there doesn't trigger logout.
-- A 401 on any authenticated request clears the token in the response interceptor (`core/api/client.ts`), which propagates through `tokenStorage`'s listeners into `useAuthStore`, which `RequireAuth` reacts to.
-- `useLogin`/`useLogout` call `queryClient.clear()` to purge cross-user cache.
+- `useAuthStore` holds `user`, bootstrap `status`, `setUser(user)` and `clearUser()` in memory. Never persist the user or authentication token in browser storage. The server owns the HttpOnly cookie; JavaScript must not read or write it.
+- `AuthBootstrap` always obtains the initial session through TanStack Query and `getMe`. It withholds page rendering and redirects until lookup finishes. Initial 401 means guest; other failures show a retry screen.
+- `skipAuth: true` suppresses global session-expiry handling for the initial `getMe` request; it does not disable cookies. Login failures with `INVALID_CREDENTIALS` belong to the form. A current-session `401 UNAUTHORIZED` from Axios or SSE emits a shared expiry event; 403 does not log out.
+- Login/registration use the returned user without a second login or `me` request. Session transitions advance a request version, cancel outstanding queries, clear cross-user cache and synchronize the `me` cache/store. Stale responses must not restore a previous user or expire a newer session.
+- Authentication mutations share a global transition lock so navigation between guest forms cannot send competing cookie-setting requests. Keep the lock until the mutation settles and use its pending state to disable submission across forms.
+- Pure validation and contract types live in `modules/auth/validation.ts` and `types.ts`. The Node mock imports these files directly by relative path, avoiding the React module barrel; keep them independent of React, browser globals and application runtime code.
 - Comments: only for non-obvious _why_ (a workaround, a subtle invariant, a constraint) — never restate _what_ the code already says. Default to no comment.
 - Components hold only rendering/JSX logic; hooks hold only hook logic (state, effects, query/store wiring). Pull every pure function (formatting, calculations, mapping, validation) out into a `helpers.ts`/`utils.ts` inside the module (or `common/lib` if it's shared across modules) and import it in — don't inline that logic in a component or a hook body.
 
@@ -125,18 +136,24 @@ Cards are `bg-card` + `border` + `rounded-lg`, no shadow. They hold forms and th
 
 Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border and ring on focus. The invalid state is driven by `aria-invalid={!!errors.x}` on the input, which `field` turns into a destructive border — that keeps the accessibility attribute and the visual in sync instead of threading an `isError` prop through every form.
 
-## Backend integration
+## Authentication API and mocks
 
-- Base URL: `VITE_API_URL` (validated in `core/env.ts`) + `/api/v1`, except `/health` which is hit directly. `VITE_API_URL` must be in the backend's `CORS_ORIGINS`.
-- Error shape: backend returns `{"error": {"code", "message", "details"}}`; `toApiError()` normalizes it (whether from axios or the SSE fetch path) into `ApiError { status, code, message, details?, requestId? }`.
-- `getFieldErrors(err)` maps FastAPI 422 `details` (`{loc: ["body", "field"], msg}`) into a `{field: message}` record for `react-hook-form`'s `setError`.
-- SSE: `streamSse()` POSTs via raw `fetch` (not axios) to `${API_V1_URL}<path>`, parses `event:`/`data:` blocks, yields typed events. Used by `modules/ai/hooks/useChatStream.ts` against `POST /ai/chat/stream`; event contract is `delta` / `done` (with usage) / `error`, matching `backend/app/services/ai.py`.
+- Active API: `POST /api/auth/register/business`, `POST /api/auth/register/student`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`. Successful registration/login/lookup responses contain `{ user }`, unwrapped by `modules/auth/api/auth.ts`; logout returns 204/`void`.
+- `User` is discriminated by `role: "business" | "student"`; `createdAt` and profile fields use camelCase and the other role's profile is `null`.
+- Axios uses relative `/api`, `withCredentials: true` and JSON headers. SSE also includes credentials and uses the shared expiry event; its retained demo endpoint remains `/api/v1/ai/chat/stream`.
+- Errors normalize to `{ status, code, message, fields?, details?, requestId? }`, preserving server messages and code case. `getFieldErrors` supports contract `fields` plus legacy FastAPI `details`. Field-level 409/422 errors stay in forms; preserve server text instead of translating it.
+- `AUTH_MOCKS=true` is the default only for Vite development serve. The plugin's `configureServer` middleware runs before the proxy; it is absent from production builds and `vite preview`. The old MSW worker is not started.
+- The mock sets `access_token=<opaque session id>; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800`; logout clears the cookie and revokes the session. Accounts and expiring sessions are held in memory: page reload preserves login, Vite restart resets all registrations and sessions.
+- Seed accounts: business `owner@zerno.kz` / `coffee2026` (Кофейня «Зерно»); student `arman@student.kz` / `arman2026` (Арман Сейтказы). These credentials are development fixtures only.
+- `AUTH_MOCKS=false` sends `/api` to `API_PROXY_TARGET` without rewriting the path. Local default: `http://localhost:8000`; Docker Compose: `http://api:8000`. These variables are Vite server settings without the `VITE_` prefix; authentication never uses `VITE_API_URL`.
+- The current FastAPI backend uses a different contract. Keep real-API acceptance open until a compatible backend exists; then disable mocks and repeat registration, login, reload, guards and logout against it. Do not adapt the backend as part of this frontend scope.
+- Production hosting must route `/api` to the compatible backend and serve SPA fallback routes. Build and preview do not provide an authentication mock server.
 
 ## ~~Don'ts~~
 
-- Don't bypass `tokenStorage` to read/write the auth token directly from components or stores.
+- Don't reintroduce Bearer tokens, `tokenStorage`, or authentication persistence in localStorage/sessionStorage. Startup removes the old `authToken` key.
 - Don't import a module's internal files from outside it — use the module's `index.ts` barrel.
-- Don't trust `frontend/README.md` for the current module/stack list — it's stale (describes a "quotes" module that doesn't exist and Tailwind 3; the real modules are `auth`, `notes`, `ai`, `system`, `dashboard`, `theme`, and the stack uses Tailwind 4).
+- Don't restore demo routes or technical API-status navigation as part of authentication work. Password recovery, email verification, profile editing and teams remain out of scope.
 - Don't build on `modules/dashboard/stores/useAppStore.ts` — it's an unused starter-kit leftover (a demo counter), not real app state.
 
 Visual rules — the reasoning for each is in **Design system** above:

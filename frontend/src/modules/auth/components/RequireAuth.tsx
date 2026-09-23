@@ -1,18 +1,12 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
+import { homeForUser } from "../helpers";
 import { useAuthStore } from "../stores/useAuthStore";
+import type { UserRole } from "../types";
 
-/**
- * Route guard: renders child routes while signed in, otherwise redirects to
- * /login and remembers where the user came from so login can send them back.
- */
-export const RequireAuth = () => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const location = useLocation();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-
+export const RequireAuth = ({ role }: { role: UserRole }) => {
+  const user = useAuthStore((state) => state.user);
+  if (!user || user.role !== role)
+    return <Navigate to={homeForUser(user)} replace />;
   return <Outlet />;
 };

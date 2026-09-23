@@ -55,38 +55,67 @@
     }
   },
   "auth": {
+    "language": "Язык интерфейса",
     "form": {
       "email": "Email",
-      "emailPlaceholder": "you@example.com",
       "password": "Пароль",
-      "passwordPlaceholder": "Минимум 8 символов",
-      "fullName": "Имя",
-      "fullNamePlaceholder": "Алиса Иванова"
+      "companyName": "Название компании",
+      "contactName": "Контактное лицо",
+      "contactPhone": "Телефон",
+      "name": "Имя",
+      "skills": "Навыки",
+      "technologies": "Технологии"
     },
     "errors": {
-      "emailRequired": "Укажите email",
-      "emailInvalid": "Введите корректный email",
-      "passwordRequired": "Укажите пароль",
-      "passwordTooShort": "Пароль должен быть не короче 8 символов",
-      "generic": "Что-то пошло не так. Попробуйте ещё раз."
+      "emailRequired": "Введите email",
+      "passwordRequired": "Введите пароль",
+      "emailInvalid": "Неверный формат email",
+      "passwordInvalid": "Минимум 8 символов, хотя бы одна буква и одна цифра",
+      "companyNameInvalid": "Название компании: от 2 до 200 символов",
+      "contactNameInvalid": "Имя контактного лица: от 2 до 100 символов",
+      "contactPhoneInvalid": "Телефон: от 10 до 15 цифр, можно с + в начале",
+      "nameInvalid": "Имя: от 2 до 100 символов",
+      "tagsInvalid": "До 20 тегов, каждый до 50 символов",
+      "registerFailed": "Не удалось зарегистрироваться. Попробуйте ещё раз",
+      "loginFailed": "Не удалось войти. Попробуйте ещё раз",
+      "logoutFailed": "Не удалось выйти. Попробуйте ещё раз",
+      "invalidCredentials": "Неверный email или пароль"
     },
     "login": {
       "title": "Вход",
-      "description": "С возвращением. Введите свои данные, чтобы продолжить.",
-      "sectionTitle": "Ваши данные",
+      "description": "Войдите, чтобы перейти в свой кабинет.",
       "submit": "Войти",
-      "submitting": "Входим...",
-      "noAccount": "Ещё нет аккаунта?",
-      "registerCta": "Создать"
+      "submitting": "Входим…",
+      "businessLink": "Регистрация для бизнеса",
+      "studentLink": "Регистрация для студента"
     },
     "register": {
-      "title": "Регистрация",
-      "description": "Минута на настройку — и заметки с AI-чатом ваши.",
-      "sectionTitle": "Кто вы?",
-      "submit": "Создать аккаунт",
-      "submitting": "Создаём...",
+      "businessTitle": "Регистрация бизнеса",
+      "businessDescription": "Создайте аккаунт компании для работы со студентами.",
+      "studentTitle": "Регистрация студента",
+      "studentDescription": "Расскажите о себе и своих навыках, чтобы начать работу.",
+      "submit": "Зарегистрироваться",
+      "submitting": "Регистрируем…",
       "haveAccount": "Уже есть аккаунт?",
-      "loginCta": "Войти"
+      "loginCta": "Войти",
+      "studentLink": "Я студент",
+      "businessLink": "Я представляю бизнес"
+    },
+    "tags": {
+      "placeholder": "Добавьте тег",
+      "hint": "Необязательно. Enter или запятая добавляют тег",
+      "remove": "Удалить {{tag}}"
+    },
+    "session": {
+      "loading": "Загрузка…",
+      "error": "Не удалось загрузить данные",
+      "retry": "Повторить"
+    },
+    "business": {
+      "title": "Кабинет бизнеса"
+    },
+    "student": {
+      "title": "Кабинет студента"
     }
   },
   "notes": {
