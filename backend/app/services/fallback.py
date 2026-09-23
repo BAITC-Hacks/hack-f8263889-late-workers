@@ -10,6 +10,7 @@ from typing import Any
 
 from app.core.blocks import (
     BLOCK_CODES,
+    BLOCK_NAMES,
     BLOCK_WEIGHTS,
     QUALITY_NAMES,
     QUALITY_ORDER,
@@ -96,6 +97,7 @@ def fallback_assessment(answered_blocks: set[str], has_draft: bool) -> list[dict
         entries.append(
             {
                 "block": block,
+                "name": BLOCK_NAMES[block],
                 "quality": {"code": quality, "name": QUALITY_NAMES[quality]},
                 "reason": reason,
             }

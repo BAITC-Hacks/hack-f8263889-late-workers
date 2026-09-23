@@ -38,3 +38,17 @@ def unknown_industry(code: str) -> str:
 
 def unknown_level(code: str) -> str:
     return f"Неизвестный уровень: {code}"
+
+
+# --- Card builder ---
+INVALID_STATUS = "Действие недоступно в текущем статусе задачи"
+ROUND_LIMIT_REACHED = "Лимит раундов уточнения исчерпан"
+ROUND_NOT_ANSWERED = "Сначала ответьте на вопросы текущего раунда"
+CARD_NOT_CONFIRMED = "Сначала подтвердите карточку"
+DRAFT_TEXT = "Описание: от 50 до 3000 символов"
+ANSWERS_INCOMPLETE = "Передайте ответы на все вопросы раунда"
+ANSWER_TOO_LONG = "Ответ: до 1000 символов"
+TITLE_TOO_LONG = "До 120 символов"
+TITLE_REQUIRED = "Заполните название"
+FIELD_TOO_LONG = "До 2000 символов"
+NEED_REQUIRED = "Заполните потребность"

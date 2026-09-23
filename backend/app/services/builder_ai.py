@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from app.core.blocks import (
     BLOCK_CODES,
+    BLOCK_NAMES,
     CARD_FIELDS,
     MIN_QUESTIONS_PER_ROUND,
     QUALITY_CODES,
@@ -68,9 +69,22 @@ class ExtractedField(BaseModel):
     sources: list[str]
 
 
+class ExtractFields(BaseModel):
+    """Explicit fields, not a dict: strict Structured Outputs rejects open maps."""
+
+    context: ExtractedField
+    need: ExtractedField
+    targetUsers: ExtractedField
+    dataMaterials: ExtractedField
+    constraints: ExtractedField
+    expectedResult: ExtractedField
+    successCriteria: ExtractedField
+    interactionFormat: ExtractedField
+
+
 class ExtractOut(BaseModel):
     title: ExtractedField
-    fields: dict[str, ExtractedField]
+    fields: ExtractFields
 
 
 class AssessOut(BaseModel):
@@ -99,9 +113,8 @@ def _validate_analyze(out: AnalyzeOut) -> None:
 def _validate_extract(out: ExtractOut) -> None:
     if out.title.value is not None and len(out.title.value) > TITLE_LIMIT:
         raise AIResponseInvalid(f"title длиннее {TITLE_LIMIT} символов")
-    for name, field in out.fields.items():
-        if name not in EXTRACT_FIELDS:
-            raise AIResponseInvalid(f"неизвестное поле: {name}")
+    for name in EXTRACT_FIELDS:
+        field = getattr(out.fields, name)
         if field.value is not None and len(field.value) > FIELD_LIMIT:
             raise AIResponseInvalid(f"поле {name} длиннее {FIELD_LIMIT} символов")
 
@@ -168,6 +181,7 @@ async def analyze(
     assessment = [
         {
             "block": entry.block,
+            "name": BLOCK_NAMES[entry.block],
             "quality": {"code": entry.quality, "name": QUALITY_NAMES[entry.quality]},
             "reason": entry.reason,
         }
@@ -292,10 +306,7 @@ async def extract_card(
 
     card = {
         "title": keep("title", out.title),
-        "fields": {
-            name: keep(name, out.fields.get(name, ExtractedField(value=None, sources=[])))
-            for name in EXTRACT_FIELDS
-        },
+        "fields": {name: keep(name, getattr(out.fields, name)) for name in EXTRACT_FIELDS},
     }
     return "ai", card, violations
 
