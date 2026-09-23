@@ -247,7 +247,8 @@
       "updatedAt": "Updated"
     },
     "empty": "You have no tasks yet",
-    "error": "Could not load your tasks"
+    "error": "Could not load your tasks",
+    "create": "Create task"
   },
   "task": {
     "back": "Catalog",
@@ -266,7 +267,8 @@
       "successCriteria": "Success criteria",
       "contact": "Contact",
       "interactionFormat": "Interaction format"
-    }
+    },
+    "edit": "Edit"
   },
   "save": {
     "add": "Save",
@@ -381,6 +383,156 @@
       "durationWeeks": "Duration: a whole number of weeks from 1 to 52",
       "prototypeUrl": "The link must start with http:// or https://",
       "prototypeUrlLong": "Link: up to 500 characters"
+    }
+  },
+  "builder": {
+    "title": "Task builder",
+    "back": "My tasks",
+    "notFound": "Task not found",
+    "error": "Could not load the task",
+    "fallback": "AI is unavailable — this result was produced in fallback mode",
+    "draftText": {
+      "title": "Original description",
+      "empty": "No description saved"
+    },
+    "steps": {
+      "label": "Builder steps",
+      "description": "Description",
+      "clarification": "Clarification",
+      "card": "Card",
+      "publication": "Publication"
+    },
+    "blocks": {
+      "context_need": "Context and need",
+      "data": "Data and materials",
+      "result": "Expected result",
+      "success_criteria": "Success criteria",
+      "constraints": "Constraints",
+      "users": "Users",
+      "business_link": "Link with the business"
+    },
+    "quality": {
+      "missing": "Empty",
+      "formal": "Formal",
+      "partial": "Incomplete",
+      "specific": "Specific"
+    },
+    "new": {
+      "title": "New task",
+      "description": "Describe the task — AI will ask clarifying questions and build the card only from your answers.",
+      "draftText": "Describe the task in your own words",
+      "industry": "Industry",
+      "industryPlaceholder": "Choose an industry",
+      "industriesError": "Could not load industries",
+      "submit": "Continue",
+      "saving": "Saving the description…",
+      "analyzing": "Analyzing the description and preparing questions…",
+      "error": "Could not save the description. Please try again",
+      "errors": {
+        "draftLength": "Description: 50 to 3000 characters",
+        "industryRequired": "Choose an industry"
+      }
+    },
+    "analyze": {
+      "hint": "The description is saved. Run the analysis to get clarifying questions.",
+      "submit": "Analyze the description",
+      "pending": "Analyzing the description and preparing questions…",
+      "error": "Could not analyze the description. Please try again"
+    },
+    "assessment": {
+      "title": "Description completeness"
+    },
+    "questions": {
+      "title": "Clarifying questions",
+      "roundTitle": "Round {{number}}",
+      "skip": "Skip",
+      "answer": "Answer",
+      "skipped": "Question skipped",
+      "noAnswer": "Skipped",
+      "more": "More questions ({{left}} left)",
+      "build": "Build the card",
+      "saving": "Saving the answers…",
+      "preparing": "Preparing new questions…",
+      "building": "Building the card…",
+      "error": "Could not send the answers. Please try again"
+    },
+    "card": {
+      "title": "Task card",
+      "titleField": "Title",
+      "titlePlaceholder": "Name the task briefly",
+      "industry": "Industry",
+      "empty": "Not specified — fill it in to raise the rating",
+      "marks": {
+        "ai": "AI",
+        "human": "You",
+        "profile": "From profile",
+        "changed": "Changed"
+      },
+      "confirmed": "Confirmed",
+      "sourcesTitle": "Taken from:",
+      "sourceDraft": "description: \"{{text}}\"",
+      "sourceAnswer": "answer to the question \"{{text}}\"",
+      "confirm": "Confirm the card",
+      "confirming": "Confirming and rating…",
+      "confirmError": "Could not confirm the card. Please try again",
+      "leave": "You have unconfirmed changes. Leave the page?"
+    },
+    "rating": {
+      "title": "Rating",
+      "pending": "The rating appears after confirmation",
+      "stale": "The rating will update after confirmation",
+      "heuristic": "rated by heuristics",
+      "hintsTitle": "What to add",
+      "complete": "All the information is complete",
+      "hint": "{{hint}}: up to +{{gain}}"
+    },
+    "hints": {
+      "context_need": {
+        "missing": "Describe what happens now and what needs to change",
+        "improve": "Clarify the situation and the goal: add numbers or examples"
+      },
+      "data": {
+        "missing": "Specify the data, examples or sources you will give the team",
+        "improve": "Clarify the data: volume, period, format"
+      },
+      "result": {
+        "missing": "Describe what the team should hand over at the end",
+        "improve": "Clarify the result: format and contents"
+      },
+      "success_criteria": {
+        "missing": "Add measurable success criteria",
+        "improve": "Make the criteria measurable: a metric and a target value"
+      },
+      "constraints": {
+        "missing": "Specify deadlines, technologies or access",
+        "improve": "Clarify the constraints: deadline, platform, access"
+      },
+      "users": {
+        "missing": "Specify who the solution is for",
+        "improve": "Clarify the users: who they are and how often they will use the solution"
+      },
+      "business_link": {
+        "missing": "Specify the format of consultations and feedback",
+        "improve": "Clarify how you keep in touch: how often and through which channel"
+      }
+    },
+    "publish": {
+      "submit": "Publish",
+      "republish": "Publish again",
+      "blocked": {
+        "confirm": "Confirm the card before publishing",
+        "required": "Fill in the title and the need"
+      },
+      "error": "Could not publish. Please try again",
+      "published": "The task is published",
+      "openInCatalog": "Open in the catalog",
+      "unpublishedNotice": "The task is unpublished",
+      "unpublish": "Unpublish",
+      "dialogTitle": "Unpublish the task?",
+      "dialogText": "The task will disappear from the catalog. Responses will be kept.",
+      "dialogConfirm": "Unpublish",
+      "dialogCancel": "Cancel",
+      "actionError": "Could not complete the action. Please try again"
     }
   }
 }

@@ -7,6 +7,7 @@ import {
   SessionRedirect,
   StudentRegisterPage,
 } from "@/modules/auth";
+import { BuilderPage, NewTaskPage } from "@/modules/builder";
 import {
   BusinessTasksPage,
   CatalogPage,
@@ -41,7 +42,11 @@ export const appRoutes: RouteObject[] = [
   },
   {
     element: <RequireAuth role="business" />,
-    children: [{ path: "/business", element: <BusinessTasksPage /> }],
+    children: [
+      { path: "/business", element: <BusinessTasksPage /> },
+      { path: "/business/tasks/new", element: <NewTaskPage /> },
+      { path: "/business/tasks/:id/builder", element: <BuilderPage /> },
+    ],
   },
   {
     element: <RequireAuth role="student" />,

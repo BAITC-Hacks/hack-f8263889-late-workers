@@ -3,6 +3,7 @@ import { parseId } from "@/common/lib/query";
 import { formatDateTime } from "@/core/api";
 
 import {
+  type BusinessTask,
   TASK_LEVELS,
   TASK_SORTS,
   type TaskLevelCode,
@@ -98,6 +99,16 @@ export const isInProgress = (status: { code: string }) =>
   status.code === "in_progress";
 
 export const parseTaskId = parseId;
+
+export const builderPath = (id: number) => `/business/tasks/${id}/builder`;
+
+/** Statuses finished in the builder; a task past them opens its catalog page. */
+const BUILDER_STATUSES = new Set(["draft", "clarifying", "review"]);
+
+export const businessTaskHref = (task: BusinessTask) =>
+  BUILDER_STATUSES.has(task.status.code)
+    ? builderPath(task.id)
+    : `/catalog/${task.id}`;
 
 export type CatalogLinkState = { catalogSearch: string };
 

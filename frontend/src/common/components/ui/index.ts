@@ -3,6 +3,7 @@ export { Badge, badgeVariants, type BadgeProps } from "./badge";
 export { Select, type SelectProps } from "./select";
 export { Pagination } from "./pagination";
 export { Toaster } from "./toaster";
+export { Tooltip } from "./tooltip";
 export {
   Card,
   CardContent,
