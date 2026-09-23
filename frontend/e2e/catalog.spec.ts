@@ -1,6 +1,6 @@
 import { type Page, expect, test } from "@playwright/test";
 
-import { fillBusiness, signIn } from "./helpers";
+import { fillBusiness, fillStudent, signIn } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -562,4 +562,120 @@ test("student cannot open the business section", async ({ page }) => {
   await signIn(page, "student");
   await page.goto("/business");
   await expect(page).toHaveURL("/catalog");
+});
+
+async function registerStudent(page: Page) {
+  await page.goto("/register/student");
+  await fillStudent(page);
+  await page
+    .getByRole("button", { name: "Зарегистрироваться", exact: true })
+    .click();
+  await expect(page).toHaveURL("/catalog");
+  await expect(cards(page)).toHaveCount(20);
+}
+
+const bakery = (page: Page) =>
+  page.getByRole("article", { name: "Прогноз спроса на выпечку", exact: true });
+
+test("save from a card, then unsave from the task page", async ({ page }) => {
+  await registerStudent(page);
+  await page.goto("/catalog?industry=horeca");
+  const card = bakery(page);
+  const saveRequest = page.waitForRequest(
+    (request) =>
+      request.method() === "POST" &&
+      new URL(request.url()).pathname === "/api/tasks/12/save"
+  );
+  await card.getByRole("button", { name: "В интересное", exact: true }).click();
+  expect((await saveRequest).postData()).toBeNull();
+  await expect(
+    card.getByRole("button", { name: "В интересном", exact: true })
+  ).toBeVisible();
+  await expect(page).toHaveURL("/catalog?industry=horeca");
+
+  await card.getByRole("link").click();
+  await expect(page).toHaveURL("/catalog/12");
+  const main = page.getByRole("main");
+  const unsaveRequest = page.waitForRequest(
+    (request) =>
+      request.method() === "DELETE" &&
+      new URL(request.url()).pathname === "/api/tasks/12/save"
+  );
+  await main.getByRole("button", { name: "В интересном", exact: true }).click();
+  await unsaveRequest;
+  await expect(
+    main.getByRole("button", { name: "В интересное", exact: true })
+  ).toBeVisible();
+
+  await page.reload();
+  await expect(
+    main.getByRole("button", { name: "В интересное", exact: true })
+  ).toBeVisible();
+});
+
+test("save button is disabled until the response", async ({ page }) => {
+  await registerStudent(page);
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/tasks/*/save", async (route) => {
+    await ready;
+    await route.continue();
+  });
+  const button = cards(page)
+    .first()
+    .getByRole("button", { name: "В интересное", exact: true });
+  await button.click();
+  await expect(button).toBeDisabled();
+  release();
+  await expect(
+    cards(page)
+      .first()
+      .getByRole("button", { name: "В интересном", exact: true })
+  ).toBeEnabled();
+});
+
+test("a failed save restores the button and shows a toast", async ({
+  page,
+}) => {
+  await registerStudent(page);
+  await page.route("**/api/tasks/*/save", (route) =>
+    route.fulfill({
+      status: 500,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: { code: "INTERNAL_ERROR", message: "Ошибка сервера" },
+      }),
+    })
+  );
+  const card = cards(page).first();
+  await card.getByRole("button", { name: "В интересное", exact: true }).click();
+  await expect(
+    page.getByText("Не удалось сохранить изменения", { exact: true })
+  ).toBeVisible();
+  await expect(
+    card.getByRole("button", { name: "В интересное", exact: true })
+  ).toBeEnabled();
+  await expect(page).toHaveURL("/catalog");
+});
+
+test("business sees no save buttons", async ({ page }) => {
+  await signIn(page, "business");
+  await page.goto("/catalog");
+  await expect(cards(page)).toHaveCount(20);
+  await expect(page.getByRole("button", { name: /^В интересно/ })).toHaveCount(
+    0
+  );
+  await page.goto("/catalog/12");
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Прогноз спроса на выпечку",
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /^В интересно/ })).toHaveCount(
+    0
+  );
 });

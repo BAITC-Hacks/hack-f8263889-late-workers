@@ -5,7 +5,9 @@ import {
   TASK_LEVELS,
   TASK_SORTS,
   type TaskLevelCode,
+  type TaskListItem,
   type TaskSort,
+  type TasksPage,
   type TasksQuery,
 } from "./types";
 
@@ -128,3 +130,21 @@ const STATUS_BADGE: Record<string, BadgeProps["variant"]> = {
 
 export const statusBadgeVariant = (status: { code: string }) =>
   STATUS_BADGE[status.code] ?? "muted";
+
+export const withSavedFlag = <T extends { id: number; isSaved: boolean }>(
+  task: T,
+  id: number,
+  isSaved: boolean
+): T => (task.id === id ? { ...task, isSaved } : task);
+
+export const markSavedInPage = (
+  page: TasksPage,
+  id: number,
+  isSaved: boolean
+): TasksPage => ({
+  ...page,
+  items: page.items.map((task) => withSavedFlag(task, id, isSaved)),
+});
+
+export const withoutTask = (items: TaskListItem[], id: number) =>
+  items.filter((task) => task.id !== id);

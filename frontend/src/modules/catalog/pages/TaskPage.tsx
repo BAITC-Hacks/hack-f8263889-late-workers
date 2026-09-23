@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useParams } from "react-router-dom";
 
 import { ErrorState } from "../components/ErrorState";
+import { SaveTaskButton } from "../components/SaveTaskButton";
 import { TaskBadges } from "../components/TaskBadges";
 import { TaskFields } from "../components/TaskFields";
 import { TaskPageSkeleton } from "../components/TaskPageSkeleton";
@@ -64,6 +65,9 @@ export const TaskPage = () => {
                   })
                 : data.status.name}
             </span>
+          </div>
+          <div>
+            <SaveTaskButton taskId={data.id} isSaved={data.isSaved} />
           </div>
         </Stack>
         <TaskFields fields={data.fields} />

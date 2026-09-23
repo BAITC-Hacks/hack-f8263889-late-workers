@@ -257,5 +257,10 @@
       "contact": "Contact",
       "interactionFormat": "Interaction format"
     }
+  },
+  "save": {
+    "add": "Save",
+    "saved": "Saved",
+    "error": "Could not save your changes"
   }
 }

@@ -1,25 +1,25 @@
 import { Card } from "@/common/components/ui";
 import { cn } from "@/common/lib/utils";
-import { type ReactNode, useId } from "react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import type { CatalogLinkState } from "../helpers";
 import type { TaskListItem } from "../types";
+import { SaveTaskButton } from "./SaveTaskButton";
 import { TaskBadges } from "./TaskBadges";
 
 type TaskCardProps = {
   task: TaskListItem;
   /** Catalog address to return to from the task page. */
   catalogSearch?: string;
-  action?: ReactNode;
 };
 
 /**
- * The title link is stretched over the whole card; `action` sits above it,
- * so pressing the action never opens the task.
+ * The title link is stretched over the whole card; the save button sits
+ * above it, so pressing the button never opens the task.
  */
-export const TaskCard = ({ task, catalogSearch, action }: TaskCardProps) => {
+export const TaskCard = ({ task, catalogSearch }: TaskCardProps) => {
   const { t } = useTranslation();
   const titleId = useId();
 
@@ -64,7 +64,9 @@ export const TaskCard = ({ task, catalogSearch, action }: TaskCardProps) => {
         <span className="text-muted-foreground">
           {t("catalog.card.responses", { count: task.responsesCount })}
         </span>
-        {action && <div className="relative z-10 ml-auto">{action}</div>}
+        <div className="relative z-10 ml-auto">
+          <SaveTaskButton taskId={task.id} isSaved={task.isSaved} />
+        </div>
       </div>
     </Card>
   );
