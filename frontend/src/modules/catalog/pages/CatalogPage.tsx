@@ -49,11 +49,33 @@ export const CatalogPage = () => {
       );
     return (
       <Stack gap="lg">
-        <div className={cardGrid}>
-          {items.map((task) => (
-            <TaskCard key={task.id} task={task} catalogSearch={search.search} />
-          ))}
-        </div>
+        {items.length > 0 ? (
+          <div className={cardGrid}>
+            {items.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                catalogSearch={search.search}
+              />
+            ))}
+          </div>
+        ) : (
+          // A shared link can outlive its page once the catalogue shrinks.
+          <Stack gap="md">
+            <p className="text-muted-foreground text-sm">
+              {t("catalog.pageEmpty")}
+            </p>
+            <div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => search.changePage(1)}
+              >
+                {t("catalog.firstPage")}
+              </Button>
+            </div>
+          </Stack>
+        )}
         <Pagination
           total={total}
           pageSize={pageSize}
