@@ -24,7 +24,7 @@ async def test_notes_crud(client: AsyncClient, auth_headers: dict[str, str]) -> 
 
     response = await client.get(f"/api/v1/notes/{note['id']}", headers=auth_headers)
     assert response.status_code == 404
-    assert response.json()["error"]["code"] == "not_found"
+    assert response.json()["error"]["code"] == "NOT_FOUND"
 
 
 async def test_notes_pagination(client: AsyncClient, auth_headers: dict[str, str]) -> None:

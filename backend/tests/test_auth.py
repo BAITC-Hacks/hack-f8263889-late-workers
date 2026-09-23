@@ -25,15 +25,15 @@ async def test_register_duplicate_email_conflicts(client: AsyncClient) -> None:
     await client.post("/api/v1/auth/register", json=USER)
     response = await client.post("/api/v1/auth/register", json=USER)
     assert response.status_code == 409
-    assert response.json()["error"]["code"] == "conflict"
+    assert response.json()["error"]["code"] == "CONFLICT"
 
 
 async def test_register_validation_error_shape(client: AsyncClient) -> None:
     response = await client.post("/api/v1/auth/register", json={"email": "nope", "password": "x"})
     assert response.status_code == 422
     error = response.json()["error"]
-    assert error["code"] == "validation_error"
-    assert isinstance(error["details"], list)
+    assert error["code"] == "VALIDATION_ERROR"
+    assert isinstance(error["fields"], dict)
 
 
 async def test_login_wrong_password(client: AsyncClient) -> None:
@@ -42,13 +42,13 @@ async def test_login_wrong_password(client: AsyncClient) -> None:
         "/api/v1/auth/login", data={"username": USER["email"], "password": "wrong-password"}
     )
     assert response.status_code == 401
-    assert response.json()["error"]["code"] == "unauthorized"
+    assert response.json()["error"]["code"] == "UNAUTHORIZED"
 
 
 async def test_me_without_token(client: AsyncClient) -> None:
     response = await client.get("/api/v1/users/me")
     assert response.status_code == 401
-    assert response.json()["error"]["code"] == "unauthorized"
+    assert response.json()["error"]["code"] == "UNAUTHORIZED"
 
 
 async def test_me_with_garbage_token(client: AsyncClient) -> None:
