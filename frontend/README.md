@@ -1,220 +1,112 @@
-# React Starter Kit
+# Late Workers — фронтенд
 
-A lean, opinionated **Vite + React 19 + TypeScript** template. Everything real apps need — routing, state, data, forms, i18n, theming, error handling — wired up and ready to ship.
+React 19, TypeScript, Vite, Tailwind 4, TanStack Query, Zustand, React Hook Form и i18next. Реализованы регистрация бизнеса и студента, вход, восстановление сессии, выход и доступ по ролям, а также каталог задач: сортировка, фильтры по отрасли и уровню, страница задачи, «Интересное» студента и «Мои задачи» бизнеса. Интерфейс доступен на русском, казахском и английском, в светлой и тёмной темах.
 
-```
-rsk /
-```
+По умолчанию фронтенд подключён к FastAPI из `backend/`: авторизация `/api/auth/*`, каталог `/api/industries` и `/api/tasks`, сохранённые задачи `/api/me/saved-tasks` и задачи бизнеса `/api/business/tasks`. Аккаунты и задачи хранятся в PostgreSQL. Vite проксирует `/api` на backend без изменения пути, включая HttpOnly cookie.
 
----
+## Запуск
 
-## Features
-
-**Core**
-
-- **Vite 7** with SWC — instant HMR and fast builds
-- **React 19** + **TypeScript** strict
-- **React Router** for client-side routing
-
-**Styling & design**
-
-- **Tailwind CSS 3** with a full design-token system (light / dark / system)
-- **shadcn/ui** primitives you own in-repo
-- **JetBrains Mono** for code & UI eyebrows, **Inter** for body
-- Subtle fixed dot-grid background, tuned per theme
-- Reusable layout primitives: `Page`, `Section`, `Stack`, `Footer`
-
-**State & data**
-
-- **Zustand** for UI / global state
-- **TanStack Query** + **axios** for server state, with a typed `apiClient`, request/response interceptors, normalized errors, and DevTools in dev
-
-**Forms & validation**
-
-- **React Hook Form** for performant forms
-- **Zod** for runtime validation — schema-driven env vars, reusable across forms
-
-**Internationalization**
-
-- **i18next** + browser language detection, HTTP backend, localStorage persistence
-- Ships with **English**, **Russian** and **Kazakh** locales
-
-**Reliability**
-
-- **Zod-validated environment** — app refuses to boot on missing / malformed env vars
-- **Error boundary** around the whole tree with a styled fallback + dev stack trace
-
-**DX & conventions**
-
-- **Public API barrels** per module with lint-enforced boundaries
-- **Husky** + **lint-staged** pre-commit hook running ESLint + Prettier on staged files
-- Prettier with import sorting and Tailwind class sorting
-- `@` → `src` path alias
-
----
-
-## Quick start
+Для полного стека нужны Node.js 22.12+, Yarn, Python 3.12+, uv и Docker. Команды из корня репозитория:
 
 ```bash
-# 1. install deps
-yarn install   # or npm install
-
-# 2. copy envs
-cp .env.example .env
-
-# 3. run
-yarn dev
+make setup
+make infra
+make -C backend migrate
+make dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Если `.env` уже существует, установите в `frontend/.env` `AUTH_MOCKS=false` и `API_PROXY_TARGET=http://127.0.0.1:8000`, а в `backend/.env` — PostgreSQL из `.env.example` (порт `5439`) и `ACCESS_TOKEN_EXPIRE_MINUTES=10080`. Откройте [localhost:5173](http://localhost:5173): гость попадёт на `/login`. API доступен на [localhost:8000/docs](http://localhost:8000/docs). Отдельный фронтенд запускается командой `yarn dev` из `frontend/`.
 
----
+Для демонстрационных аккаунтов и задач в новой локальной базе выполните `make -C backend seed` из корня. **Эта команда удаляет существующие аккаунты, их задачи и сохранения**, поэтому не запускайте её в базе с нужными данными. Пароль всех аккаунтов настоящего API — `demo2026`:
 
-## Environment variables
+| Роль                    | Email              | Пароль     |
+| ----------------------- | ------------------ | ---------- |
+| Бизнес, Кофейня «Зерно» | `owner@zerno.kz`   | `demo2026` |
+| Студент, Арман Сейтказы | `arman@student.kz` | `demo2026` |
 
-All envs are validated with Zod at boot — a missing or malformed value fails fast with a clear message.
+Серверный seed содержит 3 бизнеса, 6 студентов и 7 задач: 6 доступны в каталоге, один черновик виден владельцу. Можно регистрировать новые аккаунты; данные сохраняются в PostgreSQL после перезапуска приложений.
 
-| Variable       | Type                                   | Default                 | Notes                     |
-| -------------- | -------------------------------------- | ----------------------- | ------------------------- |
-| `VITE_API_URL` | URL                                    | `https://dummyjson.com` | Base URL for `apiClient`. |
-| `VITE_APP_ENV` | `development \| staging \| production` | `development`           | Build environment tag.    |
+## Работа без backend
 
-Schema lives in [`src/core/env.ts`](src/core/env.ts). To add a new variable:
+Из `frontend/` запустите `AUTH_MOCKS=true yarn dev`. Это включает моки авторизации и каталога. Здесь действуют отдельные пароли: `owner@zerno.kz` / `coffee2026` и `arman@student.kz` / `arman2026`. Моки хранят аккаунты, сессии и сохранённые задачи в памяти Vite: обновление страницы сохраняет вход, перезапуск Vite сбрасывает данные.
 
-1. Add it to the schema with the right Zod type (`z.url()`, `z.coerce.number()`, `z.enum([...])`, etc.)
-2. Document it in `.env.example`
-3. Use it anywhere via `import { env } from "@/core/env"` — fully typed.
+В mock-каталоге 26 задач, 25 из них опубликованы или в работе — хватает на две страницы. Кофейне «Зерно» принадлежат задачи 12 (опубликована), 15 (черновик) и 21 (в работе). При переключении между режимами войдите заново: mock-сессия и JWT реального сервера несовместимы.
 
----
+## Переменные окружения
 
-## Project structure
+| Переменная         | Значение по умолчанию   | Назначение                                                                     |
+| ------------------ | ----------------------- | ------------------------------------------------------------------------------ |
+| `AUTH_MOCKS`       | `false`                 | `true` включает mock API авторизации и каталога только в режиме `development`. |
+| `API_PROXY_TARGET` | `http://127.0.0.1:8000` | Backend для прокси `/api`; путь передаётся без изменений.                      |
+| `VITE_APP_ENV`     | `development`           | Метка окружения: `development`, `staging` или `production`.                    |
 
-```
-src/
-  common/
-    components/
-      layout/        Page · Section · Stack · Footer
-      ui/            shadcn primitives (Button, Card, …)
-      TopBar.tsx
-    lib/             utils (cn helper)
-    styles/          class-name constants (eyebrow, field, …)
+`AUTH_MOCKS` и `API_PROXY_TARGET` читает сервер Vite; эти значения не становятся переменными браузерного приложения. В Docker Compose адрес прокси установлен в `http://api:8000`; значение `AUTH_MOCKS` можно передать через окружение команды Compose. Полный стек из корня репозитория запускается командой `make docker-up`.
 
-  core/
-    api/             axios instance + interceptors
-    query/           TanStack QueryClient + Provider
-    router/          appRoutes
-    env.ts           Zod-validated env
-    ErrorBoundary.tsx
-    i18n.ts
-    main.tsx · App.tsx · index.css
+Для подключения к другому экземпляру API:
 
-  modules/
-    dashboard/       HomePage, AboutPage, useAppStore
-    quotes/          Random-quote demo — the reference data-fetching module
-    theme/           light / dark / system switcher
-
-public/
-  locales/           en, ru, kk translation JSON
+```bash
+AUTH_MOCKS=false API_PROXY_TARGET=http://127.0.0.1:8001 yarn dev
 ```
 
-Each module and folder with multiple exports has an **`index.ts` public API**. Cross-module imports go through the barrel; same-module imports use relative paths.
+`yarn build` и `yarn preview` не включают mock API. В production хостинг должен направлять `/api` к совместимому backend и отдавать SPA для клиентских маршрутов. `VITE_API_URL` сохранился только для исходников старого health-демо; действующая авторизация его не использует.
 
----
+## Сессия и маршруты
 
-## Conventions
+Все auth-запросы идут на относительный `/api` с JSON и `withCredentials: true`. При `ACCESS_TOKEN_EXPIRE_MINUTES=10080` сервер устанавливает cookie `access_token` с `HttpOnly; SameSite=Lax; Path=/; Max-Age=604800`. Реальный сервер хранит в ней JWT, моки — случайный идентификатор сессии. JavaScript не читает cookie, Bearer-заголовки и хранение токена в браузерных хранилищах не используются. Старый ключ `authToken` удаляется при старте приложения.
 
-### Module public APIs
+При запуске приложение запрашивает `GET /api/auth/me`: до ответа виден индикатор загрузки, без промежуточных редиректов. Начальный 401 означает гостя; другие ошибки открывают экран с повторной попыткой. Вход и регистрация сразу используют пользователя из ответа. Logout очищает cookie; mock-сервер также удаляет сессию из памяти, а FastAPI использует JWT без серверного списка отзыва. Последующий `401 UNAUTHORIZED` очищает состояние и ведёт на вход; `INVALID_CREDENTIALS` остаётся ошибкой формы, а 403 не завершает сессию.
 
-```ts
-// ✅ from outside the module — use the barrel
-import { ThemeProvider, ThemeToggle } from "@/modules/theme";
+| Маршрут              | Доступ                                                           |
+| -------------------- | ---------------------------------------------------------------- |
+| `/login`             | Вход гостя                                                       |
+| `/register/business` | Регистрация бизнеса                                              |
+| `/register/student`  | Регистрация студента                                             |
+| `/catalog`           | Каталог задач, обе роли                                          |
+| `/catalog/:id`       | Страница задачи, обе роли                                        |
+| `/business`          | «Мои задачи», роль `business`                                    |
+| `/student`           | «Интересное», роль `student`                                     |
+| `/`                  | Вход для гостя, `/catalog` для студента, `/business` для бизнеса |
 
-// ❌ reaching into internals — blocked by ESLint
-import { ThemeProvider } from "@/modules/theme/ThemeProvider";
+После входа и регистрации студент попадает в каталог, бизнес — в «Мои задачи». Пользователь другой роли перенаправляется в свой раздел, гость — на вход. Авторизованный пользователь на странице входа или регистрации также переходит в свой раздел. Старые демонстрационные и неизвестные адреса перенаправляются через `/`; исходники демо сохранены. Восстановление пароля, подтверждение email, редактирование профиля и команды не входят в этот этап.
+
+Сортировка, фильтры и номер страницы каталога хранятся в адресе (`/catalog?sort=date&industry=horeca&level=ready&page=2`), поэтому скопированная ссылка открывает тот же вид, а «← Каталог» на странице задачи возвращает к нему. Кнопка «В интересное» есть только у студента; она ждёт ответа сервера, а при ошибке остаётся в прежнем состоянии и показывает всплывающее сообщение. Отклики, создание задач и поиск по тексту в этот этап не входят.
+
+## Проверки
+
+```bash
+yarn lint
+yarn typecheck
+yarn build
+npx playwright install chromium
+yarn test:e2e
 ```
 
-Enforced by `no-restricted-imports` in [`eslint.config.js`](eslint.config.js). Same rule applies to `@/common/components/layout/*`, `@/common/components/ui/*`, `@/common/styles/*`.
+`lint` проверяет исходники приложения, dev-middleware, браузерные тесты и TypeScript-конфигурации. `typecheck` проверяет приложение, Node-конфигурацию с mock-плагином и E2E-тесты. Playwright самостоятельно запускает Vite с моками на `127.0.0.1:5180`; порт должен быть свободен. Chromium устанавливается один раз, затем достаточно запускать `yarn test:e2e`.
 
-### Styling
+Браузерные сценарии проверяют регистрацию и вход обеих ролей, навигацию по разделам, каталог (сортировку, фильтры, адрес, пагинацию, загрузку, пустые состояния и ошибки), страницу задачи, «Интересное» и «Мои задачи», атрибуты cookie и отсутствие токена в JavaScript, сохранение входа после обновления, выход, редиректы, ошибки 401/409/422/500, клиентскую валидацию, правила тегов, загрузку и повтор запроса сессии. Проверки интерфейса охватывают три языка, обе темы и ширины 375, 768 и 1920 px. При ошибках Playwright сохраняет скриншоты и trace; HTML-отчёт открывается командой `npx playwright show-report`.
 
-- **Layout primitives first** — reach for `Page` / `Section` / `Stack` before writing ad-hoc containers.
-- **`cva` for component variants** — see [`button.tsx`](src/common/components/ui/button.tsx). This is the Tailwind equivalent of MUI's `styled()`.
-- **Class-name constants** — if you write the same long `className` twice, lift it to [`src/common/styles/classes.ts`](src/common/styles/classes.ts).
-- **Theme tokens over raw colors** — use `bg-background`, `text-foreground`, `border-input`, etc. They automatically adapt to light / dark.
+## Структура и правила разработки
 
-### Data fetching
-
-Every server-state feature follows this shape:
-
+```text
+src/common/            компоненты, общие className и утилиты
+src/core/index.css     цветовые токены и базовые стили
+src/core/api/          Axios, ошибки, SSE, события истечения сессии
+src/core/query/        TanStack QueryClient и Provider
+src/core/router/       маршруты приложения
+src/modules/auth/      контракты, валидация, API, store, hooks, формы и ссылки разделов
+src/modules/catalog/   контракты, API, состояние в адресе, каталог, задача, «Интересное», «Мои задачи»
+src/modules/theme/     тема и переключатель
+src/modules/*/         сохранённые демомодули
+dev/authMock.ts        серверные моки авторизации для Vite, подключают мок каталога
+dev/catalogMock.ts     серверные моки каталога поверх тех же сессий
+dev/catalogData.ts     демонстрационные отрасли и задачи
+e2e/                   Playwright-сценарии
+public/locales/        переводы ru, kk, en
 ```
-src/modules/<feature>/
-  api/<resource>.ts        # typed fetch functions using apiClient
-  queryKeys.ts             # key factory: keys.all, .detail(id), .list(filters)
-  hooks/use<Thing>.ts      # useQuery / useMutation wrappers
-  components/<Thing>.tsx   # UI with loading / error / success states
-  index.ts                 # public barrel
-```
 
-Reference implementation: [`src/modules/quotes/`](src/modules/quotes/).
+Правила архитектуры и дизайна находятся в [AGENTS.md](AGENTS.md). Между модулями используйте публичные `index.ts`, внутри модуля — относительные импорты. Компоненты отвечают за JSX, hooks — за состояние и запросы, чистые функции — за валидацию и преобразования. Dev-моки напрямую импортируют только чистые типы и валидаторы авторизации и каталога, чтобы не загружать браузерный runtime в Node.
 
-### Forms
-
-- Controlled via `react-hook-form`
-- Use class constants `field` / `fieldLabel` / `fieldError` from `@/common/styles`
-- For complex validation, add a Zod schema and plug it in with `@hookform/resolvers/zod` (not installed by default — `yarn add @hookform/resolvers`)
-
----
-
-## Scripts
-
-| Script         | What it does                                         |
-| -------------- | ---------------------------------------------------- |
-| `yarn dev`     | Vite dev server with HMR                             |
-| `yarn build`   | Production build                                     |
-| `yarn preview` | Preview the production build locally                 |
-| `yarn lint`    | ESLint over `src/**/*.{ts,tsx}`                      |
-| `yarn format`  | Prettier over `src/**/*.{ts,tsx,js,jsx,json,css,md}` |
-
-A **pre-commit hook** (Husky + lint-staged) runs `eslint --fix` and `prettier --write` on staged files automatically. Bypass with `--no-verify` only in emergencies.
-
----
-
-## Theming
-
-Dark / light / system switcher in the top bar. Theme is:
-
-- Persisted to `localStorage` under `theme`
-- Applied via a `.dark` class on `<html>`
-- Anti-flash: an inline script in [`index.html`](index.html) sets the class **before** React mounts
-
-Tokens live in [`src/core/index.css`](src/core/index.css) — edit once, the whole app follows.
-
----
-
-## Error handling
-
-Outer [`ErrorBoundary`](src/core/ErrorBoundary.tsx) wraps the entire app. On any render error it shows:
-
-- A mono eyebrow + large heading
-- The error message in a `<pre>`
-- A collapsible stack trace (dev-only)
-- `Reload` and `Try again` actions
-
-Test it: go to Home → click **Trigger boom**.
-
----
-
-## i18n
-
-Languages load lazily from `public/locales/<lng>/translation.json`. Switch with the segmented control in the top bar.
-
-To add a new language:
-
-1. Create `public/locales/<lng>/translation.json`
-2. Add the code to `supportedLngs` in [`src/core/i18n.ts`](src/core/i18n.ts)
-3. Add it to `LANGS` in [`src/common/components/TopBar.tsx`](src/common/components/TopBar.tsx)
-
----
+Для интерфейса используйте существующие `Page`, `Section`, `Stack`, `Card`, `Button`, общие классы и цветовые токены. Сохраняйте переводы, доступность форм и поведение тем; валидация браузера и моков опирается на одни правила. Старый MSW worker не запускается, хотя его исходники и зависимость сохранены для компиляции демомодулей.
 
 ## License
 

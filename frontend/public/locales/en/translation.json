@@ -55,38 +55,61 @@
     }
   },
   "auth": {
+    "language": "Interface language",
     "form": {
       "email": "Email",
-      "emailPlaceholder": "you@example.com",
       "password": "Password",
-      "passwordPlaceholder": "At least 8 characters",
-      "fullName": "Full name",
-      "fullNamePlaceholder": "Alice Johnson"
+      "companyName": "Company name",
+      "contactName": "Contact person",
+      "contactPhone": "Phone",
+      "name": "Name",
+      "skills": "Skills",
+      "technologies": "Technologies"
     },
     "errors": {
-      "emailRequired": "Email is required",
-      "emailInvalid": "Enter a valid email",
-      "passwordRequired": "Password is required",
-      "passwordTooShort": "Password must be at least 8 characters",
-      "generic": "Something went wrong. Try again."
+      "emailRequired": "Enter your email",
+      "passwordRequired": "Enter your password",
+      "emailInvalid": "Invalid email format",
+      "passwordInvalid": "At least 8 characters, including a letter and a number",
+      "companyNameInvalid": "Company name: 2 to 200 characters",
+      "contactNameInvalid": "Contact name: 2 to 100 characters",
+      "contactPhoneInvalid": "Phone: 10 to 15 digits, optionally starting with +",
+      "nameInvalid": "Name: 2 to 100 characters",
+      "tagsInvalid": "Up to 20 tags, each up to 50 characters",
+      "registerFailed": "Could not create your account. Please try again",
+      "loginFailed": "Could not sign in. Please try again",
+      "logoutFailed": "Could not sign out. Please try again",
+      "invalidCredentials": "Incorrect email or password"
     },
     "login": {
       "title": "Sign in",
-      "description": "Welcome back. Enter your credentials to continue.",
-      "sectionTitle": "Your credentials",
+      "description": "Sign in to access your account.",
       "submit": "Sign in",
-      "submitting": "Signing in...",
-      "noAccount": "No account yet?",
-      "registerCta": "Create one"
+      "submitting": "Signing in…",
+      "businessLink": "Register as a business",
+      "studentLink": "Register as a student"
     },
     "register": {
-      "title": "Create account",
-      "description": "A minute of setup — then notes and AI chat are yours.",
-      "sectionTitle": "Who are you?",
-      "submit": "Create account",
-      "submitting": "Creating...",
+      "businessTitle": "Business registration",
+      "businessDescription": "Create a company account to work with students.",
+      "studentTitle": "Student registration",
+      "studentDescription": "Tell us about yourself and your skills to get started.",
+      "submit": "Register",
+      "submitting": "Registering…",
       "haveAccount": "Already have an account?",
-      "loginCta": "Sign in"
+      "loginCta": "Sign in",
+      "studentLink": "I am a student",
+      "businessLink": "I represent a business"
+    },
+    "tags": {
+      "placeholder": "Add a tag",
+      "hint": "Optional. Press Enter or comma to add a tag",
+      "remove": "Remove {{tag}}"
+    },
+    "session": {
+      "loading": "Loading…",
+      "error": "Could not load your account",
+      "retry": "Try again"
     }
   },
   "notes": {
@@ -155,6 +178,92 @@
     "notes": "Notes",
     "chat": "AI chat",
     "login": "Sign in",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "sections": "Sections",
+    "catalog": "Catalog",
+    "saved": "Saved",
+    "myTasks": "My tasks"
+  },
+  "common": {
+    "close": "Close",
+    "retry": "Try again",
+    "loading": "Loading…"
+  },
+  "catalog": {
+    "title": "Task catalog",
+    "sort": {
+      "label": "Sort by",
+      "rating": "Rating",
+      "date": "Newest first",
+      "responses": "Most responses"
+    },
+    "levels": {
+      "needs_clarification": "Needs clarification",
+      "working": "Working",
+      "ready": "Ready",
+      "priority": "Priority"
+    },
+    "status": {
+      "inProgress": "In progress"
+    },
+    "card": {
+      "rating": "Rating",
+      "ratingValue": "{{rating}} / 100",
+      "responses_one": "{{count}} response",
+      "responses_other": "{{count}} responses"
+    },
+    "filters": {
+      "reset": "Reset filters",
+      "industry": "Industry",
+      "level": "Level",
+      "industriesError": "Could not load industries"
+    },
+    "empty": "No published tasks yet",
+    "emptyFiltered": "No tasks match the selected filters",
+    "error": "Could not load the catalog",
+    "pagination": "Catalog pages"
+  },
+  "saved": {
+    "title": "Saved",
+    "empty": "You haven't saved anything yet",
+    "goCatalog": "Go to catalog",
+    "error": "Could not load the list"
+  },
+  "myTasks": {
+    "title": "My tasks",
+    "columns": {
+      "title": "Title",
+      "status": "Status",
+      "rating": "Rating",
+      "level": "Level",
+      "responses": "Responses",
+      "updatedAt": "Updated"
+    },
+    "empty": "You have no tasks yet",
+    "error": "Could not load your tasks"
+  },
+  "task": {
+    "back": "Catalog",
+    "toCatalog": "Go to catalog",
+    "notFound": "Task not found",
+    "error": "Could not load the task",
+    "notSpecified": "Not specified",
+    "published": "Published {{date}}",
+    "fields": {
+      "context": "Context",
+      "need": "Need",
+      "targetUsers": "Users",
+      "dataMaterials": "Data and materials",
+      "constraints": "Constraints",
+      "expectedResult": "Expected result",
+      "successCriteria": "Success criteria",
+      "contact": "Contact",
+      "interactionFormat": "Interaction format"
+    }
+  },
+  "save": {
+    "add": "Save",
+    "saved": "Saved",
+    "error": "Could not save your changes"
   }
 }

@@ -55,38 +55,61 @@
     }
   },
   "auth": {
+    "language": "Язык интерфейса",
     "form": {
       "email": "Email",
-      "emailPlaceholder": "you@example.com",
       "password": "Пароль",
-      "passwordPlaceholder": "Минимум 8 символов",
-      "fullName": "Имя",
-      "fullNamePlaceholder": "Алиса Иванова"
+      "companyName": "Название компании",
+      "contactName": "Контактное лицо",
+      "contactPhone": "Телефон",
+      "name": "Имя",
+      "skills": "Навыки",
+      "technologies": "Технологии"
     },
     "errors": {
-      "emailRequired": "Укажите email",
-      "emailInvalid": "Введите корректный email",
-      "passwordRequired": "Укажите пароль",
-      "passwordTooShort": "Пароль должен быть не короче 8 символов",
-      "generic": "Что-то пошло не так. Попробуйте ещё раз."
+      "emailRequired": "Введите email",
+      "passwordRequired": "Введите пароль",
+      "emailInvalid": "Неверный формат email",
+      "passwordInvalid": "Минимум 8 символов, хотя бы одна буква и одна цифра",
+      "companyNameInvalid": "Название компании: от 2 до 200 символов",
+      "contactNameInvalid": "Имя контактного лица: от 2 до 100 символов",
+      "contactPhoneInvalid": "Телефон: от 10 до 15 цифр, можно с + в начале",
+      "nameInvalid": "Имя: от 2 до 100 символов",
+      "tagsInvalid": "До 20 тегов, каждый до 50 символов",
+      "registerFailed": "Не удалось зарегистрироваться. Попробуйте ещё раз",
+      "loginFailed": "Не удалось войти. Попробуйте ещё раз",
+      "logoutFailed": "Не удалось выйти. Попробуйте ещё раз",
+      "invalidCredentials": "Неверный email или пароль"
     },
     "login": {
       "title": "Вход",
-      "description": "С возвращением. Введите свои данные, чтобы продолжить.",
-      "sectionTitle": "Ваши данные",
+      "description": "Войдите, чтобы перейти в свой кабинет.",
       "submit": "Войти",
-      "submitting": "Входим...",
-      "noAccount": "Ещё нет аккаунта?",
-      "registerCta": "Создать"
+      "submitting": "Входим…",
+      "businessLink": "Регистрация для бизнеса",
+      "studentLink": "Регистрация для студента"
     },
     "register": {
-      "title": "Регистрация",
-      "description": "Минута на настройку — и заметки с AI-чатом ваши.",
-      "sectionTitle": "Кто вы?",
-      "submit": "Создать аккаунт",
-      "submitting": "Создаём...",
+      "businessTitle": "Регистрация бизнеса",
+      "businessDescription": "Создайте аккаунт компании для работы со студентами.",
+      "studentTitle": "Регистрация студента",
+      "studentDescription": "Расскажите о себе и своих навыках, чтобы начать работу.",
+      "submit": "Зарегистрироваться",
+      "submitting": "Регистрируем…",
       "haveAccount": "Уже есть аккаунт?",
-      "loginCta": "Войти"
+      "loginCta": "Войти",
+      "studentLink": "Я студент",
+      "businessLink": "Я представляю бизнес"
+    },
+    "tags": {
+      "placeholder": "Добавьте тег",
+      "hint": "Необязательно. Enter или запятая добавляют тег",
+      "remove": "Удалить {{tag}}"
+    },
+    "session": {
+      "loading": "Загрузка…",
+      "error": "Не удалось загрузить данные",
+      "retry": "Повторить"
     }
   },
   "notes": {
@@ -155,6 +178,94 @@
     "notes": "Заметки",
     "chat": "AI-чат",
     "login": "Войти",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "sections": "Разделы",
+    "catalog": "Каталог",
+    "saved": "Интересное",
+    "myTasks": "Мои задачи"
+  },
+  "common": {
+    "close": "Закрыть",
+    "retry": "Повторить",
+    "loading": "Загрузка…"
+  },
+  "catalog": {
+    "title": "Каталог задач",
+    "sort": {
+      "label": "Сортировка",
+      "rating": "По рейтингу",
+      "date": "Сначала новые",
+      "responses": "По числу откликов"
+    },
+    "levels": {
+      "needs_clarification": "Требует уточнения",
+      "working": "Рабочая",
+      "ready": "Готовая",
+      "priority": "Приоритетная"
+    },
+    "status": {
+      "inProgress": "В работе"
+    },
+    "card": {
+      "rating": "Рейтинг",
+      "ratingValue": "{{rating}} / 100",
+      "responses_one": "{{count}} отклик",
+      "responses_few": "{{count}} отклика",
+      "responses_many": "{{count}} откликов",
+      "responses_other": "{{count}} отклика"
+    },
+    "filters": {
+      "reset": "Сбросить фильтры",
+      "industry": "Отрасль",
+      "level": "Уровень",
+      "industriesError": "Не удалось загрузить отрасли"
+    },
+    "empty": "Опубликованных задач пока нет",
+    "emptyFiltered": "По выбранным фильтрам задач нет",
+    "error": "Не удалось загрузить каталог",
+    "pagination": "Страницы каталога"
+  },
+  "saved": {
+    "title": "Интересное",
+    "empty": "Вы пока ничего не сохранили",
+    "goCatalog": "Перейти в каталог",
+    "error": "Не удалось загрузить список"
+  },
+  "myTasks": {
+    "title": "Мои задачи",
+    "columns": {
+      "title": "Название",
+      "status": "Статус",
+      "rating": "Рейтинг",
+      "level": "Уровень",
+      "responses": "Отклики",
+      "updatedAt": "Обновлена"
+    },
+    "empty": "У вас пока нет задач",
+    "error": "Не удалось загрузить задачи"
+  },
+  "task": {
+    "back": "Каталог",
+    "toCatalog": "В каталог",
+    "notFound": "Задача не найдена",
+    "error": "Не удалось загрузить задачу",
+    "notSpecified": "Не указано",
+    "published": "Опубликована {{date}}",
+    "fields": {
+      "context": "Контекст",
+      "need": "Потребность",
+      "targetUsers": "Пользователи",
+      "dataMaterials": "Данные и материалы",
+      "constraints": "Ограничения",
+      "expectedResult": "Ожидаемый результат",
+      "successCriteria": "Критерии успеха",
+      "contact": "Контакт",
+      "interactionFormat": "Формат взаимодействия"
+    }
+  },
+  "save": {
+    "add": "В интересное",
+    "saved": "В интересном",
+    "error": "Не удалось сохранить изменения"
   }
 }

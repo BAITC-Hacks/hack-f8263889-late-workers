@@ -1,6 +1,11 @@
 /** Reading measure for prose blocks — the page is full-width, text is not. */
 export const prose = "max-w-3xl";
 
+export const tableCell = "px-4 py-3 text-left";
+export const tableHeadCell =
+  "px-4 py-3 text-left text-sm font-medium text-muted-foreground";
+export const skeleton = "animate-pulse rounded-md bg-muted";
+
 export const pageTitle = "text-3xl font-semibold tracking-tight text-balance";
 
 export const pageDescription = "text-muted-foreground text-base";
@@ -24,3 +29,10 @@ export const iconButton =
 
 export const inlineLink =
   "inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary";
+
+export const cardGrid =
+  "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+
+/** Label/value row of a definition list; the label column collapses on phones. */
+export const definitionRow =
+  "grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-6";

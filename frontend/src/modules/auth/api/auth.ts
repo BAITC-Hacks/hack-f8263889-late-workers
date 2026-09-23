@@ -1,52 +1,52 @@
 import { apiClient } from "@/core/api";
 
-/** Mirrors backend/app/schemas/user.py::UserRead. */
-export type User = {
-  id: number;
-  email: string;
-  full_name: string | null;
-  is_active: boolean;
-  created_at: string;
+import type {
+  LoginInput,
+  RegisterBusinessInput,
+  RegisterStudentInput,
+  User,
+  UserResponse,
+} from "../types";
+
+export const registerBusiness = async (
+  input: RegisterBusinessInput
+): Promise<User> => {
+  const { data } = await apiClient.post<UserResponse>(
+    "/auth/register/business",
+    input
+  );
+  return data.user;
 };
 
-/** Mirrors backend/app/schemas/auth.py::Token. */
-export type Token = {
-  access_token: string;
-  token_type: "bearer";
+export const registerStudent = async (
+  input: RegisterStudentInput
+): Promise<User> => {
+  const { data } = await apiClient.post<UserResponse>(
+    "/auth/register/student",
+    input
+  );
+  return data.user;
 };
 
-export type RegisterInput = {
-  email: string;
-  password: string;
-  full_name?: string;
-};
-
-export type LoginInput = {
-  email: string;
-  password: string;
-};
-
-/** `POST /auth/register` — 201 with the new user, 409 `conflict` if the email is taken. */
-export const register = async (input: RegisterInput): Promise<User> => {
-  const { data } = await apiClient.post<User>("/auth/register", input, {
-    skipAuth: true,
+export const login = async (input: LoginInput): Promise<User> => {
+  const { data } = await apiClient.post<UserResponse>("/auth/login", {
+    ...input,
+    email: input.email.trim(),
   });
-  return data;
+  return data.user;
 };
 
-/**
- * `POST /auth/login/json` — 401 on bad credentials. `skipAuth` keeps a stale
- * token out of the request and stops that 401 from logging the user out.
- */
-export const login = async (input: LoginInput): Promise<Token> => {
-  const { data } = await apiClient.post<Token>("/auth/login/json", input, {
-    skipAuth: true,
+export const logout = async (): Promise<void> => {
+  await apiClient.post("/auth/logout");
+};
+
+export const getMe = async (
+  signal?: AbortSignal,
+  bootstrap = false
+): Promise<User> => {
+  const { data } = await apiClient.get<UserResponse>("/auth/me", {
+    signal,
+    skipAuth: bootstrap,
   });
-  return data;
-};
-
-/** `GET /users/me` — the signed-in user; a 401 here clears the token (interceptor). */
-export const fetchMe = async (): Promise<User> => {
-  const { data } = await apiClient.get<User>("/users/me");
-  return data;
+  return data.user;
 };

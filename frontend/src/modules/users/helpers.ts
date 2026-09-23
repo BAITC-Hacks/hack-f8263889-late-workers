@@ -8,6 +8,8 @@ import type {
   UsersSort,
 } from "./api/users";
 
+export { pageNumbers } from "@/common/lib/utils";
+
 /** The contract's page size; also what the pagination counts with. */
 export const USERS_PAGE_SIZE = 20;
 
@@ -55,6 +57,3 @@ export const formatCreatedAt = (iso: string): string => {
 export const genderLabelKey = (gender: Gender) => `users.gender.${gender}`;
 
 export const statusLabelKey = (status: UserStatus) => `users.status.${status}`;
-
-export const pageNumbers = (total: number, limit: number): number[] =>
-  Array.from({ length: Math.ceil(total / limit) }, (_, index) => index + 1);
