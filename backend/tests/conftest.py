@@ -55,7 +55,10 @@ STUDENT = {
     "technologies": ["Python", "React"],
 }
 
-_TABLES = "users, businesses, students, notes, tasks, saved_tasks"
+_TABLES = (
+    "users, businesses, students, notes, tasks, saved_tasks, "
+    "clarification_rounds, round_questions, ai_calls"
+)
 
 
 @pytest.fixture(scope="session", autouse=True)

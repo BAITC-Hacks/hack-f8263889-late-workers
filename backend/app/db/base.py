@@ -28,3 +28,7 @@ class TimestampMixin:
 # it does not compile on SQLite at all. MutableList is what makes an in-place
 # `student.skills.append(...)` reach the UPDATE — a bare JSON column drops it.
 TagList = MutableList.as_mutable(JSON().with_variant(JSONB, "postgresql"))
+
+# For stored structures we replace wholesale (field metadata, assessments, rating
+# breakdown). No mutation tracking on purpose: every writer reassigns the value.
+JsonColumn = JSON().with_variant(JSONB, "postgresql")

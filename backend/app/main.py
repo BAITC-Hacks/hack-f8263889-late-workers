@@ -24,6 +24,7 @@ from app.core.middleware import RequestContextMiddleware
 from app.core.redis import close_redis
 from app.db.migrations import run_migrations
 from app.db.session import engine
+from app.services.ai import close_client, get_client
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +32,14 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     logger.info("Starting %s v%s (env=%s)", settings.APP_NAME, settings.APP_VERSION, settings.ENV)
+    if settings.ai_enabled:
+        get_client()  # one shared client for the whole process
+    else:
+        logger.warning("OPENAI_API_KEY не задан, AI работает в резервном режиме")
     if settings.AUTO_MIGRATE:
         await run_migrations()
     yield
+    await close_client()
     await close_redis()
     await engine.dispose()
     logger.info("Shutdown complete")

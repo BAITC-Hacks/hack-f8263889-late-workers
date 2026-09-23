@@ -21,6 +21,7 @@ INDUSTRIES: tuple[tuple[str, str], ...] = (
 
 STATUS_NAMES: dict[str, str] = {
     "draft": "Черновик",
+    "clarifying": "Уточнение",
     "review": "На проверке",
     "published": "Опубликована",
     "in_progress": "В работе",
