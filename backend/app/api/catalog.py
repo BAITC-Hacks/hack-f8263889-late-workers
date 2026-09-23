@@ -7,6 +7,7 @@ from app.api.catalog_params import CatalogueQueryDep
 from app.api.deps import BusinessUser, CurrentUser, DbSession, StudentUser
 from app.core.catalog import PAGE_SIZE
 from app.models import Industry
+from app.schemas.proposal import ProposalList, ProposalRequest, ProposalResponse
 from app.schemas.task import (
     BusinessTaskList,
     IndustryList,
@@ -14,6 +15,7 @@ from app.schemas.task import (
     TaskList,
     TaskPage,
 )
+from app.services import proposals as proposals_service
 from app.services import tasks as tasks_service
 
 industries_router = APIRouter(prefix="/industries", tags=["catalog"])
@@ -51,6 +53,38 @@ async def save_task(task_id: int, user: StudentUser, db: DbSession) -> None:
 )
 async def unsave_task(task_id: int, user: StudentUser, db: DbSession) -> None:
     await tasks_service.unsave_task(db, task_id, user.student.id)
+
+
+@tasks_router.post(
+    "/{task_id}/proposals", response_model=ProposalResponse, status_code=status.HTTP_201_CREATED
+)
+async def create_proposal(task_id: int, payload: ProposalRequest, user: StudentUser, db: DbSession):
+    proposal = await proposals_service.create_proposal(db, task_id, payload, user.student.id)
+    captains = await proposals_service.captain_of(db, user.student.id)
+    return {"proposal": proposals_service.serialize_proposal(proposal, user.student.id, captains)}
+
+
+@tasks_router.get("/{task_id}/my-proposals", response_model=ProposalList)
+async def list_task_proposals(task_id: int, user: StudentUser, db: DbSession):
+    await tasks_service.get_task(db, task_id, user)  # 404 for a task outside the catalogue
+    proposals = await proposals_service.list_proposals(db, user.student.id, task_id)
+    captains = await proposals_service.captain_of(db, user.student.id)
+    return {
+        "items": [
+            proposals_service.serialize_proposal(p, user.student.id, captains) for p in proposals
+        ]
+    }
+
+
+@me_router.get("/proposals", response_model=ProposalList)
+async def list_my_proposals(user: StudentUser, db: DbSession):
+    proposals = await proposals_service.list_proposals(db, user.student.id)
+    captains = await proposals_service.captain_of(db, user.student.id)
+    return {
+        "items": [
+            proposals_service.serialize_proposal(p, user.student.id, captains) for p in proposals
+        ]
+    }
 
 
 @me_router.get("/saved-tasks", response_model=TaskList)
