@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     # Run `alembic upgrade head` automatically on startup.
     AUTO_MIGRATE: bool = True
 
-    # --- Redis (optional: leave unset to disable rate limiting) ---
+    # --- Redis (optional: leave unset to disable rate limiting and the AI cache) ---
     REDIS_URL: str | None = None
     AI_RATE_LIMIT_PER_MINUTE: int = 20
 
@@ -60,6 +60,10 @@ class Settings(BaseSettings):
     # Unset = provider default. Lower values answer faster; not every model accepts every level.
     OPENAI_REASONING_EFFORT: ReasoningEffort | None = None
     AI_SYSTEM_PROMPT: str = "You are a helpful assistant. Answer concisely."
+    AI_TIMEOUT_SECONDS: int = 30
+    # Structured AI calls per business per hour. The 31st falls back instead of calling.
+    AI_HOURLY_LIMIT_PER_BUSINESS: int = 30
+    AI_CACHE_TTL_SECONDS: int = 7 * 24 * 3600
 
     @field_validator("REDIS_URL", mode="before")
     @classmethod
@@ -78,6 +82,11 @@ class Settings(BaseSettings):
         if self.ENV == "prod" and self.SECRET_KEY.startswith("change-me"):
             raise ValueError("SECRET_KEY must be set to a strong random value when ENV=prod")
         return self
+
+    @property
+    def ai_enabled(self) -> bool:
+        """False when no API key is configured: every AI call takes the fallback path."""
+        return bool(self.OPENAI_API_KEY)
 
     @property
     def is_sqlite(self) -> bool:

@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from app.api.auth import router as accounts_router
+from app.api.builder import router as builder_router
 from app.api.catalog import (
     business_router,
     industries_router,
@@ -24,6 +25,7 @@ from app.core.middleware import RequestContextMiddleware
 from app.core.redis import close_redis
 from app.db.migrations import run_migrations
 from app.db.session import engine
+from app.services.ai import close_client, get_client
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +33,14 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     logger.info("Starting %s v%s (env=%s)", settings.APP_NAME, settings.APP_VERSION, settings.ENV)
+    if settings.ai_enabled:
+        get_client()  # one shared client for the whole process
+    else:
+        logger.warning("OPENAI_API_KEY не задан, AI работает в резервном режиме")
     if settings.AUTO_MIGRATE:
         await run_migrations()
     yield
+    await close_client()
     await close_redis()
     await engine.dispose()
     logger.info("Shutdown complete")
@@ -65,7 +72,13 @@ def create_app() -> FastAPI:
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
     # The accounts contract is unversioned: /api/auth/*
     app.include_router(accounts_router, prefix=settings.API_PREFIX)
-    for catalog_router in (industries_router, tasks_router, me_router, business_router):
+    for catalog_router in (
+        industries_router,
+        tasks_router,
+        me_router,
+        business_router,
+        builder_router,
+    ):
         app.include_router(catalog_router, prefix=settings.API_PREFIX)
 
     @app.get("/", include_in_schema=False)

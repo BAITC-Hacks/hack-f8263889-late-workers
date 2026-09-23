@@ -55,7 +55,10 @@ STUDENT = {
     "technologies": ["Python", "React"],
 }
 
-_TABLES = "users, businesses, students, notes, tasks, saved_tasks"
+_TABLES = (
+    "users, businesses, students, notes, tasks, saved_tasks, "
+    "clarification_rounds, round_questions, ai_calls"
+)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -301,3 +304,77 @@ async def owner_client(client: AsyncClient, catalogue: list[Task]) -> AsyncClien
     response = await client.post("/api/auth/login", json=CATALOGUE_OWNER)
     assert response.status_code == 200, response.text
     return client
+
+
+# --- Card builder fixtures ----------------------------------------------------
+
+DRAFT_TEXT = (
+    "У нас 4 кофейни в Астане, выпечку печём сами каждое утро. "
+    "Каждый день списываем до 15% выпечки, хотим понимать, сколько печь на завтра."
+)
+
+
+@pytest.fixture(autouse=True)
+def journal_session(
+    session_factory: async_sessionmaker[AsyncSession], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Point the AI journal at the test engine.
+
+    The journal deliberately opens its own session on the module-level engine, which
+    binds to the first event loop it sees — and pytest-asyncio gives every test a
+    fresh one, so the second test would fail with "attached to a different loop".
+    """
+    import app.db.session as db_session
+    from app.services import ai_client
+
+    monkeypatch.setattr(db_session, "SessionLocal", session_factory)
+    monkeypatch.setattr(ai_client, "SessionLocal", session_factory)
+
+
+@pytest.fixture
+def ai_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Every AI call fails, so the builder must take the fallback path."""
+    from app.services import builder_ai
+    from app.services.ai_client import AIUnavailable
+
+    async def unavailable(**_: object):
+        raise AIUnavailable("test: AI disabled")
+
+    monkeypatch.setattr(builder_ai, "call_structured", unavailable)
+
+
+@pytest.fixture
+def ai_answers(monkeypatch: pytest.MonkeyPatch):
+    """Install canned model answers, keyed by operation."""
+    from app.services import builder_ai
+    from app.services.ai_client import AIUnavailable
+
+    calls: list[str] = []
+
+    def install(**answers: object):
+        async def fake(*, operation: str, validate=None, user_payload=None, **_: object):
+            calls.append(operation)
+            answer = answers.get(operation)
+            if answer is None:
+                raise AIUnavailable(f"test: no canned answer for {operation}")
+            # A callable answer is built from the payload — `assess` must reply about
+            # exactly the blocks it was asked about, and that set varies per test.
+            if callable(answer):
+                answer = answer(user_payload or {})
+            if validate is not None:
+                validate(answer)
+            return answer
+
+        monkeypatch.setattr(builder_ai, "call_structured", fake)
+        return calls
+
+    return install
+
+
+@pytest.fixture
+async def draft(client: AsyncClient, business: dict) -> dict:
+    response = await client.post(
+        "/api/business/tasks", json={"draftText": DRAFT_TEXT, "industryCode": "horeca"}
+    )
+    assert response.status_code == 201, response.text
+    return response.json()["task"]

@@ -29,12 +29,25 @@ def get_client() -> openai.AsyncOpenAI:
     if _client is None:
         try:
             # None values let the SDK fall back to OPENAI_API_KEY / OPENAI_BASE_URL env vars.
+            # max_retries=0 on purpose: retries belong to app/services/ai_client.py, which
+            # has to journal and re-validate every attempt.
             _client = openai.AsyncOpenAI(
-                api_key=settings.OPENAI_API_KEY, base_url=settings.OPENAI_BASE_URL
+                api_key=settings.OPENAI_API_KEY,
+                base_url=settings.OPENAI_BASE_URL,
+                timeout=settings.AI_TIMEOUT_SECONDS,
+                max_retries=0,
             )
         except openai.OpenAIError as exc:
             raise UpstreamError("AI provider is not configured (set OPENAI_API_KEY)") from exc
     return _client
+
+
+async def close_client() -> None:
+    """Release the shared client at shutdown."""
+    global _client
+    if _client is not None:
+        await _client.close()
+        _client = None
 
 
 def build_params(request: ChatRequest) -> dict[str, Any]:

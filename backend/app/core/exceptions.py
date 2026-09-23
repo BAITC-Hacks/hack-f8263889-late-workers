@@ -102,6 +102,34 @@ class ValidationError(AppError):
         super().__init__(message, fields=fields, **kwargs)
 
 
+class InvalidStatusError(ConflictError):
+    code = "INVALID_STATUS"
+
+    def __init__(self, message: str = messages.INVALID_STATUS, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
+
+
+class RoundLimitReachedError(ConflictError):
+    code = "ROUND_LIMIT_REACHED"
+
+    def __init__(self, message: str = messages.ROUND_LIMIT_REACHED, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
+
+
+class RoundNotAnsweredError(ConflictError):
+    code = "ROUND_NOT_ANSWERED"
+
+    def __init__(self, message: str = messages.ROUND_NOT_ANSWERED, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
+
+
+class CardNotConfirmedError(ConflictError):
+    code = "CARD_NOT_CONFIRMED"
+
+    def __init__(self, message: str = messages.CARD_NOT_CONFIRMED, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
+
+
 class EmailTakenError(ConflictError):
     code = "EMAIL_TAKEN"
 
