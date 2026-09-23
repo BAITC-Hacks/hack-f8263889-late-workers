@@ -1,7 +1,7 @@
 import { Page, Stack } from "@/common/components/layout";
 import { Button } from "@/common/components/ui";
 import { inlineLink, pageTitle, prose } from "@/common/styles";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useParams } from "react-router-dom";
 
@@ -12,6 +12,7 @@ import { TaskFields } from "../components/TaskFields";
 import { TaskPageSkeleton } from "../components/TaskPageSkeleton";
 import {
   backToCatalogHref,
+  builderPath,
   formatPublishedDate,
   isNotFound,
   parseTaskId,
@@ -66,8 +67,16 @@ export const TaskPage = () => {
                 : data.status.name}
             </span>
           </div>
-          <div>
+          <div className="flex flex-wrap gap-2">
             <SaveTaskButton taskId={data.id} isSaved={data.isSaved} />
+            {data.isOwner && (
+              <Button asChild variant="outline" size="sm">
+                <Link to={builderPath(data.id)}>
+                  <Pencil aria-hidden="true" />
+                  {t("task.edit")}
+                </Link>
+              </Button>
+            )}
           </div>
         </Stack>
         <TaskFields fields={data.fields} />

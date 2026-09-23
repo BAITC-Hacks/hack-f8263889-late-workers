@@ -2,6 +2,7 @@ import type { BadgeProps } from "@/common/components/ui";
 import { formatDateTime, isApiError } from "@/core/api";
 
 import {
+  type BusinessTask,
   TASK_LEVELS,
   TASK_SORTS,
   type TaskLevelCode,
@@ -104,6 +105,16 @@ export const isInProgress = (status: { code: string }) =>
 
 export const parseTaskId = (raw: string | undefined): number | null =>
   raw && /^[1-9]\d*$/.test(raw) ? Number(raw) : null;
+
+export const builderPath = (id: number) => `/business/tasks/${id}/builder`;
+
+/** Statuses finished in the builder; a task past them opens its catalog page. */
+const BUILDER_STATUSES = new Set(["draft", "clarifying", "review"]);
+
+export const businessTaskHref = (task: BusinessTask) =>
+  BUILDER_STATUSES.has(task.status.code)
+    ? builderPath(task.id)
+    : `/catalog/${task.id}`;
 
 export type CatalogLinkState = { catalogSearch: string };
 
