@@ -24,6 +24,9 @@ export const field =
 
 export const fieldError = "text-xs text-destructive";
 
+/** A form-level message: the request failed as a whole, not one field. */
+export const formError = "text-sm text-destructive";
+
 export const iconButton =
   "flex h-9 w-9 items-center justify-center rounded-md border text-muted-foreground transition-colors hover:border-primary hover:text-primary";
 

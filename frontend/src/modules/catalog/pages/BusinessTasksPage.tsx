@@ -1,6 +1,9 @@
 import { Page, Stack } from "@/common/components/layout";
+import { Button } from "@/common/components/ui";
 import { pageTitle } from "@/common/styles";
+import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 import {
   BusinessTasksTable,
@@ -35,7 +38,15 @@ export const BusinessTasksPage = () => {
   return (
     <Page>
       <Stack gap="xl">
-        <h1 className={pageTitle}>{t("myTasks.title")}</h1>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <h1 className={pageTitle}>{t("myTasks.title")}</h1>
+          <Button asChild>
+            <Link to="/business/tasks/new">
+              <Plus aria-hidden="true" />
+              {t("myTasks.create")}
+            </Link>
+          </Button>
+        </div>
         {renderTasks()}
       </Stack>
     </Page>

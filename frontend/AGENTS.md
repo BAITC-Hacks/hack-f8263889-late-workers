@@ -4,7 +4,7 @@ Guidance for coding agents (Codex, Claude Code, etc.) working in this repository
 
 ## What this is
 
-A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*` and the task catalog (`/api/tasks`, `/api/industries`, saved tasks, business tasks). Development uses the FastAPI backend and PostgreSQL by default; the Vite mock server is opt-in. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
+A Vite + React 19 + TypeScript SPA: Tailwind 4, TanStack Query, zustand, i18next (react-i18next), axios. The active product is cookie-based business/student authentication over `/api/auth/*`, the task catalog (`/api/tasks`, `/api/industries`, saved tasks, business tasks) and the business task builder (`/api/business/tasks/*`). Development uses the FastAPI backend and PostgreSQL by default; the Vite mock server is opt-in. Node 22.12+, package manager is `yarn` (root `Makefile` uses it; `npm` scripts also work directly inside `frontend/`).
 
 ## Commands
 
@@ -30,7 +30,7 @@ Run `lint` and `typecheck` before finishing any task. Both must pass. For authen
 src/
   common/
     components/layout/   Page, Section, Stack, Footer — layout primitives (barrel index.ts)
-    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster) via @radix-ui/react-slot + cva (barrel index.ts)
+    components/ui/       shadcn-style primitives (button, card, badge, select, pagination, toaster, tooltip) via @radix-ui/react-slot + cva (barrel index.ts)
     lib/utils.ts          cn() — clsx + tailwind-merge; pageNumbers()
     lib/toast.ts          zustand toast queue + showToast(); rendered by <Toaster /> in core/App.tsx
     styles/classes.ts      shared className constants (pageTitle, sectionTitle, field, fieldLabel, ...)
@@ -49,6 +49,7 @@ src/
   modules/                 feature modules
     auth/         typed cookie API, pure validation, in-memory user store, session bootstrap, role guards, forms, tags, section links
     catalog/      contract types, tasks/industries API, URL-state hook, catalog/task/saved/business-tasks pages, save button
+    builder/      builder contract types and API, new-task page, builder page (analysis, clarification rounds, card editor, rating, publication)
     notes/        api/notes.ts (CRUD), hooks/useNotes* , components/{NoteForm,NoteList,Pagination}, pages/NotesPage
     ai/           api/chat.ts, hooks/{useChat,useChatStream}, components/ChatPanel.tsx, pages/ChatPage.tsx
     system/       api/health.ts, hooks/useHealth.ts, components/ApiStatus.tsx
@@ -64,7 +65,7 @@ e2e/real/                  mock-free acceptance against FastAPI; global setup ch
 playwright.config.ts       isolated mock dev server and Chromium configuration
 ```
 
-Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks") and `/student` (student "Saved"). A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
+Active product routes: `/login`, `/register/business`, `/register/student`; `/catalog` and `/catalog/:id` for both roles; `/business` (business "My tasks"), `/business/tasks/new` and `/business/tasks/:id/builder` (business only) and `/student` (student "Saved"). A student's home is `/catalog`, a business's is `/business` (`homeForUser`); `/` routes to login or that home, a role mismatch redirects home, and unknown and former demo routes redirect through `/`. The top bar shows `sectionLinks(role)` as `NavLink`s. Demo source modules remain in the repo but are absent from routing and navigation.
 
 Each module follows the same internal layout: `api/<resource>.ts` (typed fetch fns over `apiClient`) → `queryKeys.ts` (key factory: `.all/.lists()/.list(filters)/.details()/.detail(id)`) → `hooks/use<Thing>.ts` (TanStack Query wrappers) → `components/` + `pages/` → public barrel `index.ts`.
 
@@ -111,7 +112,7 @@ Localized strings are stored in sentence case; casing is never baked into a tran
 
 ### Color
 
-Every color goes through a token in `core/index.css`; there are no raw Tailwind palette classes anywhere in `src`. Status has its own tokens (`success`, `warning`) next to `destructive`.
+Every color goes through a token in `core/index.css`; there are no raw Tailwind palette classes anywhere in `src`. Status has its own tokens (`success`, `warning`, `caution`) next to `destructive`. `caution` is the yellow step between `warning` (orange) and `success`; the builder's four quality labels need all four.
 
 The token set is contrast-checked **as a whole** — 24 pairs against WCAG AA. When you change a color token, re-check every pair it takes part in: text on its background, foreground on its fill, border against its surface, status dots at 3:1 or better.
 
@@ -167,6 +168,15 @@ Fields are boxed (`field`): border, `rounded-md`, `px-3 py-2`, primary border an
 - The catalog mock runs inside the auth mock plugin, so `AUTH_MOCKS` switches both. It validates query parameters (422 with `fields`), returns 401/403/404 per the contract, shows only `published`/`in_progress` tasks in the catalog and lets an owner open its draft. Seed: 26 tasks, 25 visible; Кофейня «Зерно» (the seed business) owns tasks 12 (published), 15 (draft) and 21 (in progress). Saved tasks are kept per user in memory until Vite restarts.
 - A page past the end (a shared `?page=2` after the list shrank, or the 6-task demo seed) shows "На этой странице задач нет" with a way back to page 1 instead of an empty grid.
 - FastAPI implements these endpoints against PostgreSQL. Its seed has 7 tasks (6 visible and an owner-only draft), with database-generated IDs; real-API tests must locate tasks by title/response rather than hardcode mock IDs (`e2e/real/helpers.ts` keeps the seed titles and compares the UI with the `/api/tasks` response). The seed command deletes existing accounts and their related data; use it only for disposable or intentionally reset demo databases.
+
+## Builder API
+
+- Endpoints: `POST /api/business/tasks`, `GET /api/business/tasks/:id`, `POST …/rounds`, `PUT …/rounds/:number/answers`, `POST …/card/build`, `PUT …/card`, `POST …/publish`, `POST …/unpublish`. Every response is `{ task }` in one shape, unwrapped by `modules/builder/api/builder.ts`; `useTaskCache().apply` writes it over the page state as is and marks the catalog's business list, lists and detail stale.
+- `createRound`, `buildCard` and `confirmCard` wait for the AI: their timeout is 45 s (the server allows 30 s per AI call) and a timeout rejects with `code: "TIMEOUT"`. The rest keep the client's 15 s.
+- The page picks its screen from `status`: `draft` → analyze the draft, `clarifying` → the last round's questions, anything later → the card editor. Steps map `draft`/`clarifying` → Clarification, `review` → Card, `published`/`in_progress`/`unpublished` → Publication.
+- The answers form is mounted per round (`key={round.number}`) and the card editor per task; the editor resets only from a confirmation's response, so refetches never wipe edits. Unconfirmed edits arm `useLeaveGuard`: `beforeunload` for the tab and a capture-phase click guard for in-app links (the app uses `BrowserRouter`, so `useBlocker` is unavailable).
+- Tasks created before the builder (the seed) have `card: null`; `useCardDefaults` fills the editor from `GET /api/tasks/:id` instead.
+- 404 for someone else's task is by design on the server. There is no builder mock: with `AUTH_MOCKS=true` the builder routes have no API.
 
 ## ~~Don'ts~~
 
