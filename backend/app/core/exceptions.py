@@ -38,6 +38,7 @@ class AppError(Exception):
         code: str | None = None,
         details: Any = None,
         fields: dict[str, str] | None = None,
+        extra: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(message)
@@ -48,6 +49,7 @@ class AppError(Exception):
             self.code = code
         self.details = details
         self.fields = fields
+        self.extra = extra
         self.headers = headers
 
 
@@ -130,6 +132,29 @@ class CardNotConfirmedError(ConflictError):
         super().__init__(message, **kwargs)
 
 
+class TeamFullError(ConflictError):
+    code = "TEAM_FULL"
+
+    def __init__(self, message: str = messages.TEAM_FULL, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
+
+
+class CaptainCannotLeaveError(ConflictError):
+    code = "CAPTAIN_CANNOT_LEAVE"
+
+    def __init__(self, message: str = messages.CAPTAIN_CANNOT_LEAVE, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
+
+
+class ProposalExistsError(ConflictError):
+    """Carries the id of the proposal that is already in the way."""
+
+    code = "PROPOSAL_EXISTS"
+
+    def __init__(self, proposal_id: int, **kwargs: Any) -> None:
+        super().__init__(messages.PROPOSAL_EXISTS, extra={"proposalId": proposal_id}, **kwargs)
+
+
 class EmailTakenError(ConflictError):
     code = "EMAIL_TAKEN"
 
@@ -150,9 +175,13 @@ def error_response(
     message: str,
     details: Any = None,
     fields: dict[str, str] | None = None,
+    extra: dict[str, Any] | None = None,
     headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     body: dict[str, Any] = {"error": {"code": code, "message": message}}
+    # Contract-specific siblings of code/message, e.g. PROPOSAL_EXISTS carries proposalId.
+    if extra:
+        body["error"].update(extra)
     if fields is not None:
         body["error"]["fields"] = fields
     if details is not None:
@@ -185,6 +214,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             exc.message,
             details=exc.details,
             fields=exc.fields,
+            extra=exc.extra,
             headers=exc.headers,
         )
 

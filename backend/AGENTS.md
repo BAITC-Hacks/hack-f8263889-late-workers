@@ -69,6 +69,59 @@ Deliberate deviations from the written spec, so nobody "fixes" them later:
 Passwords are bcrypt cost 10 (spec), with argon2 kept second in the chain so hashes written
 before the switch still verify.
 
+## The card builder (`/api/business/tasks/*`)
+
+A business writes a free-form draft; AI grades it across seven blocks, asks 3-5
+questions (up to 3 rounds), assembles a card strictly from what was said, the
+business edits and confirms it, and the task is rated 0-100 and published.
+
+- `app/core/blocks.py` — the seven blocks, their weights (they sum to 100) and the
+  quality scale. Everything else reads from here.
+- `app/services/ai_client.py` — the only place structured AI calls happen. It owns
+  the Redis cache, the hourly per-business limit, the `ai_calls` journal and the one
+  revalidation retry. Every failure raises `AIUnavailable`, which is an internal
+  signal to fall back — it must never reach the HTTP layer.
+- `app/services/fallback.py` — the offline half: the question bank, verbatim card
+  assembly, and the heuristic grader. The whole flow must work with no API key.
+- `app/services/rating.py` — blocks whose `textHash` is unchanged reuse their previous
+  assessment, so re-confirming an unedited card neither calls the model nor moves the
+  rating. `round_half_up` exists because Python's `round()` is banker's rounding.
+
+Three things that will bite if forgotten:
+
+1. Structured Outputs are `responses.parse(text_format=Model)`, and **strict schemas
+   reject open maps** — use explicit fields, never `dict[str, ...]`.
+2. `responses.parse` raises nothing on a refusal or a truncated answer; check the
+   output items, `status`, and `output_parsed is None` yourself.
+3. After a write, re-select the task with `populate_existing` instead of
+   `db.refresh` — refresh expires the relationships and the next attribute access
+   lazy-loads in the async path and raises `MissingGreenlet`.
+
+Run `uv run python scripts/check_openai.py` to verify the key and model.
+
+## Teams and proposals (`/api/teams`, `/api/proposals`)
+
+Students form teams of up to five; the captain sends a proposal to a task from the
+catalogue. `app/services/teams.py` and `app/services/proposals.py` hold the logic,
+`app/api/teams.py` the routes (the proposal routes that hang off a task live on the
+catalogue's `tasks_router`).
+
+- `tasks.responses_count` is **recomputed**, never incremented:
+  `recalc_responses_count` counts every proposal that was not withdrawn, and runs on
+  send, on withdraw, and at the end of the seed.
+- Three constraints are index expressions, not `unique=True`: case-insensitive team
+  names, one captain per team, and one live proposal per (task, team). The last one
+  is partial — that is what lets a team apply again after withdrawing.
+  In a model index, write `text("lower(name)")`: `func.lower("name")` indexes the
+  literal string, not the column, and only `create_all` would show it.
+- Visibility: a student outside a team gets **404** for it, not 403, so team and
+  proposal ids cannot be probed; a member who is not the captain gets 403 on writes.
+  `GET /api/teams/{id}` is the one endpoint open to businesses, and it hides member
+  emails from everyone outside the team.
+
+Tag handling is shared, not copied: `dedupe_tags` and `validate_tag_fields` in
+`app/core/validation.py` back registration, the student profile and team tags alike.
+
 ## Conventions
 
 - Routers are thin: parse input, call a service, return. No SQL in routers.

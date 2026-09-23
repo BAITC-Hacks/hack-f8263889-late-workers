@@ -72,3 +72,23 @@ def need_excerpt(need: str | None) -> str:
     if len(text) <= NEED_EXCERPT_LENGTH:
         return text
     return text[:NEED_EXCERPT_LENGTH] + "…"
+
+
+# --- Teams and proposals ---
+TEAM_MEMBERS_LIMIT = 5
+
+PROPOSAL_STATUS_NAMES: dict[str, str] = {
+    "sent": "Отправлен",
+    "reviewing": "Рассматривается",
+    "selected": "Выбран",
+    "rejected": "Отклонён",
+    "withdrawn": "Отозван",
+}
+# Statuses that occupy the "one live proposal per task" slot.
+ACTIVE_PROPOSAL_STATUSES: tuple[str, ...] = ("sent", "reviewing", "selected")
+# A captain may still edit or withdraw while the business has not decided.
+EDITABLE_PROPOSAL_STATUSES: tuple[str, ...] = ("sent", "reviewing")
+
+
+def proposal_status_name(code: str) -> str:
+    return PROPOSAL_STATUS_NAMES.get(code, code)

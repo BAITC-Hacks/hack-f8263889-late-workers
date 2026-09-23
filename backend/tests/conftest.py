@@ -29,7 +29,7 @@ from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
-from app.models import Business, Task, User
+from app.models import Business, Student, Task, User
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
@@ -57,7 +57,7 @@ STUDENT = {
 
 _TABLES = (
     "users, businesses, students, notes, tasks, saved_tasks, "
-    "clarification_rounds, round_questions, ai_calls"
+    "clarification_rounds, round_questions, ai_calls, teams, team_members, proposals"
 )
 
 
@@ -378,3 +378,61 @@ async def draft(client: AsyncClient, business: dict) -> dict:
     )
     assert response.status_code == 201, response.text
     return response.json()["task"]
+
+
+# --- Team fixtures ------------------------------------------------------------
+
+SECOND_STUDENT = {
+    "email": "dina@student.kz",
+    "password": "dina2026",
+    "name": "Дина Ахметова",
+    "skills": ["Backend"],
+    "technologies": ["FastAPI", "PostgreSQL"],
+}
+TEAM = {
+    "name": "Data Hawks",
+    "interests": ["Ритейл", "HoReCa"],
+    "ownSkills": ["Машинное обучение"],
+    "ownTechnologies": ["Pandas"],
+}
+
+
+@pytest.fixture
+async def teammate(db: AsyncSession) -> Student:
+    """A second student, created directly so no auth cookie is overwritten."""
+    user = User(
+        email=SECOND_STUDENT["email"],
+        hashed_password=hash_password(SECOND_STUDENT["password"]),
+        role="student",
+        student=Student(
+            name=SECOND_STUDENT["name"],
+            skills=SECOND_STUDENT["skills"],
+            technologies=SECOND_STUDENT["technologies"],
+        ),
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user.student
+
+
+@pytest.fixture
+async def team(client: AsyncClient, student: dict) -> dict:
+    """A team whose captain is the signed-in student."""
+    response = await client.post("/api/teams", json=TEAM)
+    assert response.status_code == 201, response.text
+    return response.json()["team"]
+
+
+@pytest.fixture
+async def teammate_client(
+    client_factory: Callable[[], AsyncClient], teammate: Student
+) -> AsyncIterator[AsyncClient]:
+    """A signed-in client for the second student — a separate cookie jar."""
+    async with client_factory() as second:
+        response = await second.post(
+            "/api/auth/login",
+            json={"email": SECOND_STUDENT["email"], "password": SECOND_STUDENT["password"]},
+        )
+        assert response.status_code == 200, response.text
+        yield second

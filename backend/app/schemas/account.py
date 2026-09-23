@@ -11,8 +11,8 @@ from app.core.validation import (
     is_valid_password,
     normalize_email,
     normalize_phone,
-    normalize_tags,
     normalize_text,
+    validate_tag_fields,
 )
 from app.schemas.base import ContractModel
 
@@ -89,12 +89,7 @@ class StudentRegisterRequest(_Credentials):
         else:
             self.name = name
 
-        for attr, key in (("skills", "skills"), ("technologies", "technologies")):
-            tags = normalize_tags(getattr(self, attr))
-            if tags is None:
-                fields[key] = messages.TAGS
-            else:
-                setattr(self, attr, tags)
+        validate_tag_fields(self, fields, {"skills": "skills", "technologies": "technologies"})
 
         if fields:
             raise ValidationError(fields)

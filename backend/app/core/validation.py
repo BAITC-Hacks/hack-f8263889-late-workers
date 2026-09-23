@@ -6,6 +6,7 @@ raising, which is what the contract requires.
 """
 
 import re
+from collections.abc import Iterable
 from typing import Any
 
 from pydantic import EmailStr, TypeAdapter
@@ -73,6 +74,21 @@ def normalize_phone(value: Any) -> str | None:
     return phone if _PHONE.match(phone) else None
 
 
+def dedupe_tags(values: Iterable[str]) -> list[str]:
+    """Drop case-insensitive duplicates, keeping the first occurrence.
+
+    Shared by tag validation and by merging a team's skills out of its members'.
+    """
+    tags: list[str] = []
+    seen: set[str] = set()
+    for tag in values:
+        key = tag.casefold()
+        if key not in seen:
+            seen.add(key)
+            tags.append(tag)
+    return tags
+
+
 def normalize_tags(value: Any) -> list[str] | None:
     """Trim each tag, then drop case-insensitive duplicates keeping the first one.
 
@@ -83,8 +99,7 @@ def normalize_tags(value: Any) -> list[str] | None:
         return []
     if not isinstance(value, list):
         return None
-    tags: list[str] = []
-    seen: set[str] = set()
+    trimmed: list[str] = []
     for item in value:
         tag = as_text(item)
         if tag is None:
@@ -92,8 +107,21 @@ def normalize_tags(value: Any) -> list[str] | None:
         tag = tag.strip()
         if not 1 <= len(tag) <= MAX_TAG_LENGTH:
             return None
-        key = tag.casefold()
-        if key not in seen:
-            seen.add(key)
-            tags.append(tag)
+        trimmed.append(tag)
+    tags = dedupe_tags(trimmed)
     return tags if len(tags) <= MAX_TAGS else None
+
+
+def validate_tag_fields(payload: object, fields: dict[str, str], names: dict[str, str]) -> None:
+    """Normalise several tag attributes in place, recording which ones failed.
+
+    `names` maps the python attribute to the camelCase key the contract reports.
+    """
+    from app.core import messages
+
+    for attribute, key in names.items():
+        tags = normalize_tags(getattr(payload, attribute))
+        if tags is None:
+            fields[key] = messages.TAGS
+        else:
+            setattr(payload, attribute, tags)
