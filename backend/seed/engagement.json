@@ -1,0 +1,36 @@
+{
+  "views": [
+    {"taskTitle": "Прогноз спроса на выпечку", "students": [
+      "arman@student.kz", "aisha@student.kz", "daniyar@student.kz", "madina@student.kz",
+      "timur@student.kz", "kamila@student.kz", "dina@student.kz", "nurlan@student.kz",
+      "aliya@student.kz", "ruslan@student.kz", "saule@student.kz", "olzhas@student.kz"
+    ], "firstViewedAt": "2026-09-21T12:00:00Z"},
+    {"taskTitle": "Программа лояльности для постоянных гостей", "students": [
+      "arman@student.kz", "aisha@student.kz"
+    ], "firstViewedAt": "2026-09-21T13:00:00Z"},
+    {"taskTitle": "Инжиниринг меню и цен", "students": [
+      "daniyar@student.kz"
+    ], "firstViewedAt": "2026-09-22T10:00:00Z"},
+    {"taskTitle": "Планирование маршрутов доставки по городу", "students": [
+      "madina@student.kz", "aliya@student.kz", "nurlan@student.kz", "kamila@student.kz"
+    ], "firstViewedAt": "2026-09-21T14:00:00Z"},
+    {"taskTitle": "Перенос карт пациентов в электронный вид", "students": [
+      "arman@student.kz", "olzhas@student.kz", "saule@student.kz"
+    ], "firstViewedAt": "2026-09-21T15:00:00Z"},
+    {"taskTitle": "Напоминания пациентам о приёме", "students": [
+      "timur@student.kz", "saule@student.kz", "olzhas@student.kz", "dina@student.kz",
+      "ruslan@student.kz"
+    ], "firstViewedAt": "2026-09-19T12:00:00Z"},
+    {"taskTitle": "Обучение новых водителей", "students": [
+      "nurlan@student.kz"
+    ], "firstViewedAt": "2026-09-21T16:00:00Z"}
+  ],
+  "saves": [
+    {"taskTitle": "Прогноз спроса на выпечку", "students": [
+      "arman@student.kz", "madina@student.kz", "olzhas@student.kz"
+    ], "createdAt": "2026-09-21T18:00:00Z"},
+    {"taskTitle": "Программа лояльности для постоянных гостей", "students": [
+      "daniyar@student.kz"
+    ], "createdAt": "2026-09-21T19:00:00Z"}
+  ]
+}

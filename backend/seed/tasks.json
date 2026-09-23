@@ -15,13 +15,23 @@
     "expectedResult": "Веб-страница с прогнозом на завтра по каждой позиции и кофейне.",
     "successCriteria": "Списания снижаются до 8% за месяц пилота.",
     "contact": "Айгерим Нурланова, +77011234567",
-    "interactionFormat": null
+    "interactionFormat": null,
+    "blockQualities": {
+      "context_need": "partial",
+      "data": "specific",
+      "result": "specific",
+      "success_criteria": "specific",
+      "constraints": "specific",
+      "users": "missing",
+      "business_link": "formal"
+    },
+    "confirmedAt": "2026-09-20T09:55:00Z"
   },
   {
     "businessEmail": "owner@zerno.kz",
-    "industryCode": "retail",
+    "industryCode": "horeca",
     "status": "published",
-    "rating": 92,
+    "rating": 94,
     "responsesCount": 6,
     "publishedAt": "2026-09-21T09:30:00Z",
     "title": "Программа лояльности для постоянных гостей",
@@ -33,7 +43,17 @@
     "expectedResult": "Мобильная страница гостя и экран кассира с балансом бонусов.",
     "successCriteria": "Треть постоянных гостей регистрируется за два месяца.",
     "contact": "Айгерим Нурланова, +77011234567",
-    "interactionFormat": "Еженедельные созвоны по четвергам."
+    "interactionFormat": "Еженедельные созвоны по четвергам.",
+    "blockQualities": {
+      "context_need": "specific",
+      "data": "specific",
+      "result": "specific",
+      "success_criteria": "specific",
+      "constraints": "partial",
+      "users": "partial",
+      "business_link": "specific"
+    },
+    "confirmedAt": "2026-09-21T09:30:00Z"
   },
   {
     "businessEmail": "logistics@karavan.kz",
@@ -51,7 +71,17 @@
     "expectedResult": "Экран диспетчера со списком маршрутов и картой.",
     "successCriteria": "Средний пробег на заказ снижается на 15%.",
     "contact": "Бауыржан Ермеков, +77025554433",
-    "interactionFormat": null
+    "interactionFormat": null,
+    "blockQualities": {
+      "context_need": "partial",
+      "data": "formal",
+      "result": "partial",
+      "success_criteria": "partial",
+      "constraints": "partial",
+      "users": "missing",
+      "business_link": "formal"
+    },
+    "confirmedAt": "2026-09-18T12:00:00Z"
   },
   {
     "businessEmail": "logistics@karavan.kz",
@@ -69,7 +99,17 @@
     "expectedResult": "Курс из нескольких уроков и финальный тест.",
     "successCriteria": null,
     "contact": "Бауыржан Ермеков, +77025554433",
-    "interactionFormat": null
+    "interactionFormat": null,
+    "blockQualities": {
+      "context_need": "formal",
+      "data": "formal",
+      "result": "partial",
+      "success_criteria": "missing",
+      "constraints": "formal",
+      "users": "formal",
+      "business_link": "missing"
+    },
+    "confirmedAt": "2026-09-15T08:00:00Z"
   },
   {
     "businessEmail": "clinic@saulyk.kz",
@@ -87,7 +127,17 @@
     "expectedResult": "Поиск по пациенту с предпросмотром карты.",
     "successCriteria": "Карта находится меньше чем за 10 секунд.",
     "contact": "Динара Абишева, +77071112233",
-    "interactionFormat": "Встречи в клинике раз в две недели."
+    "interactionFormat": "Встречи в клинике раз в две недели.",
+    "blockQualities": {
+      "context_need": "partial",
+      "data": "specific",
+      "result": "partial",
+      "success_criteria": "partial",
+      "constraints": "missing",
+      "users": "partial",
+      "business_link": "partial"
+    },
+    "confirmedAt": "2026-09-19T14:15:00Z"
   },
   {
     "businessEmail": "clinic@saulyk.kz",
@@ -105,7 +155,17 @@
     "expectedResult": "Рассылка напоминаний и отчёт по неявкам.",
     "successCriteria": "Неявки снижаются вдвое.",
     "contact": "Динара Абишева, +77071112233",
-    "interactionFormat": null
+    "interactionFormat": null,
+    "blockQualities": {
+      "context_need": "partial",
+      "data": "partial",
+      "result": "partial",
+      "success_criteria": "partial",
+      "constraints": "partial",
+      "users": "missing",
+      "business_link": "partial"
+    },
+    "confirmedAt": "2026-09-12T11:00:00Z"
   },
   {
     "businessEmail": "owner@zerno.kz",
@@ -124,5 +184,33 @@
     "successCriteria": null,
     "contact": null,
     "interactionFormat": null
+  },
+  {
+    "businessEmail": "owner@zerno.kz",
+    "industryCode": "horeca",
+    "status": "published",
+    "rating": 47,
+    "responsesCount": 0,
+    "publishedAt": "2026-09-22T09:00:00Z",
+    "confirmedAt": "2026-09-22T08:55:00Z",
+    "title": "Инжиниринг меню и цен",
+    "context": "Четыре кофейни с одинаковым меню, цены не пересматривали год.",
+    "need": "Хотим понять, какие позиции меню тянут выручку вниз и что поднять в цене без потери гостей.",
+    "targetUsers": null,
+    "dataMaterials": null,
+    "constraints": null,
+    "expectedResult": "Отчёт с рекомендациями по меню.",
+    "successCriteria": null,
+    "contact": "Айгерим Нурланова, +77011234567",
+    "interactionFormat": null,
+    "blockQualities": {
+      "context_need": "partial",
+      "data": "formal",
+      "result": "partial",
+      "success_criteria": "formal",
+      "constraints": "formal",
+      "users": "formal",
+      "business_link": "missing"
+    }
   }
 ]

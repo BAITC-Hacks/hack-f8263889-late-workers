@@ -27,6 +27,14 @@ class IndustryList(ContractModel):
     items: list[CodeName]
 
 
+class BadgeInfo(CodeName):
+    condition: str
+
+
+class BadgeList(ContractModel):
+    items: list[BadgeInfo]
+
+
 class TaskCard(ContractModel):
     id: int
     title: str
@@ -39,6 +47,7 @@ class TaskCard(ContractModel):
     responses_count: int
     published_at: datetime | None = None
     is_saved: bool = False
+    badges: list[CodeName] = []
 
     @field_serializer("published_at")
     def _serialize_published_at(self, value: datetime | None) -> str | None:
@@ -71,6 +80,7 @@ class TaskDetail(ContractModel):
     published_at: datetime | None = None
     is_saved: bool = False
     is_owner: bool = False
+    badges: list[CodeName] = []
     fields: TaskFields
 
     @field_serializer("published_at")

@@ -10,6 +10,7 @@ from app.models.proposal import Proposal
 from app.models.saved_task import SavedTask
 from app.models.student import Student
 from app.models.task import Task
+from app.models.task_view import TaskView
 from app.models.team import Team, TeamMember
 from app.models.user import User
 
@@ -25,6 +26,7 @@ __all__ = [
     "SavedTask",
     "Student",
     "Task",
+    "TaskView",
     "Team",
     "TeamMember",
     "User",

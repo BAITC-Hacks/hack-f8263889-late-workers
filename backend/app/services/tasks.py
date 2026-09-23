@@ -2,12 +2,14 @@
 
 from typing import Any
 
-from sqlalchemy import Select, and_, func, or_, select
+from sqlalchemy import Select, and_, func, literal, or_, select
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.catalog_params import CatalogueQuery
 from app.core import messages
+from app.core.badges import badge_name
 from app.core.catalog import (
     CATALOGUE_STATUSES,
     LEVEL_RANGES,
@@ -17,7 +19,7 @@ from app.core.catalog import (
     status_name,
 )
 from app.core.exceptions import NotFoundError
-from app.models import SavedTask, Task, User
+from app.models import SavedTask, Task, TaskView, User
 
 
 def _code_name(code: str, name: str) -> dict[str, str]:
@@ -38,6 +40,7 @@ def _card(task: Task, *, is_saved: bool) -> dict[str, Any]:
         "responses_count": task.responses_count,
         "published_at": task.published_at,
         "is_saved": is_saved,
+        "badges": [_code_name(code, badge_name(code)) for code in task.badges or []],
     }
 
 
@@ -79,6 +82,12 @@ def _catalogue_filters(query: CatalogueQuery) -> list[Any]:
             for code in query.levels
         ]
         filters.append(or_(*ranges))
+    # A task qualifies only when it carries every requested badge: one JSONB
+    # containment per code, ANDed. The operand must be a typed *Python list* —
+    # a pre-dumped JSON string binds as text and asyncpg then re-serialises it
+    # into a JSONB string, which never contains an array.
+    for code in query.badges:
+        filters.append(Task.badges.op("@>")(literal([code], JSONB)))
     return filters
 
 
@@ -127,6 +136,7 @@ async def get_task(db: AsyncSession, task_id: int, viewer: User) -> dict[str, An
     if task is None or (task.status not in CATALOGUE_STATUSES and not is_owner):
         raise NotFoundError(messages.TASK_NOT_FOUND)
 
+    await _record_view(db, task, viewer)
     saved = await _saved_ids(db, viewer, [task.id])
     card = _card(task, is_saved=task.id in saved)
     card.pop("need_excerpt")
@@ -143,6 +153,18 @@ async def get_task(db: AsyncSession, task_id: int, viewer: User) -> dict[str, An
         "interaction_format": task.interaction_format,
     }
     return card
+
+
+async def _record_view(db: AsyncSession, task: Task, viewer: User) -> None:
+    """First-open bookkeeping: students only, catalogue statuses only, once ever."""
+    if viewer.student is None or task.status not in CATALOGUE_STATUSES:
+        return
+    await db.execute(
+        pg_insert(TaskView)
+        .values(task_id=task.id, student_id=viewer.student.id)
+        .on_conflict_do_nothing(index_elements=["task_id", "student_id"])
+    )
+    await db.commit()
 
 
 async def save_task(db: AsyncSession, task_id: int, student_id: int) -> None:

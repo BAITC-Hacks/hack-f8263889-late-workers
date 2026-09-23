@@ -13,8 +13,10 @@ from app.schemas.selection import (
     BusinessProposalsPage,
     DecisionRequest,
     DecisionResponse,
+    MarketResponse,
     MilestoneRequest,
 )
+from app.services import market as market_service
 from app.services import proposals as proposals_service
 from app.services.rating import level_of
 
@@ -31,6 +33,11 @@ async def business_milestone(milestone_id: int, user: BusinessUser, db: DbSessio
 
 BusinessProposal = Annotated[Proposal, Depends(business_proposal)]
 BusinessMilestone = Annotated[Milestone, Depends(business_milestone)]
+
+
+@router.get("/tasks/{task_id}/market", response_model=MarketResponse)
+async def task_market(task: OwnedTask, db: DbSession):
+    return {"market": await market_service.market_for(db, task)}
 
 
 @router.get("/tasks/{task_id}/proposals", response_model=BusinessProposalsPage)

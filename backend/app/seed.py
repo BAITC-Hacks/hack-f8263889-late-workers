@@ -14,10 +14,23 @@ from typing import Any
 
 from sqlalchemy import delete, func, select
 
+from app.core.badges import recalc_badges
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models import Business, Milestone, Proposal, Student, Task, Team, TeamMember, User
+from app.models import (
+    Business,
+    Milestone,
+    Proposal,
+    SavedTask,
+    Student,
+    Task,
+    TaskView,
+    Team,
+    TeamMember,
+    User,
+)
+from app.services import rating as rating_service
 from app.services.proposals import recalc_responses_count, recalc_team_points
 
 logger = logging.getLogger(__name__)
@@ -44,6 +57,7 @@ async def seed() -> tuple[int, int, int, int, int]:
     tasks = _load("tasks")
     teams = _load("teams")
     proposals = _load("proposals")
+    engagement = _load("engagement")
 
     async with SessionLocal() as db:
         # Teams are not owned by a user, so deleting users does not reach them;
@@ -109,6 +123,35 @@ async def seed() -> tuple[int, int, int, int, int]:
                 responses_count=entry["responsesCount"],
                 published_at=_timestamp(entry["publishedAt"]),
             )
+            qualities = entry.get("blockQualities")
+            if qualities:
+                # The demo breakdown goes through the real scorer, so the stored
+                # points, rating and badges can never disagree with production math.
+                values = {
+                    "context": task.context,
+                    "need": task.need,
+                    "targetUsers": task.target_users,
+                    "dataMaterials": task.data_materials,
+                    "constraints": task.constraints,
+                    "expectedResult": task.expected_result,
+                    "successCriteria": task.success_criteria,
+                    "contact": task.contact,
+                    "interactionFormat": task.interaction_format,
+                }
+                texts = rating_service.block_texts(values)
+                assessments = {
+                    block: (quality, "Задано в демо-данных", "ai")
+                    for block, quality in qualities.items()
+                }
+                rating, breakdown = rating_service.build_breakdown(texts, assessments)
+                if rating != entry["rating"]:
+                    raise SystemExit(
+                        f"{entry['title']}: blockQualities sum to {rating}, "
+                        f"json says {entry['rating']}"
+                    )
+                task.rating_breakdown = breakdown
+                task.confirmed_at = _timestamp(entry["confirmedAt"])
+                task.badges = recalc_badges(True, breakdown, task.constraints)
             tasks_by_title[entry["title"]] = task
             db.add(task)
 
@@ -156,6 +199,26 @@ async def seed() -> tuple[int, int, int, int, int]:
             )
             db.add(proposal)
 
+        await db.flush()
+
+        for block in engagement["views"]:
+            for email in block["students"]:
+                db.add(
+                    TaskView(
+                        task_id=tasks_by_title[block["taskTitle"]].id,
+                        student_id=students_by_email[email].id,
+                        first_viewed_at=_timestamp(block["firstViewedAt"]),
+                    )
+                )
+        for block in engagement["saves"]:
+            for email in block["students"]:
+                db.add(
+                    SavedTask(
+                        task_id=tasks_by_title[block["taskTitle"]].id,
+                        student_id=students_by_email[email].id,
+                        created_at=_timestamp(block["createdAt"]),
+                    )
+                )
         await db.flush()
         # The JSON carries starting counters; make both match reality.
         for task in tasks_by_title.values():

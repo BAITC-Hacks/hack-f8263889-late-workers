@@ -80,3 +80,33 @@ class DecisionRequest(ContractModel):
 
 class MilestoneRequest(ContractModel):
     title: Any = ""
+
+
+class MarketSinceUpdate(ContractModel):
+    since: datetime
+    views: int
+    responses: int
+
+    @field_serializer("since")
+    def _serialize_since(self, value: datetime) -> str | None:
+        return _utc_z(value)
+
+
+class MarketHint(ContractModel):
+    block: str
+    name: str
+
+
+class MarketOut(ContractModel):
+    views: int
+    saves: int
+    responses: int
+    conversion: int | None = None
+    industry_median_responses: float | int | None = None
+    industry_median_conversion: float | int | None = None
+    since_update: MarketSinceUpdate | None = None
+    hint: MarketHint | None = None
+
+
+class MarketResponse(ContractModel):
+    market: MarketOut
