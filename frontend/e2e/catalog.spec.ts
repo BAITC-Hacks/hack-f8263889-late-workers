@@ -761,3 +761,19 @@ test("saved page loading placeholders and error retry", async ({ page }) => {
     page.getByText("Вы пока ничего не сохранили", { exact: true })
   ).toBeVisible();
 });
+
+test("a page past the end explains itself and leads back to page 1", async ({
+  page,
+}) => {
+  await signIn(page, "student");
+  await page.goto("/catalog?sort=date&page=5");
+  await expect(
+    page.getByText("На этой странице задач нет", { exact: true })
+  ).toBeVisible();
+  await expect(cards(page)).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "На первую страницу", exact: true })
+    .click();
+  await expect(page).toHaveURL("/catalog?sort=date");
+  await expect(cards(page)).toHaveCount(20);
+});

@@ -2,6 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
+  // Mock-free acceptance lives in e2e/real and runs via playwright.real.config.ts.
+  testIgnore: "real/**",
   fullyParallel: true,
   workers: 2,
   forbidOnly: !!process.env.CI,
