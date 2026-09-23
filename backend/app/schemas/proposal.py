@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import field_serializer
 
 from app.schemas.base import ContractModel
+from app.schemas.selection import MilestoneOut
 from app.schemas.task import CodeName, _utc_z
 
 
@@ -39,6 +40,7 @@ class ProposalOut(ContractModel):
     prototype_url: str | None = None
     business_comment: str | None = None
     can_edit: bool
+    milestones: list[MilestoneOut]
     created_at: datetime
     updated_at: datetime
     decided_at: datetime | None = None

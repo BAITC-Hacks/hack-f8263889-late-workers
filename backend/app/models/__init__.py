@@ -4,6 +4,7 @@ from app.models.ai_call import AiCall
 from app.models.business import Business
 from app.models.clarification import ClarificationRound, RoundQuestion
 from app.models.industry import Industry
+from app.models.milestone import Milestone
 from app.models.note import Note
 from app.models.proposal import Proposal
 from app.models.saved_task import SavedTask
@@ -17,6 +18,7 @@ __all__ = [
     "Business",
     "ClarificationRound",
     "Industry",
+    "Milestone",
     "Note",
     "Proposal",
     "RoundQuestion",

@@ -14,6 +14,7 @@ from app.core.catalog import (
     proposal_status_name,
 )
 from app.core.exceptions import (
+    AlreadyConfirmedError,
     ForbiddenError,
     InvalidStatusError,
     NotFoundError,
@@ -21,7 +22,7 @@ from app.core.exceptions import (
     ValidationError,
 )
 from app.core.validation import as_text, normalize_text
-from app.models import Proposal, Task, Team, TeamMember
+from app.models import Milestone, Proposal, Task, Team, TeamMember
 from app.services import teams as teams_service
 from app.services.rating import level_of
 
@@ -60,6 +61,7 @@ def serialize_proposal(proposal: Proposal, viewer_student_id: int, captain_of: s
         "prototype_url": proposal.prototype_url,
         "business_comment": proposal.business_comment,
         "can_edit": can_edit,
+        "milestones": [_serialize_milestone(m) for m in proposal.milestones],
         "created_at": proposal.created_at,
         "updated_at": proposal.updated_at,
         "decided_at": proposal.decided_at,
@@ -234,3 +236,156 @@ async def list_proposals(
 
 async def team_for_student(db: AsyncSession, team_id: int, student_id: int) -> Team:
     return await teams_service.get_own_team(db, team_id, student_id)
+
+
+# --- Business selection and milestones -----------------------------------------
+
+
+def _serialize_milestone(milestone: Milestone) -> dict[str, Any]:
+    """One shape for the student and business serializers alike."""
+    return {
+        "id": milestone.id,
+        "title": milestone.title,
+        "confirmed": milestone.confirmed,
+        "points": milestone.points,
+        "created_at": milestone.created_at,
+        "confirmed_at": milestone.confirmed_at,
+    }
+
+
+def serialize_business_proposal(proposal: Proposal) -> dict[str, Any]:
+    """The business's view: the team's profile instead of author/canEdit."""
+    return {
+        "id": proposal.id,
+        "status": {"code": proposal.status, "name": proposal_status_name(proposal.status)},
+        # summarize_team also carries myRole/membersLimit; the schema drops them.
+        "team": teams_service.summarize_team(proposal.team, viewer_student_id=0),
+        "idea": proposal.idea,
+        "plan": proposal.plan,
+        "duration_weeks": proposal.duration_weeks,
+        "prototype_url": proposal.prototype_url,
+        "business_comment": proposal.business_comment,
+        "milestones": [_serialize_milestone(m) for m in proposal.milestones],
+        "created_at": proposal.created_at,
+        "updated_at": proposal.updated_at,
+        "decided_at": proposal.decided_at,
+    }
+
+
+async def recalc_team_points(db: AsyncSession, team_id: int) -> None:
+    """teams.points = the sum of confirmed milestone points across the team's proposals."""
+    total = (
+        select(func.coalesce(func.sum(Milestone.points), 0))
+        .select_from(Milestone)
+        .join(Proposal, Proposal.id == Milestone.proposal_id)
+        .where(Proposal.team_id == team_id, Milestone.confirmed.is_(True))
+    )
+    await db.execute(update(Team).where(Team.id == team_id).values(points=total.scalar_subquery()))
+
+
+async def list_business_proposals(db: AsyncSession, task: Task) -> list[Proposal]:
+    """Every non-withdrawn proposal of the task, oldest first.
+
+    Opening the list is what moves fresh proposals to "reviewing" — the team can
+    see that the business has looked at them.
+    """
+    await db.execute(
+        update(Proposal)
+        .where(Proposal.task_id == task.id, Proposal.status == "sent")
+        .values(status="reviewing")
+    )
+    await db.commit()
+    rows = await db.scalars(
+        select(Proposal)
+        .where(Proposal.task_id == task.id, Proposal.status != "withdrawn")
+        .order_by(Proposal.created_at.asc(), Proposal.id.asc())
+        .execution_options(populate_existing=True)
+    )
+    return list(rows)
+
+
+async def get_business_proposal(db: AsyncSession, proposal_id: int, business_id: int) -> Proposal:
+    """A proposal on one of this business's tasks, or a 404 — ids are not probeable."""
+    proposal = await db.scalar(
+        select(Proposal)
+        .join(Task, Task.id == Proposal.task_id)
+        .where(Proposal.id == proposal_id, Task.business_id == business_id)
+    )
+    if proposal is None:
+        raise NotFoundError(messages.PROPOSAL_NOT_FOUND)
+    return proposal
+
+
+async def get_business_milestone(
+    db: AsyncSession, milestone_id: int, business_id: int
+) -> Milestone:
+    milestone = await db.scalar(
+        select(Milestone)
+        .join(Proposal, Proposal.id == Milestone.proposal_id)
+        .join(Task, Task.id == Proposal.task_id)
+        .where(Milestone.id == milestone_id, Task.business_id == business_id)
+    )
+    if milestone is None:
+        raise NotFoundError(messages.MILESTONE_NOT_FOUND)
+    return milestone
+
+
+def _clean_comment(comment: Any) -> str | None:
+    text = (as_text(comment) or "").strip()
+    if len(text) > 1000:
+        raise ValidationError({"comment": messages.COMMENT_LONG})
+    return text or None
+
+
+async def decide(
+    db: AsyncSession, proposal: Proposal, status: str, comment: Any
+) -> tuple[Proposal, Task]:
+    """Select or reject. Final by contract: a decided proposal never changes again."""
+    if proposal.status not in EDITABLE_PROPOSAL_STATUSES:
+        raise InvalidStatusError(messages.DECISION_TAKEN)
+    cleaned = _clean_comment(comment)
+
+    proposal.status = status
+    proposal.business_comment = cleaned
+    proposal.decided_at = datetime.now(UTC)
+
+    task = await db.get(Task, proposal.task_id)
+    assert task is not None
+    if status == "selected" and task.status == "published":
+        task.status = "in_progress"
+    await db.commit()
+    return await reload(db, proposal.id), task
+
+
+async def add_milestone(db: AsyncSession, proposal: Proposal, title: Any) -> Proposal:
+    if proposal.status != "selected":
+        raise InvalidStatusError(messages.MILESTONES_ONLY_SELECTED)
+    cleaned = normalize_text(title, min_length=3, max_length=200)
+    if cleaned is None:
+        raise ValidationError({"title": messages.MILESTONE_TITLE})
+
+    db.add(Milestone(proposal_id=proposal.id, title=cleaned))
+    await db.commit()
+    return await reload(db, proposal.id)
+
+
+async def delete_milestone(db: AsyncSession, milestone: Milestone) -> None:
+    """A confirmed milestone is history — earned points cannot be deleted away."""
+    if milestone.confirmed:
+        raise AlreadyConfirmedError()
+    await db.delete(milestone)
+    await db.commit()
+
+
+async def confirm_milestone(db: AsyncSession, milestone: Milestone) -> Proposal:
+    """Irreversible: the flag, the timestamp and the team's points in one transaction."""
+    if milestone.confirmed:
+        raise AlreadyConfirmedError()
+    milestone.confirmed = True
+    milestone.confirmed_at = datetime.now(UTC)
+    proposal = await db.get(Proposal, milestone.proposal_id)
+    assert proposal is not None
+    await db.flush()
+    await recalc_team_points(db, proposal.team_id)
+    await db.commit()
+    return await reload(db, proposal.id)

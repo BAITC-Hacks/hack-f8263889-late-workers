@@ -57,7 +57,7 @@ STUDENT = {
 
 _TABLES = (
     "users, businesses, students, notes, tasks, saved_tasks, "
-    "clarification_rounds, round_questions, ai_calls, teams, team_members, proposals"
+    "clarification_rounds, round_questions, ai_calls, teams, team_members, proposals, milestones"
 )
 
 

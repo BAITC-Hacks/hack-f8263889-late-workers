@@ -17,6 +17,7 @@ from app.api.catalog import (
     tasks_router,
 )
 from app.api.router import api_router
+from app.api.selection import router as selection_router
 from app.api.teams import proposals_router, student_router, teams_router
 from app.api.v1.health import router as health_router
 from app.core.config import settings
@@ -79,6 +80,7 @@ def create_app() -> FastAPI:
         me_router,
         business_router,
         builder_router,
+        selection_router,
         teams_router,
         proposals_router,
         student_router,

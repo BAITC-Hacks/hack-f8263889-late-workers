@@ -17,8 +17,8 @@ from sqlalchemy import delete, func, select
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models import Business, Proposal, Student, Task, Team, TeamMember, User
-from app.services.proposals import recalc_responses_count
+from app.models import Business, Milestone, Proposal, Student, Task, Team, TeamMember, User
+from app.services.proposals import recalc_responses_count, recalc_team_points
 
 logger = logging.getLogger(__name__)
 
@@ -132,26 +132,36 @@ async def seed() -> tuple[int, int, int, int, int]:
         await db.flush()
 
         for entry in proposals:
-            db.add(
-                Proposal(
-                    task_id=tasks_by_title[entry["taskTitle"]].id,
-                    team_id=teams_by_name[entry["team"]].id,
-                    author_student_id=students_by_email[entry["author"]].id,
-                    idea=entry["idea"],
-                    plan=entry["plan"],
-                    duration_weeks=entry["durationWeeks"],
-                    prototype_url=entry["prototypeUrl"],
-                    status=entry["status"],
-                    business_comment=entry.get("businessComment"),
-                    created_at=_timestamp(entry["createdAt"]),
-                    decided_at=_timestamp(entry.get("decidedAt")),
-                )
+            proposal = Proposal(
+                task_id=tasks_by_title[entry["taskTitle"]].id,
+                team_id=teams_by_name[entry["team"]].id,
+                author_student_id=students_by_email[entry["author"]].id,
+                idea=entry["idea"],
+                plan=entry["plan"],
+                duration_weeks=entry["durationWeeks"],
+                prototype_url=entry["prototypeUrl"],
+                status=entry["status"],
+                business_comment=entry.get("businessComment"),
+                created_at=_timestamp(entry["createdAt"]),
+                decided_at=_timestamp(entry.get("decidedAt")),
+                milestones=[
+                    Milestone(
+                        title=item["title"],
+                        confirmed=item["confirmed"],
+                        created_at=_timestamp(item["createdAt"]),
+                        confirmed_at=_timestamp(item.get("confirmedAt")),
+                    )
+                    for item in entry.get("milestones", [])
+                ],
             )
+            db.add(proposal)
 
         await db.flush()
-        # The JSON carries a starting responses_count; make it match reality.
+        # The JSON carries starting counters; make both match reality.
         for task in tasks_by_title.values():
             await recalc_responses_count(db, task.id)
+        for team in teams_by_name.values():
+            await recalc_team_points(db, team.id)
 
         await db.commit()
         counts: list[int] = []
