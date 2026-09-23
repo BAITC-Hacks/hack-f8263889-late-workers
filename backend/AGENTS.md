@@ -122,6 +122,20 @@ catalogue's `tasks_router`).
 Tag handling is shared, not copied: `dedupe_tags` and `validate_tag_fields` in
 `app/core/validation.py` back registration, the student profile and team tags alike.
 
+## Selection and milestones (`/api/business/proposals`, `/api/business/milestones`)
+
+The business's half of proposals lives in `app/api/selection.py` +
+`app/services/proposals.py` (same module as the student half, one serializer per
+audience, `_serialize_milestone` shared between them).
+
+- Opening `GET /api/business/tasks/{id}/proposals` moves that task's `sent`
+  proposals to `reviewing` — a deliberate side effect of the contract.
+- Decisions are final; selecting on a `published` task moves it to `in_progress`.
+- `teams.points` is derived: the sum of confirmed milestone points across the
+  team's proposals, recomputed by `recalc_team_points` (never incremented), the
+  same rule as `tasks.responses_count`. The seed recomputes both at the end.
+- A confirmed milestone can be neither re-confirmed nor deleted.
+
 ## Conventions
 
 - Routers are thin: parse input, call a service, return. No SQL in routers.

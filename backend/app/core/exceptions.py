@@ -155,6 +155,13 @@ class ProposalExistsError(ConflictError):
         super().__init__(messages.PROPOSAL_EXISTS, extra={"proposalId": proposal_id}, **kwargs)
 
 
+class AlreadyConfirmedError(ConflictError):
+    code = "ALREADY_CONFIRMED"
+
+    def __init__(self, message: str = messages.ALREADY_CONFIRMED, **kwargs: Any) -> None:
+        super().__init__(message, **kwargs)
+
+
 class EmailTakenError(ConflictError):
     code = "EMAIL_TAKEN"
 

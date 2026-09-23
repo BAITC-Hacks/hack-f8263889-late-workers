@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
+    from app.models.milestone import Milestone
     from app.models.student import Student
     from app.models.task import Task
     from app.models.team import Team
@@ -43,3 +44,9 @@ class Proposal(TimestampMixin, Base):
     task: Mapped["Task"] = relationship(lazy="selectin")
     team: Mapped["Team"] = relationship(back_populates="proposals", lazy="selectin")
     author: Mapped["Student"] = relationship(lazy="selectin")
+    milestones: Mapped[list["Milestone"]] = relationship(
+        back_populates="proposal",
+        cascade="all, delete-orphan",
+        order_by="Milestone.created_at, Milestone.id",
+        lazy="selectin",
+    )

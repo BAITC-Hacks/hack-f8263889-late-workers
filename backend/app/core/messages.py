@@ -73,3 +73,12 @@ PLAN = "План: от 20 до 3000 символов"
 DURATION_WEEKS = "Срок: целое число недель от 1 до 52"
 PROTOTYPE_URL = "Ссылка должна начинаться с http:// или https://"
 PROTOTYPE_URL_LONG = "Ссылка: до 500 символов"
+
+
+# --- Selection and milestones ---
+MILESTONE_NOT_FOUND = "Этап не найден"
+ALREADY_CONFIRMED = "Этап уже подтверждён"
+DECISION_TAKEN = "Решение по отклику уже принято или отклик отозван"
+MILESTONES_ONLY_SELECTED = "Этапы доступны только для выбранной команды"
+COMMENT_LONG = "Комментарий: до 1000 символов"
+MILESTONE_TITLE = "Название этапа: от 3 до 200 символов"

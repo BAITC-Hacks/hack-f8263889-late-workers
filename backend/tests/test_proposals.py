@@ -217,3 +217,19 @@ async def test_my_proposals_for_one_task(
 
     assert len((await client.get(f"/api/tasks/{answered.id}/my-proposals")).json()["items"]) == 1
     assert (await client.get(f"/api/tasks/{other.id}/my-proposals")).json()["items"] == []
+
+
+async def test_a_students_proposal_carries_its_milestones(
+    client: AsyncClient, team: dict, open_task: Task, db: AsyncSession
+) -> None:
+    from app.models import Milestone
+
+    proposal = (await _send(client, open_task.id, team["id"])).json()["proposal"]
+    assert proposal["milestones"] == []
+
+    db.add(Milestone(proposal_id=proposal["id"], title="Первый этап", confirmed=True))
+    await db.commit()
+
+    mine = (await client.get("/api/me/proposals")).json()["items"]
+    assert [m["title"] for m in mine[0]["milestones"]] == ["Первый этап"]
+    assert mine[0]["milestones"][0]["confirmed"] is True
