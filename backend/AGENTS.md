@@ -136,6 +136,27 @@ audience, `_serialize_milestone` shared between them).
   same rule as `tasks.responses_count`. The seed recomputes both at the end.
 - A confirmed milestone can be neither re-confirmed nor deleted.
 
+## Gamification (`/api/badges`, task views, `/api/business/tasks/{id}/market`)
+
+- Badges live in `app/core/badges.py` (pure code) and are recomputed together with
+  the rating — the single point is `_recalculate` in `app/services/builder.py`.
+  Unconfirmed cards always have `badges: []`.
+- The catalogue's `?badge=` filter is one JSONB containment per code, ANDed. The
+  operand must be a **typed literal list** (`literal([code], JSONB)`): a pre-dumped
+  JSON string binds as text, asyncpg re-serialises it into a JSONB *string*, and the
+  filter silently matches nothing while the same SQL works in psql.
+- Views are one row per (task, student) ever (`task_views`, ON CONFLICT DO NOTHING),
+  written as a side effect of the student's `GET /api/tasks/{id}` — never for
+  businesses, never outside catalogue statuses.
+- The market indicator (`app/services/market.py`): conversion is a whole percentage
+  (half up, `null` without views); industry medians follow the spec's rule (mean of
+  the two middle values, one decimal, integers stay integers); the hint fires only
+  with 10+ views and a conversion below the industry median, pointing at the weakest
+  block by points share (heavier block wins ties).
+- Seed block qualities are validated at load: their scored sum must equal the task's
+  JSON rating, or the seed refuses to start. Note 92 is unreachable as a sum of
+  block scores — that is why the loyalty task is rated 94.
+
 ## Conventions
 
 - Routers are thin: parse input, call a service, return. No SQL in routers.

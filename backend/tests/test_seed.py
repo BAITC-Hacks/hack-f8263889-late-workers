@@ -33,7 +33,7 @@ async def seeded(db: AsyncSession) -> None:
 async def test_seed_loads_the_demo_dataset(seeded: None, db: AsyncSession) -> None:
     assert await db.scalar(select(func.count()).select_from(Business)) == 3
     assert await db.scalar(select(func.count()).select_from(Student)) == 12
-    assert await db.scalar(select(func.count()).select_from(Task)) == 7
+    assert await db.scalar(select(func.count()).select_from(Task)) == 8
     assert await db.scalar(select(func.count()).select_from(Team)) == 5
     assert await db.scalar(select(func.count()).select_from(Proposal)) == 7
 
@@ -43,23 +43,23 @@ async def test_seed_is_idempotent(seeded: None, db: AsyncSession) -> None:
     assert result.returncode == 0, result.stderr
     assert await db.scalar(select(func.count()).select_from(Business)) == 3
     assert await db.scalar(select(func.count()).select_from(Student)) == 12
-    assert await db.scalar(select(func.count()).select_from(Task)) == 7
+    assert await db.scalar(select(func.count()).select_from(Task)) == 8
     assert await db.scalar(select(func.count()).select_from(Team)) == 5
     assert await db.scalar(select(func.count()).select_from(Proposal)) == 7
 
 
-async def test_the_catalogue_shows_six_of_the_seven_seeded_tasks(
+async def test_the_catalogue_shows_seven_of_the_eight_seeded_tasks(
     seeded: None, client: AsyncClient
 ) -> None:
-    """Five published plus one in progress; the draft stays out."""
+    """Six published plus one in progress; the draft stays out."""
     login = await client.post(
         "/api/auth/login", json={"email": "arman@student.kz", "password": DEMO_PASSWORD}
     )
     assert login.status_code == 200, login.text
 
     body = (await client.get("/api/tasks")).json()
-    assert body["total"] == 6
-    assert [item["rating"] for item in body["items"]] == [92, 78, 70, 64, 55, 35]
+    assert body["total"] == 7
+    assert [item["rating"] for item in body["items"]] == [94, 78, 70, 64, 55, 47, 35]
     # All four levels appear among the seeded tasks.
     assert {item["level"]["code"] for item in body["items"]} == {
         "priority",
@@ -107,3 +107,39 @@ async def test_seeded_selection_and_points(
     chosen = next(p for p in mine if p["status"]["code"] == "selected")
     assert chosen["businessComment"] is not None
     assert [m["confirmed"] for m in chosen["milestones"]] == [True, False]
+
+
+async def test_seeded_badges_cover_the_whole_reference(
+    seeded: None, client: AsyncClient, db: AsyncSession
+) -> None:
+    from app.core.badges import BADGE_CODES
+
+    login = await client.post(
+        "/api/auth/login", json={"email": "arman@student.kz", "password": DEMO_PASSWORD}
+    )
+    assert login.status_code == 200, login.text
+
+    catalogue = (await client.get("/api/tasks")).json()["items"]
+    seen = {badge["code"] for item in catalogue for badge in item["badges"]}
+    assert seen == set(BADGE_CODES)  # every badge appears somewhere
+    assert any(item["badges"] == [] for item in catalogue)  # and one task has none
+
+    for code in BADGE_CODES:
+        filtered = (await client.get(f"/api/tasks?badge={code}")).json()
+        assert filtered["total"] > 0, code
+
+
+async def test_seeded_market_hint(seeded: None, client: AsyncClient) -> None:
+    login = await client.post(
+        "/api/auth/login", json={"email": "owner@zerno.kz", "password": DEMO_PASSWORD}
+    )
+    assert login.status_code == 200, login.text
+    tasks = (await client.get("/api/business/tasks")).json()["items"]
+    bakery = next(t for t in tasks if "выпечк" in t["title"].lower())
+
+    market = (await client.get(f"/api/business/tasks/{bakery['id']}/market")).json()["market"]
+    assert market["views"] >= 10
+    assert market["conversion"] is not None
+    assert market["industryMedianConversion"] is not None
+    assert market["conversion"] < market["industryMedianConversion"]
+    assert market["hint"] == {"block": "users", "name": "Пользователи"}
