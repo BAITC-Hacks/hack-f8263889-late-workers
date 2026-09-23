@@ -14,6 +14,8 @@
 
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-brand-task: hsl(var(--brand-task));
+  --color-brand-bridge: hsl(var(--brand-bridge));
 
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
@@ -63,6 +65,8 @@
     --popover-foreground: 215 20% 14%;
     --primary: 219 85% 42%;
     --primary-foreground: 0 0% 100%;
+    --brand-task: 204 67% 26%;
+    --brand-bridge: 172 42% 41%;
     --secondary: 210 16% 96%;
     --secondary-foreground: 215 20% 20%;
     --muted: 210 16% 96%;
@@ -94,6 +98,8 @@
     --popover-foreground: 210 20% 96%;
     --primary: 217 85% 66%;
     --primary-foreground: 215 30% 10%;
+    --brand-task: 204 70% 76%;
+    --brand-bridge: 172 49% 63%;
     --secondary: 215 20% 16%;
     --secondary-foreground: 210 20% 96%;
     --muted: 215 20% 16%;

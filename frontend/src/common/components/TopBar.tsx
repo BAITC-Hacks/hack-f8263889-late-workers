@@ -6,6 +6,8 @@ import { LoaderCircle, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink } from "react-router-dom";
 
+import { BrandLogo } from "./BrandLogo";
+
 const LANGS = ["en", "ru", "kk"] as const;
 
 export const TopBar = () => {
@@ -16,15 +18,18 @@ export const TopBar = () => {
   return (
     <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
       <div className="flex min-h-14 w-full flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3 sm:px-10">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="flex min-w-32 flex-1 flex-wrap items-center gap-x-6 gap-y-2 sm:min-w-40">
           <Link
             to="/"
-            className="hover:text-primary shrink-0 text-sm font-semibold tracking-tight"
+            className="focus-visible:ring-ring shrink-0 rounded-xs outline-hidden transition-opacity hover:opacity-80 focus-visible:ring-2"
           >
-            rsk<span className="text-primary">/</span>
+            <BrandLogo className="w-32 sm:w-40" />
           </Link>
           {user && (
-            <nav aria-label={t("nav.sections")} className="flex gap-4">
+            <nav
+              aria-label={t("nav.sections")}
+              className="flex flex-wrap gap-x-4 gap-y-2"
+            >
               {sectionLinks(user.role).map((link) => (
                 <NavLink
                   key={link.to}
