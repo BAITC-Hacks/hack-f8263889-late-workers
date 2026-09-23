@@ -13,6 +13,7 @@ export {
   parseTaskId,
   retryUnlessClientError,
   statusBadgeVariant,
+  taskProposalsPath,
 } from "./helpers";
 export { TASK_FIELDS } from "./types";
 export type {

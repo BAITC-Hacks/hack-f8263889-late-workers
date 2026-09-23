@@ -15,6 +15,15 @@ export type ProposalTask = {
   level: { code: string; name: string };
 };
 
+export type Milestone = {
+  id: number;
+  title: string;
+  confirmed: boolean;
+  points: number;
+  createdAt: string;
+  confirmedAt: string | null;
+};
+
 export type Proposal = {
   id: number;
   task: ProposalTask;
@@ -27,6 +36,7 @@ export type Proposal = {
   prototypeUrl: string | null;
   businessComment: string | null;
   canEdit: boolean;
+  milestones: Milestone[];
   createdAt: string;
   updatedAt: string;
   decidedAt: string | null;

@@ -1,12 +1,11 @@
-import { Button, Card } from "@/common/components/ui";
-import { cn } from "@/common/lib/utils";
+import { Button, Card, ClampedText } from "@/common/components/ui";
 import { formatDateTime } from "@/core/api";
-import { useId, useRef, useState } from "react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import { useIsClamped } from "../hooks/useIsClamped";
 import type { Proposal } from "../types";
+import { MilestonesSummary } from "./MilestonesSummary";
 import { StatusBadge } from "./StatusBadge";
 
 type ProposalCardProps = {
@@ -17,10 +16,6 @@ type ProposalCardProps = {
 export const ProposalCard = ({ proposal, onWithdraw }: ProposalCardProps) => {
   const { t, i18n } = useTranslation();
   const titleId = useId();
-  const ideaId = useId();
-  const ideaRef = useRef<HTMLParagraphElement>(null);
-  const [expanded, setExpanded] = useState(false);
-  const clamped = useIsClamped(ideaRef);
 
   return (
     <Card
@@ -47,29 +42,7 @@ export const ProposalCard = ({ proposal, onWithdraw }: ProposalCardProps) => {
           {proposal.task.companyName}
         </p>
       </div>
-      <div className="space-y-1">
-        <p
-          id={ideaId}
-          ref={ideaRef}
-          className={cn(
-            "text-sm whitespace-pre-line",
-            !expanded && "line-clamp-2"
-          )}
-        >
-          {proposal.idea}
-        </p>
-        {(clamped || expanded) && (
-          <button
-            type="button"
-            aria-expanded={expanded}
-            aria-controls={ideaId}
-            onClick={() => setExpanded(!expanded)}
-            className="text-primary text-sm font-medium hover:underline"
-          >
-            {t(expanded ? "proposals.card.collapse" : "proposals.card.expand")}
-          </button>
-        )}
-      </div>
+      <ClampedText text={proposal.idea} />
       <p className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-sm">
         <span>
           {t("proposals.card.weeks", { count: proposal.durationWeeks })}
@@ -106,6 +79,9 @@ export const ProposalCard = ({ proposal, onWithdraw }: ProposalCardProps) => {
           </span>{" "}
           {proposal.businessComment}
         </p>
+      )}
+      {proposal.status.code === "selected" && (
+        <MilestonesSummary milestones={proposal.milestones} />
       )}
     </Card>
   );

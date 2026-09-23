@@ -3,6 +3,7 @@ import { isApiError } from "@/core/api";
 import type { TeamSummary } from "@/modules/teams";
 
 import type {
+  Milestone,
   Proposal,
   ProposalCreateInput,
   ProposalFormValues,
@@ -140,3 +141,10 @@ export const filterByTeam = (proposals: Proposal[], teamId: number | null) =>
 
 export const replaceProposal = (proposals: Proposal[], next: Proposal) =>
   proposals.map((proposal) => (proposal.id === next.id ? next : proposal));
+
+/** Points the team earned on one proposal: confirmed milestones only. */
+export const earnedPoints = (milestones: Milestone[]) =>
+  milestones.reduce(
+    (sum, milestone) => (milestone.confirmed ? sum + milestone.points : sum),
+    0
+  );

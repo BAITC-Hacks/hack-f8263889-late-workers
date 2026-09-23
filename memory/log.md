@@ -1,5 +1,12 @@
 # Log
 
+## 2026-09-23 — frontend: team selection and milestones
+- New `selection` module on the real FastAPI endpoints: `/business/tasks/:id/proposals` with tabs, team roster, compare panel (up to 3), select/reject with comment, milestones (add, confirm, delete). Links from «Мои задачи» (responses count) and the owner's task page («Отклики (N)»).
+- Student «Мои отклики»: milestones block and «Баллы за задачу» on selected proposals.
+- `ConfirmDialog` got `description`/`children` and native-close sync; `useModalDialog`, `useIsClamped` moved to `common/lib`; new `ClampedText`.
+- lint/typecheck/build green; not browser-tested (user verifies).
+— c
+
 ## 2026-09-23 — frontend: teams and proposals
 - New modules `teams` and `proposals` on the real FastAPI endpoints: my teams, create/edit team, members (add by email, remove, leave), proposals block on the task page, create/edit proposal form, my proposals with team filter and withdraw. Student profile page in `auth`.
 - Student nav: «Команды», «Мои отклики»; the name links to `/student/profile`; `/student` link uses `end`.

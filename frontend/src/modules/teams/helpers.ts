@@ -37,9 +37,13 @@ export const teamToInput = (team: Team): TeamInput => ({
 });
 
 /** Skills first, then technologies, capped for a compact card. */
-export const cardTags = (skills: string[], technologies: string[]) => {
+export const cardTags = (
+  skills: string[],
+  technologies: string[],
+  limit = CARD_TAGS
+) => {
   const all = [...skills, ...technologies];
-  return { shown: all.slice(0, CARD_TAGS), hidden: all.length - CARD_TAGS };
+  return { shown: all.slice(0, limit), hidden: all.length - limit };
 };
 
 export const isTeamFull = (team: Team) =>

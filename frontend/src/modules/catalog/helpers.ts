@@ -101,6 +101,8 @@ export const isInProgress = (status: { code: string }) =>
 export const parseTaskId = parseId;
 
 export const builderPath = (id: number) => `/business/tasks/${id}/builder`;
+export const taskProposalsPath = (id: number) =>
+  `/business/tasks/${id}/proposals`;
 
 /** Statuses finished in the builder; a task past them opens its catalog page. */
 const BUILDER_STATUSES = new Set(["draft", "clarifying", "review"]);
