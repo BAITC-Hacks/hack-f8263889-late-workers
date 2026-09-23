@@ -37,7 +37,9 @@ export const useCatalogSearch = () => {
       }),
     toggleLevel: (level: TaskLevelCode) =>
       update({ ...state, levels: toggleValue(state.levels, level), page: 1 }),
+    toggleBadge: (code: string) =>
+      update({ ...state, badges: toggleValue(state.badges, code), page: 1 }),
     resetFilters: () =>
-      update({ ...state, industries: [], levels: [], page: 1 }),
+      update({ ...state, industries: [], levels: [], badges: [], page: 1 }),
   };
 };

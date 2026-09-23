@@ -1,3 +1,6 @@
+import { showToast } from "@/common/lib/toast";
+import { sessionEvents } from "@/core/api";
+import { badgeNameKey } from "@/modules/gamification";
 import { useState } from "react";
 import { type FieldPath, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -9,7 +12,11 @@ import {
   conflictMessage,
   hintTarget,
   isCardFormField,
+  levelChange,
+  newlyEarnedBadges,
   publishBlocker,
+  ratingHintsId,
+  toBlockCode,
   toCardInput,
   toCardValues,
   validationFields,
@@ -62,14 +69,16 @@ export const useCardEditor = (task: BuilderTask, defaults: CardFormValues) => {
     request: () => Promise<BuilderTask>,
     onDone?: (next: BuilderTask) => void
   ) => {
+    const sessionVersion = sessionEvents.version();
     setMessage(null);
     setPending(action);
     try {
       const next = await request();
+      if (sessionEvents.version() !== sessionVersion) return;
       apply(next);
       onDone?.(next);
     } catch (error) {
-      showError(action, error);
+      if (sessionEvents.version() === sessionVersion) showError(action, error);
     } finally {
       setPending(null);
     }
@@ -79,7 +88,24 @@ export const useCardEditor = (task: BuilderTask, defaults: CardFormValues) => {
     run(
       "confirm",
       () => confirmCard(task.id, toCardInput(values)),
-      (next) => form.reset(toCardValues(next))
+      (next) => {
+        form.reset(toCardValues(next));
+        const change = levelChange(task.level, next.level);
+        if (change && next.level) {
+          showToast(
+            t(`gamification.progress.${change}`, {
+              level: t(`catalog.levels.${next.level.code}`),
+            })
+          );
+        }
+        for (const badge of newlyEarnedBadges(task.badges, next.badges)) {
+          showToast(
+            t("gamification.builderBadges.new", {
+              name: t(badgeNameKey(badge.code), { defaultValue: badge.name }),
+            })
+          );
+        }
+      }
     )
   );
 
@@ -96,7 +122,30 @@ export const useCardEditor = (task: BuilderTask, defaults: CardFormValues) => {
   const focusHint = (block: BlockCode) => {
     const target = hintTarget(block, form.getValues("fields"));
     const element = document.getElementById(cardFieldId(target));
-    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    element?.scrollIntoView({
+      behavior: reducedMotion ? "instant" : "smooth",
+      block: "center",
+    });
+    element?.focus({ preventScroll: true });
+  };
+
+  const focusMarketHint = (block: string) => {
+    const code = toBlockCode(block);
+    if (code) focusHint(code);
+  };
+
+  const focusAllHints = () => {
+    const element = document.getElementById(ratingHintsId(task.id));
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    element?.scrollIntoView({
+      behavior: reducedMotion ? "instant" : "smooth",
+      block: "start",
+    });
     element?.focus({ preventScroll: true });
   };
 
@@ -113,6 +162,8 @@ export const useCardEditor = (task: BuilderTask, defaults: CardFormValues) => {
     unpublishOpen,
     setUnpublishOpen,
     focusHint,
+    focusMarketHint,
+    focusAllHints,
   };
 };
 

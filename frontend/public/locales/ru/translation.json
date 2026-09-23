@@ -627,5 +627,79 @@
       "comment": "Комментарий: до 1000 символов",
       "milestoneTitle": "Название этапа: от 3 до 200 символов"
     }
+  },
+  "gamification": {
+    "filter": {
+      "title": "Бейджи",
+      "allSelected": "Показаны задачи со всеми выбранными бейджами",
+      "error": "Не удалось загрузить бейджи"
+    },
+    "badges": {
+      "complete": {
+        "name": "Всё заполнено",
+        "condition": "Все 7 блоков карточки заполнены хотя бы на 70%"
+      },
+      "has_data": {
+        "name": "Есть данные",
+        "condition": "Блок «Данные и материалы» заполнен конкретно: что за данные, объём, формат"
+      },
+      "measurable": {
+        "name": "Измеримый результат",
+        "condition": "Критерии успеха содержат показатель и целевое значение"
+      },
+      "clear_scope": {
+        "name": "Понятные рамки",
+        "condition": "Блок «Ограничения» заполнен хотя бы на 70% и в нём указан срок"
+      },
+      "open_dialog": {
+        "name": "Открыт к диалогу",
+        "condition": "Указаны контакт и формат консультаций и обратной связи"
+      }
+    },
+    "badgeMore": "+{{count}}",
+    "badgeMoreLabel": "Ещё бейджей: {{count}}",
+    "progress": {
+      "title": "Готовность задачи",
+      "remaining_one": "Ещё {{count}} балл до уровня «{{level}}»",
+      "remaining_few": "Ещё {{count}} балла до уровня «{{level}}»",
+      "remaining_many": "Ещё {{count}} баллов до уровня «{{level}}»",
+      "remaining_other": "Ещё {{count}} балла до уровня «{{level}}»",
+      "ready": "Задача полностью готова к работе",
+      "allHints": "Все подсказки",
+      "up": "Уровень задачи повышен: {{level}}",
+      "down": "Уровень задачи снижен: {{level}}"
+    },
+    "builderBadges": {
+      "title": "Бейджи",
+      "pending": "Бейджи появятся после подтверждения карточки",
+      "how": "Как получить: {{condition}}",
+      "error": "Не удалось загрузить бейджи",
+      "new": "Новый бейдж: {{name}}",
+      "earned": "Получен"
+    },
+    "market": {
+      "title": "Отклик рынка",
+      "refresh": "Обновить",
+      "views": "Просмотры",
+      "saves": "Сохранения",
+      "responses": "Отклики",
+      "conversion": "Конверсия",
+      "medianResponses": "Медиана по отрасли: {{value}}",
+      "medianConversion": "Медиана по отрасли: {{value}}%",
+      "noIndustryData": "Нет данных по отрасли",
+      "since": "С момента обновления карточки ({{date}}): +{{views}}, +{{responses}}",
+      "viewsAdded_one": "{{count}} просмотр",
+      "viewsAdded_few": "{{count}} просмотра",
+      "viewsAdded_many": "{{count}} просмотров",
+      "viewsAdded_other": "{{count}} просмотра",
+      "responsesAdded_one": "{{count}} отклик",
+      "responsesAdded_few": "{{count}} отклика",
+      "responsesAdded_many": "{{count}} откликов",
+      "responsesAdded_other": "{{count}} отклика",
+      "hint": "Задачу смотрят, но откликаются реже, чем в среднем по отрасли. Дополните блок «{{block}}»",
+      "improve": "Дополнить",
+      "error": "Не удалось загрузить отклик рынка",
+      "emptyValue": "—"
+    }
   }
 }

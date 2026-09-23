@@ -2,6 +2,7 @@ import { Page, Stack } from "@/common/components/layout";
 import { Button, ErrorState } from "@/common/components/ui";
 import { inlineLink, pageTitle, prose } from "@/common/styles";
 import { useAuthStore } from "@/modules/auth";
+import { EarnedBadges } from "@/modules/gamification";
 import { TaskProposalsBlock } from "@/modules/proposals";
 import { ArrowLeft, Inbox, Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -47,6 +48,7 @@ export const TaskPage = () => {
         <Stack gap="md">
           <TaskBadges level={data.level.code} status={data.status} />
           <h1 className={pageTitle}>{data.title}</h1>
+          <EarnedBadges badges={data.badges} withTooltips />
           <p className="text-muted-foreground">
             {data.companyName} · {data.industry.name}
           </p>
