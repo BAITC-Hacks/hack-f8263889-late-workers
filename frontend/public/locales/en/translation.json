@@ -221,7 +221,9 @@
     "empty": "No published tasks yet",
     "emptyFiltered": "No tasks match the selected filters",
     "error": "Could not load the catalog",
-    "pagination": "Catalog pages"
+    "pagination": "Catalog pages",
+    "pageEmpty": "There are no tasks on this page",
+    "firstPage": "Go to the first page"
   },
   "saved": {
     "title": "Saved",

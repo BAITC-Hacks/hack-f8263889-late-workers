@@ -85,6 +85,26 @@ yarn test:e2e
 
 Браузерные сценарии проверяют регистрацию и вход обеих ролей, навигацию по разделам, каталог (сортировку, фильтры, адрес, пагинацию, загрузку, пустые состояния и ошибки), страницу задачи, «Интересное» и «Мои задачи», атрибуты cookie и отсутствие токена в JavaScript, сохранение входа после обновления, выход, редиректы, ошибки 401/409/422/500, клиентскую валидацию, правила тегов, загрузку и повтор запроса сессии. Проверки интерфейса охватывают три языка, обе темы и ширины 375, 768 и 1920 px. При ошибках Playwright сохраняет скриншоты и trace; HTML-отчёт открывается командой `npx playwright show-report`.
 
+### Приёмка на настоящем API
+
+`yarn test:e2e:real` проверяет авторизацию и каталог без моков: Playwright запускает Vite на `127.0.0.1:5181` с `AUTH_MOCKS=false` и проксирует `/api` в `API_PROXY_TARGET` (по умолчанию `http://127.0.0.1:8000`). Перед тестами он проверяет `/health` и вход демо-аккаунтов и сразу останавливается с подсказкой, если API не запущен или seed не загружен. Тесты регистрируют новые аккаунты и ищут задачи по названиям из seed, поэтому запускайте их на отдельной базе, а не на рабочей. Команды из `backend/`:
+
+```bash
+docker compose exec -T db psql -U postgres -c "CREATE DATABASE app_e2e"
+export DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5439/app_e2e
+uv run alembic upgrade head
+uv run python -m app.seed
+uv run uvicorn app.main:app --port 8001
+```
+
+Затем из `frontend/`:
+
+```bash
+API_PROXY_TARGET=http://127.0.0.1:8001 yarn test:e2e:real
+```
+
+Отчёт открывается командой `npx playwright show-report playwright-report-real`. Базу можно пересоздать тем же seed или удалить: `docker compose exec -T db psql -U postgres -c "DROP DATABASE app_e2e"`.
+
 ## Структура и правила разработки
 
 ```text
