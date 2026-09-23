@@ -23,6 +23,7 @@ from collections.abc import AsyncIterator, Callable
 
 import app.models  # noqa: F401
 import pytest
+from app.core.catalog import INDUSTRIES
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
@@ -51,7 +52,7 @@ STUDENT = {
     "technologies": ["Python", "React"],
 }
 
-_TABLES = "users, businesses, students, notes"
+_TABLES = "users, businesses, students, notes, tasks, saved_tasks"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -69,6 +70,12 @@ def _database_schema() -> None:
             await conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
             await conn.execute(text("CREATE SCHEMA public"))
             await conn.run_sync(Base.metadata.create_all)
+            # The migration seeds `industries`, but this bootstrap uses create_all,
+            # so the reference rows have to be inserted from the same constant.
+            await conn.execute(
+                text("INSERT INTO industries (code, name) VALUES (:code, :name)"),
+                [{"code": code, "name": name} for code, name in INDUSTRIES],
+            )
         await engine.dispose()
 
     asyncio.run(build())

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
+    from app.models.task import Task
     from app.models.user import User
 
 
@@ -24,3 +25,6 @@ class Business(TimestampMixin, Base):
     contact_phone: Mapped[str] = mapped_column(String(16))
 
     user: Mapped["User"] = relationship(back_populates="business")
+    tasks: Mapped[list["Task"]] = relationship(
+        back_populates="business", cascade="all, delete-orphan"
+    )

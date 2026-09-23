@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TagList, TimestampMixin
 
 if TYPE_CHECKING:
+    from app.models.saved_task import SavedTask
     from app.models.user import User
 
 
@@ -23,3 +24,6 @@ class Student(TimestampMixin, Base):
     technologies: Mapped[list[str]] = mapped_column(TagList, default=list)
 
     user: Mapped["User"] = relationship(back_populates="student")
+    saved_tasks: Mapped[list["SavedTask"]] = relationship(
+        back_populates="student", cascade="all, delete-orphan"
+    )
