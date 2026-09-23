@@ -1,0 +1,160 @@
+{
+  "welcome": "Welcome to your React project",
+  "goContact": "Open Contact form",
+  "goHome": "Back to Home",
+  "increment": "Increment",
+  "decrement": "Decrement",
+  "home": {
+    "heroSubtitle": "A lean Vite + React + TypeScript template — everything's wired up, just start shipping features.",
+    "stackTitle": "Stack",
+    "counterTitle": "Counter value",
+    "counterHint": "Kept in a Zustand store — shared across every page.",
+    "stack": {
+      "vite": "Fast dev server and builds.",
+      "react": "Latest React, with the new compiler.",
+      "typescript": "Fully typed, end to end.",
+      "tailwind": "Utility classes + theming via CSS tokens.",
+      "shadcn": "Copy-in components — the code stays yours.",
+      "framer": "Subtle, unobtrusive animations.",
+      "i18next": "Multilingual out of the box (en · ru · kk).",
+      "zustand": "Global state without the boilerplate.",
+      "tanstack": "Server state, caching and devtools baked in.",
+      "hookForm": "Performant forms with minimal re-renders.",
+      "zod": "Runtime validation with inferred TypeScript types.",
+      "router": "Routing and navigation."
+    }
+  },
+  "boom": {
+    "title": "Error boundary",
+    "hint": "Click the button to throw an error and see the boundary's fallback UI.",
+    "action": "Boom"
+  },
+  "contactForm": {
+    "title": "Contact form",
+    "description": "A small demo of react-hook-form with validation, error messages and a submit handler — wired up to the project's typography, layout and i18n.",
+    "contactTitle": "Have a question or idea?",
+    "form": {
+      "name": "Your name",
+      "namePlaceholder": "Joey Jordison",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "topic": "Topic",
+      "topicPlaceholder": "Feature request, bug report, question...",
+      "message": "Message",
+      "messagePlaceholder": "Tell me a bit more about what you need...",
+      "send": "Send message",
+      "sending": "Sending...",
+      "hint": "Demo form.",
+      "errors": {
+        "nameRequired": "Name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Enter a valid email",
+        "messageRequired": "Message is required",
+        "messageTooShort": "Message should be at least 10 characters"
+      }
+    }
+  },
+  "auth": {
+    "form": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Alice Johnson"
+    },
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "generic": "Something went wrong. Try again."
+    },
+    "login": {
+      "title": "Sign in",
+      "description": "Welcome back. Enter your credentials to continue.",
+      "sectionTitle": "Your credentials",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "noAccount": "No account yet?",
+      "registerCta": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "description": "A minute of setup — then notes and AI chat are yours.",
+      "sectionTitle": "Who are you?",
+      "submit": "Create account",
+      "submitting": "Creating...",
+      "haveAccount": "Already have an account?",
+      "loginCta": "Sign in"
+    }
+  },
+  "notes": {
+    "title": "Notes",
+    "description": "Your personal notes — created, edited and deleted through the API.",
+    "create": {
+      "title": "New note"
+    },
+    "form": {
+      "titleLabel": "Title",
+      "titlePlaceholder": "What is it about?",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write anything...",
+      "create": "Add note",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "errors": {
+        "titleRequired": "Title is required",
+        "titleTooLong": "Title must be at most 200 characters"
+      }
+    },
+    "list": {
+      "title": "Your notes",
+      "loading": "Loading...",
+      "empty": "No notes yet — create the first one above.",
+      "retry": "Retry",
+      "edit": "Edit",
+      "delete": "Delete",
+      "updatedAt": "updated {{date}}"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "range": "{{from}}–{{to}} of {{total}}"
+    }
+  },
+  "ai": {
+    "page": {
+      "title": "AI chat",
+      "description": "Streaming chat with the backend's OpenAI endpoint — tokens arrive live over SSE.",
+      "sessionTitle": "Session"
+    },
+    "chat": {
+      "empty": "Ask anything — the reply streams in token by token.",
+      "roleUser": "you",
+      "roleAssistant": "assistant",
+      "inputPlaceholder": "Type a message... (Enter to send, Shift+Enter for a newline)",
+      "inputHint": "Enter to send · Shift+Enter — newline",
+      "send": "Send",
+      "stop": "Stop",
+      "clear": "Clear",
+      "error": "Error",
+      "usage": "{{input}} in · {{output}} out tokens"
+    }
+  },
+  "system": {
+    "status": {
+      "ok": "API online",
+      "degraded": "API degraded",
+      "offline": "API offline",
+      "loading": "Checking API..."
+    }
+  },
+  "nav": {
+    "notes": "Notes",
+    "chat": "AI chat",
+    "login": "Sign in",
+    "logout": "Sign out"
+  }
+}

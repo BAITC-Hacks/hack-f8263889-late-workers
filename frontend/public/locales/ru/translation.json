@@ -1,0 +1,160 @@
+{
+  "welcome": "Добро пожаловать в твой React-проект",
+  "goContact": "Открыть форму обратной связи",
+  "goHome": "Вернуться на главную",
+  "increment": "Увеличить",
+  "decrement": "Уменьшить",
+  "home": {
+    "heroSubtitle": "Лаконичный шаблон на Vite + React + TypeScript — всё уже настроено, можно сразу писать фичи.",
+    "stackTitle": "Стек",
+    "counterTitle": "Значение счётчика",
+    "counterHint": "Хранится в Zustand-сторе — доступен на всех страницах.",
+    "stack": {
+      "vite": "Быстрый dev-сервер и сборка без ожиданий.",
+      "react": "Актуальная версия React с новым компилятором.",
+      "typescript": "Полная типизация во всём проекте.",
+      "tailwind": "Utility-классы и темизация через CSS-токены.",
+      "shadcn": "Готовые компоненты — код остаётся у вас.",
+      "framer": "Лёгкие и ненавязчивые анимации.",
+      "i18next": "Мультиязычность из коробки (en · ru · kk).",
+      "zustand": "Глобальное состояние без лишнего кода.",
+      "tanstack": "Серверное состояние, кэш и devtools из коробки.",
+      "hookForm": "Быстрые формы без лишних ререндеров.",
+      "zod": "Рантайм-валидация с автоматическим выводом типов.",
+      "router": "Роутинг, навигация."
+    }
+  },
+  "boom": {
+    "title": "Error boundary",
+    "hint": "Нажмите кнопку, чтобы бросить ошибку и увидеть фолбэк граничного обработчика.",
+    "action": "Boom"
+  },
+  "contactForm": {
+    "title": "Контактная форма",
+    "description": "Небольшой пример react-hook-form с валидацией, сообщениями об ошибках и обработчиком отправки — встроенный в типографику, разметку и i18n проекта.",
+    "contactTitle": "Есть вопрос или идея?",
+    "form": {
+      "name": "Ваше имя",
+      "namePlaceholder": "Джои Джордисон",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "topic": "Тема",
+      "topicPlaceholder": "Предложение, баг, вопрос...",
+      "message": "Сообщение",
+      "messagePlaceholder": "Расскажите чуть подробнее, что вам нужно...",
+      "send": "Отправить",
+      "sending": "Отправка...",
+      "hint": "Демо-форма.",
+      "errors": {
+        "nameRequired": "Укажите имя",
+        "emailRequired": "Укажите email",
+        "emailInvalid": "Введите корректный email",
+        "messageRequired": "Напишите сообщение",
+        "messageTooShort": "Сообщение должно быть не короче 10 символов"
+      }
+    }
+  },
+  "auth": {
+    "form": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Пароль",
+      "passwordPlaceholder": "Минимум 8 символов",
+      "fullName": "Имя",
+      "fullNamePlaceholder": "Алиса Иванова"
+    },
+    "errors": {
+      "emailRequired": "Укажите email",
+      "emailInvalid": "Введите корректный email",
+      "passwordRequired": "Укажите пароль",
+      "passwordTooShort": "Пароль должен быть не короче 8 символов",
+      "generic": "Что-то пошло не так. Попробуйте ещё раз."
+    },
+    "login": {
+      "title": "Вход",
+      "description": "С возвращением. Введите свои данные, чтобы продолжить.",
+      "sectionTitle": "Ваши данные",
+      "submit": "Войти",
+      "submitting": "Входим...",
+      "noAccount": "Ещё нет аккаунта?",
+      "registerCta": "Создать"
+    },
+    "register": {
+      "title": "Регистрация",
+      "description": "Минута на настройку — и заметки с AI-чатом ваши.",
+      "sectionTitle": "Кто вы?",
+      "submit": "Создать аккаунт",
+      "submitting": "Создаём...",
+      "haveAccount": "Уже есть аккаунт?",
+      "loginCta": "Войти"
+    }
+  },
+  "notes": {
+    "title": "Заметки",
+    "description": "Ваши личные заметки — создание, правка и удаление через API.",
+    "create": {
+      "title": "Новая заметка"
+    },
+    "form": {
+      "titleLabel": "Заголовок",
+      "titlePlaceholder": "О чём это?",
+      "contentLabel": "Текст",
+      "contentPlaceholder": "Пишите что угодно...",
+      "create": "Добавить",
+      "save": "Сохранить",
+      "saving": "Сохраняем...",
+      "cancel": "Отмена",
+      "errors": {
+        "titleRequired": "Укажите заголовок",
+        "titleTooLong": "Заголовок — не больше 200 символов"
+      }
+    },
+    "list": {
+      "title": "Ваши заметки",
+      "loading": "Загрузка...",
+      "empty": "Заметок пока нет — создайте первую выше.",
+      "retry": "Повторить",
+      "edit": "Изменить",
+      "delete": "Удалить",
+      "updatedAt": "обновлено {{date}}"
+    },
+    "pagination": {
+      "prev": "Назад",
+      "next": "Вперёд",
+      "range": "{{from}}–{{to}} из {{total}}"
+    }
+  },
+  "ai": {
+    "page": {
+      "title": "AI-чат",
+      "description": "Стриминговый чат с OpenAI-эндпоинтом бэкенда — токены приходят вживую по SSE.",
+      "sessionTitle": "Сессия"
+    },
+    "chat": {
+      "empty": "Спросите что угодно — ответ приходит токен за токеном.",
+      "roleUser": "вы",
+      "roleAssistant": "ассистент",
+      "inputPlaceholder": "Введите сообщение... (Enter — отправить, Shift+Enter — перенос)",
+      "inputHint": "Enter — отправить · Shift+Enter — перенос строки",
+      "send": "Отправить",
+      "stop": "Стоп",
+      "clear": "Очистить",
+      "error": "Ошибка",
+      "usage": "{{input}} вх. · {{output}} исх. токенов"
+    }
+  },
+  "system": {
+    "status": {
+      "ok": "API в порядке",
+      "degraded": "API деградирован",
+      "offline": "API недоступен",
+      "loading": "Проверяем API..."
+    }
+  },
+  "nav": {
+    "notes": "Заметки",
+    "chat": "AI-чат",
+    "login": "Войти",
+    "logout": "Выйти"
+  }
+}

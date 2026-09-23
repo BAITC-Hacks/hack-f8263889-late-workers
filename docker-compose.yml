@@ -1,0 +1,73 @@
+# Full dev stack: Postgres + Redis + API (uvicorn --reload) + web (Vite HMR).
+# Source dirs are bind-mounted, so edits on the host reload inside the containers.
+#
+#   make docker-up     # build + start everything
+#   make docker-down   # stop (add -v via `make docker-reset` to drop the database)
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    # The API reaches it as `db:5432` inside the compose network. Host port 5439 is for
+    # DB tools (DBeaver/DataGrip) — unusual on purpose, so it won't clash with other
+    # Postgres instances on the machine. Bound to 127.0.0.1: the dev password is weak,
+    # so it must never be reachable from the LAN. Comment `ports` out if you don't need it.
+    ports:
+      - "127.0.0.1:5439:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    # Everything from backend/.env (OPENAI_API_KEY, SECRET_KEY, ...) — if it exists.
+    env_file:
+      - path: ./backend/.env
+        required: false
+    # Inside the compose network the services are reachable by name; these override .env.
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/app
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+      - /app/.venv          # keep the image's venv, don't shadow it with the host one
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build: ./frontend
+    environment:
+      # The browser talks to the API through the host-published port.
+      VITE_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules   # keep the image's node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

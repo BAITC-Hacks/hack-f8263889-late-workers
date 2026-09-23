@@ -1,0 +1,160 @@
+{
+  "welcome": "React жобаңызға қош келдіңіз",
+  "goContact": "Байланыс формасын ашу",
+  "goHome": "Басты бетке оралу",
+  "increment": "Арттыру",
+  "decrement": "Азайту",
+  "home": {
+    "heroSubtitle": "Vite + React + TypeScript негізіндегі ықшам шаблон — бәрі бапталған, бірден фича жазуға кірісуге болады.",
+    "stackTitle": "Стек",
+    "counterTitle": "Есептегіш мәні",
+    "counterHint": "Zustand қоймасында сақталады — барлық беттерде қолжетімді.",
+    "stack": {
+      "vite": "Жылдам dev-сервер және құрастыру.",
+      "react": "React-тің өзекті нұсқасы, жаңа компилятормен.",
+      "typescript": "Жоба бойы толық типтеу.",
+      "tailwind": "Utility-кластар және CSS-токендер арқылы тақырыптау.",
+      "shadcn": "Көшіріп алынатын компоненттер — код сізде қалады.",
+      "framer": "Жеңіл әрі байқатпайтын анимациялар.",
+      "i18next": "Қорапта бірден көптілділік (en · ru · kk).",
+      "zustand": "Артық кодсыз жаһандық күй.",
+      "tanstack": "Серверлік күй, кэш және devtools қораптан бірден.",
+      "hookForm": "Артық қайта рендерсіз жылдам формалар.",
+      "zod": "Типтері автоматты шығарылатын рантайм-валидация.",
+      "router": "Роутинг және навигация."
+    }
+  },
+  "boom": {
+    "title": "Error boundary",
+    "hint": "Қате тудырып, шекаралық өңдеуіштің қосалқы интерфейсін көру үшін түймені басыңыз.",
+    "action": "Boom"
+  },
+  "contactForm": {
+    "title": "Байланыс формасы",
+    "description": "Валидациясы, қате хабарлары және жіберу өңдеуіші бар react-hook-form шағын мысалы — жобаның типографикасына, жаймасына және i18n-іне қосылған.",
+    "contactTitle": "Сұрағыңыз немесе идеяңыз бар ма?",
+    "form": {
+      "name": "Атыңыз",
+      "namePlaceholder": "Жанболат Тұрсынов",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "topic": "Тақырып",
+      "topicPlaceholder": "Ұсыныс, баг, сұрақ...",
+      "message": "Хабарлама",
+      "messagePlaceholder": "Не қажет екенін сәл толығырақ жазыңыз...",
+      "send": "Жіберу",
+      "sending": "Жіберілуде...",
+      "hint": "Демо-форма.",
+      "errors": {
+        "nameRequired": "Атыңызды көрсетіңіз",
+        "emailRequired": "Email көрсетіңіз",
+        "emailInvalid": "Жарамды email енгізіңіз",
+        "messageRequired": "Хабарлама жазыңыз",
+        "messageTooShort": "Хабарлама кемінде 10 таңбадан тұруы керек"
+      }
+    }
+  },
+  "auth": {
+    "form": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Құпия сөз",
+      "passwordPlaceholder": "Кемінде 8 таңба",
+      "fullName": "Аты-жөні",
+      "fullNamePlaceholder": "Айгүл Сәрсенова"
+    },
+    "errors": {
+      "emailRequired": "Email көрсетіңіз",
+      "emailInvalid": "Жарамды email енгізіңіз",
+      "passwordRequired": "Құпия сөзді көрсетіңіз",
+      "passwordTooShort": "Құпия сөз кемінде 8 таңбадан тұруы керек",
+      "generic": "Бірдеңе дұрыс болмады. Қайталап көріңіз."
+    },
+    "login": {
+      "title": "Кіру",
+      "description": "Қайта қош келдіңіз. Жалғастыру үшін деректеріңізді енгізіңіз.",
+      "sectionTitle": "Деректеріңіз",
+      "submit": "Кіру",
+      "submitting": "Кіруде...",
+      "noAccount": "Әлі аккаунт жоқ па?",
+      "registerCta": "Құру"
+    },
+    "register": {
+      "title": "Тіркелу",
+      "description": "Бір минут баптау — жазбалар мен AI-чат сіздікі.",
+      "sectionTitle": "Сіз кімсіз?",
+      "submit": "Аккаунт құру",
+      "submitting": "Құрылуда...",
+      "haveAccount": "Аккаунтыңыз бар ма?",
+      "loginCta": "Кіру"
+    }
+  },
+  "notes": {
+    "title": "Жазбалар",
+    "description": "Сіздің жеке жазбаларыңыз — API арқылы құру, өңдеу және жою.",
+    "create": {
+      "title": "Жаңа жазба"
+    },
+    "form": {
+      "titleLabel": "Тақырып",
+      "titlePlaceholder": "Бұл не туралы?",
+      "contentLabel": "Мәтін",
+      "contentPlaceholder": "Кез келген нәрсе жазыңыз...",
+      "create": "Қосу",
+      "save": "Сақтау",
+      "saving": "Сақталуда...",
+      "cancel": "Бас тарту",
+      "errors": {
+        "titleRequired": "Тақырыпты көрсетіңіз",
+        "titleTooLong": "Тақырып 200 таңбадан аспауы керек"
+      }
+    },
+    "list": {
+      "title": "Сіздің жазбаларыңыз",
+      "loading": "Жүктелуде...",
+      "empty": "Жазбалар әзірге жоқ — жоғарыда біріншісін құрыңыз.",
+      "retry": "Қайталау",
+      "edit": "Өңдеу",
+      "delete": "Жою",
+      "updatedAt": "жаңартылды {{date}}"
+    },
+    "pagination": {
+      "prev": "Артқа",
+      "next": "Алға",
+      "range": "{{total}} ішінен {{from}}–{{to}}"
+    }
+  },
+  "ai": {
+    "page": {
+      "title": "AI-чат",
+      "description": "Бэкендтің OpenAI-эндпойнтімен стриминг чат — токендер SSE арқылы тікелей келеді.",
+      "sessionTitle": "Сессия"
+    },
+    "chat": {
+      "empty": "Кез келген нәрсе сұраңыз — жауап токен-токенмен келеді.",
+      "roleUser": "сіз",
+      "roleAssistant": "ассистент",
+      "inputPlaceholder": "Хабарлама жазыңыз... (Enter — жіберу, Shift+Enter — жол тастау)",
+      "inputHint": "Enter — жіберу · Shift+Enter — жаңа жол",
+      "send": "Жіберу",
+      "stop": "Тоқтату",
+      "clear": "Тазалау",
+      "error": "Қате",
+      "usage": "{{input}} кір. · {{output}} шығ. токен"
+    }
+  },
+  "system": {
+    "status": {
+      "ok": "API қалыпты",
+      "degraded": "API нашарлаған",
+      "offline": "API қолжетімсіз",
+      "loading": "API тексерілуде..."
+    }
+  },
+  "nav": {
+    "notes": "Жазбалар",
+    "chat": "AI-чат",
+    "login": "Кіру",
+    "logout": "Шығу"
+  }
+}
