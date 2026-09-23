@@ -1,0 +1,38 @@
+[
+  {
+    "email": "arman@student.kz",
+    "name": "Арман Сейтказы",
+    "skills": ["Анализ данных", "Машинное обучение"],
+    "technologies": ["Python", "Pandas"]
+  },
+  {
+    "email": "aisha@student.kz",
+    "name": "Айша Калиева",
+    "skills": ["Дизайн интерфейсов", "Прототипирование"],
+    "technologies": ["Figma", "React"]
+  },
+  {
+    "email": "daniyar@student.kz",
+    "name": "Данияр Оспанов",
+    "skills": ["Веб-разработка"],
+    "technologies": ["TypeScript", "React", "Node.js"]
+  },
+  {
+    "email": "madina@student.kz",
+    "name": "Мадина Ахметова",
+    "skills": ["Бизнес-анализ", "Продуктовая аналитика"],
+    "technologies": ["SQL", "Power BI"]
+  },
+  {
+    "email": "timur@student.kz",
+    "name": "Тимур Жаксылык",
+    "skills": ["Мобильная разработка"],
+    "technologies": ["Kotlin", "Swift"]
+  },
+  {
+    "email": "kamila@student.kz",
+    "name": "Камила Сагинтаева",
+    "skills": ["Тестирование", "Автоматизация"],
+    "technologies": ["Python", "Playwright"]
+  }
+]

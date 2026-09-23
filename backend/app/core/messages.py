@@ -24,3 +24,17 @@ TAGS = "До 20 тегов, каждый до 50 символов"
 # --- Login-only messages (the spec asks for "fill this in", not "this is malformed") ---
 EMAIL_REQUIRED = "Введите email"
 PASSWORD_REQUIRED = "Введите пароль"
+
+# --- Task catalogue ---
+VALIDATION_QUERY = "Проверьте параметры запроса"
+SORT = "Допустимо: rating, date, responses"
+PAGE = "Номер страницы — целое число от 1"
+TASK_NOT_FOUND = "Задача не найдена"
+
+
+def unknown_industry(code: str) -> str:
+    return f"Неизвестная отрасль: {code}"
+
+
+def unknown_level(code: str) -> str:
+    return f"Неизвестный уровень: {code}"

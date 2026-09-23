@@ -17,6 +17,9 @@ infra-down: ## Stop Postgres + Redis
 dev: ## Run the API with auto-reload (migrations run on startup)
 	uv run uvicorn app.main:app --reload --port 8000
 
+seed: ## Load the demo dataset (3 businesses, 6 students, 7 tasks)
+	uv run python -m app.seed
+
 test-db: ## Create the test database (idempotent; needs `make infra` running)
 	@$(COMPOSE) exec -T db psql -U postgres -tc \
 		"SELECT 1 FROM pg_database WHERE datname='app_test'" | grep -q 1 \
@@ -45,4 +48,4 @@ docker-up: ## Build and run the full stack in Docker
 docker-down: ## Stop the full stack
 	$(COMPOSE) down -v
 
-.PHONY: help setup infra infra-down dev test-db test lint fmt migrate migration docker-up docker-down
+.PHONY: help setup infra infra-down dev seed test-db test lint fmt migrate migration docker-up docker-down

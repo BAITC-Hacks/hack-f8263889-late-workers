@@ -1,0 +1,20 @@
+[
+  {
+    "email": "owner@zerno.kz",
+    "companyName": "Кофейня «Зерно»",
+    "contactName": "Айгерим Нурланова",
+    "contactPhone": "+77011234567"
+  },
+  {
+    "email": "logistics@karavan.kz",
+    "companyName": "Караван Логистика",
+    "contactName": "Бауыржан Ермеков",
+    "contactPhone": "+77025554433"
+  },
+  {
+    "email": "clinic@saulyk.kz",
+    "companyName": "Медцентр «Саулык»",
+    "contactName": "Динара Абишева",
+    "contactPhone": "+77071112233"
+  }
+]

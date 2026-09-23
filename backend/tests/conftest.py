@@ -20,12 +20,16 @@ os.environ.update(
 
 import asyncio
 from collections.abc import AsyncIterator, Callable
+from datetime import UTC, datetime
 
 import app.models  # noqa: F401
 import pytest
+from app.core.catalog import INDUSTRIES
+from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+from app.models import Business, Task, User
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
@@ -51,7 +55,7 @@ STUDENT = {
     "technologies": ["Python", "React"],
 }
 
-_TABLES = "users, businesses, students, notes"
+_TABLES = "users, businesses, students, notes, tasks, saved_tasks"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -69,6 +73,12 @@ def _database_schema() -> None:
             await conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
             await conn.execute(text("CREATE SCHEMA public"))
             await conn.run_sync(Base.metadata.create_all)
+            # The migration seeds `industries`, but this bootstrap uses create_all,
+            # so the reference rows have to be inserted from the same constant.
+            await conn.execute(
+                text("INSERT INTO industries (code, name) VALUES (:code, :name)"),
+                [{"code": code, "name": name} for code, name in INDUSTRIES],
+            )
         await engine.dispose()
 
     asyncio.run(build())
@@ -170,3 +180,124 @@ def fake_ai(monkeypatch: pytest.MonkeyPatch):
         return client
 
     return install
+
+
+# --- Catalogue fixtures -------------------------------------------------------
+
+# The catalogue's owner is created straight in the database, never over HTTP:
+# registering would set an auth cookie and overwrite the session the test is
+# actually using (httpx keeps one cookie jar per client).
+CATALOGUE_OWNER = {"email": "catalog@zerno.kz", "password": "catalog2026"}
+
+
+def make_task(business_id: int, **overrides: object) -> Task:
+    """A published, catalogue-visible task unless the test says otherwise."""
+    defaults: dict = {
+        "business_id": business_id,
+        "industry_code": "horeca",
+        "status": "published",
+        "title": "Прогноз спроса на выпечку",
+        "need": "Каждый день списываем до 15% выпечки.",
+        "rating": 78,
+        "responses_count": 3,
+        "published_at": datetime(2026, 9, 20, 10, 0, tzinfo=UTC),
+    }
+    return Task(**{**defaults, **overrides})
+
+
+@pytest.fixture
+async def catalogue_owner(db: AsyncSession) -> Business:
+    owner = User(
+        email=CATALOGUE_OWNER["email"],
+        hashed_password=hash_password(CATALOGUE_OWNER["password"]),
+        role="business",
+        business=Business(
+            company_name="Кофейня «Зерно»",
+            contact_name="Айгерим Нурланова",
+            contact_phone="+77011234567",
+        ),
+    )
+    db.add(owner)
+    await db.commit()
+    await db.refresh(owner)
+    return owner.business
+
+
+@pytest.fixture
+async def catalogue(catalogue_owner: Business, db: AsyncSession) -> list[Task]:
+    """Six catalogue tasks covering all four levels, plus a draft that must stay hidden."""
+    owner_id = catalogue_owner.id
+    tasks = [
+        make_task(
+            owner_id,
+            rating=92,
+            industry_code="retail",
+            title="Лояльность",
+            published_at=datetime(2026, 9, 21, 9, 30, tzinfo=UTC),
+            responses_count=6,
+        ),
+        make_task(
+            owner_id,
+            rating=78,
+            industry_code="horeca",
+            title="Выпечка",
+            published_at=datetime(2026, 9, 20, 10, 0, tzinfo=UTC),
+            responses_count=3,
+        ),
+        make_task(
+            owner_id,
+            rating=70,
+            industry_code="it",
+            title="Карты пациентов",
+            published_at=datetime(2026, 9, 19, 14, 15, tzinfo=UTC),
+            responses_count=2,
+        ),
+        make_task(
+            owner_id,
+            rating=64,
+            industry_code="healthcare",
+            title="Напоминания",
+            status="in_progress",
+            published_at=None,
+            responses_count=4,
+        ),
+        make_task(
+            owner_id,
+            rating=55,
+            industry_code="logistics",
+            title="Маршруты",
+            published_at=datetime(2026, 9, 18, 12, 0, tzinfo=UTC),
+            responses_count=1,
+        ),
+        make_task(
+            owner_id,
+            rating=35,
+            industry_code="education",
+            title="Обучение",
+            published_at=datetime(2026, 9, 15, 8, 0, tzinfo=UTC),
+            responses_count=0,
+        ),
+        make_task(
+            owner_id,
+            rating=0,
+            industry_code="other",
+            title="Черновик",
+            status="draft",
+            published_at=None,
+            responses_count=0,
+            need="Только need.",
+        ),
+    ]
+    db.add_all(tasks)
+    await db.commit()
+    for task in tasks:
+        await db.refresh(task)
+    return tasks
+
+
+@pytest.fixture
+async def owner_client(client: AsyncClient, catalogue: list[Task]) -> AsyncClient:
+    """The signed-in owner of the catalogue's tasks."""
+    response = await client.post("/api/auth/login", json=CATALOGUE_OWNER)
+    assert response.status_code == 200, response.text
+    return client
