@@ -1,13 +1,15 @@
 import { Page, Stack } from "@/common/components/layout";
-import { Button, Pagination } from "@/common/components/ui";
+import { Button, Card, Pagination } from "@/common/components/ui";
 import { cardGrid, pageTitle } from "@/common/styles";
 import { useTranslation } from "react-i18next";
 
+import { CatalogFilters } from "../components/CatalogFilters";
 import { ErrorState } from "../components/ErrorState";
 import { SortSelect } from "../components/SortSelect";
 import { TaskCard } from "../components/TaskCard";
 import { TaskCardSkeletons } from "../components/TaskCardSkeletons";
 import { useCatalogSearch } from "../hooks/useCatalogSearch";
+import { useIndustries } from "../hooks/useIndustries";
 import { useTasks } from "../hooks/useTasks";
 
 const SKELETON_CARDS = 6;
@@ -16,6 +18,7 @@ export const CatalogPage = () => {
   const { t } = useTranslation();
   const search = useCatalogSearch();
   const tasks = useTasks(search.query);
+  const industries = useIndustries();
 
   const resetFilters = search.hasFilters && (
     <Button variant="outline" size="sm" onClick={search.resetFilters}>
@@ -66,7 +69,28 @@ export const CatalogPage = () => {
     <Page>
       <Stack gap="xl">
         <h1 className={pageTitle}>{t("catalog.title")}</h1>
-        <SortSelect value={search.sort} onChange={search.changeSort} />
+        <Stack gap="md">
+          <Card className="space-y-6 p-5">
+            <CatalogFilters
+              industries={industries.data}
+              industriesLoading={industries.isPending}
+              selectedIndustries={search.industries}
+              selectedLevels={search.levels}
+              onToggleIndustry={search.toggleIndustry}
+              onToggleLevel={search.toggleLevel}
+            />
+            <div className="flex flex-wrap items-end gap-4">
+              <SortSelect value={search.sort} onChange={search.changeSort} />
+              {resetFilters}
+            </div>
+          </Card>
+          {industries.isError && (
+            <ErrorState
+              message={t("catalog.filters.industriesError")}
+              onRetry={() => void industries.refetch()}
+            />
+          )}
+        </Stack>
         {renderResults()}
       </Stack>
     </Page>

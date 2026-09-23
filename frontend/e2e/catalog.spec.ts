@@ -207,9 +207,12 @@ test("empty catalog without filters and with filters", async ({ page }) => {
   await expect(
     page.getByText("По выбранным фильтрам задач нет", { exact: true })
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Сбросить фильтры", exact: true })
-    .click();
+  const reset = page.getByRole("button", {
+    name: "Сбросить фильтры",
+    exact: true,
+  });
+  await expect(reset).toHaveCount(2);
+  await reset.last().click();
   await expect(page).toHaveURL("/catalog?sort=responses");
   await expect(cards(page)).toHaveCount(20);
 });
@@ -235,4 +238,107 @@ test("catalog error offers a retry", async ({ page }) => {
   fail = false;
   await page.getByRole("button", { name: "Повторить", exact: true }).click();
   await expect(cards(page)).toHaveCount(20);
+});
+
+const filterGroup = (page: Page, name: "Отрасль" | "Уровень") =>
+  page.getByRole("group", { name, exact: true });
+
+test("industry and level filters narrow the list and go to the address", async ({
+  page,
+}) => {
+  await signIn(page, "student");
+  await page.goto("/catalog?page=2");
+  await filterGroup(page, "Отрасль").getByLabel("HoReCa").click();
+  await expect(page).toHaveURL("/catalog?industry=horeca");
+  await filterGroup(page, "Уровень").getByLabel("Готовая").click();
+  await expect(page).toHaveURL("/catalog?industry=horeca&level=ready");
+  await expect(cards(page)).toHaveCount(1);
+  for (const card of await cards(page).all()) {
+    await expect(card).toContainText("HoReCa");
+    await expect(card).toContainText("Готовая");
+  }
+
+  await filterGroup(page, "Отрасль").getByLabel("HoReCa").click();
+  await filterGroup(page, "Уровень").getByLabel("Приоритетная").click();
+  await expect(page).toHaveURL("/catalog?level=ready,priority");
+  const request = page.waitForRequest((request) =>
+    isTasksList(new URL(request.url()))
+  );
+  await page.reload();
+  expect(new URL((await request).url()).searchParams.get("level")).toBe(
+    "ready,priority"
+  );
+  await expect(cards(page)).toHaveCount(12);
+  const levels = await cards(page)
+    .getByText(/^(Готовая|Приоритетная|Рабочая|Требует уточнения)$/)
+    .allTextContents();
+  expect(new Set(levels)).toEqual(new Set(["Готовая", "Приоритетная"]));
+  await expect(
+    filterGroup(page, "Уровень").getByLabel("Приоритетная")
+  ).toBeChecked();
+});
+
+test("reset clears industries and levels but keeps the sort", async ({
+  page,
+}) => {
+  await signIn(page, "student");
+  await page.goto("/catalog?sort=date&industry=it,finance&level=working");
+  await expect(cards(page)).toHaveCount(2);
+  await page
+    .getByRole("button", { name: "Сбросить фильтры", exact: true })
+    .click();
+  await expect(page).toHaveURL("/catalog?sort=date");
+  await expect(cards(page)).toHaveCount(20);
+  await expect(page.getByLabel("Сортировка", { exact: true })).toHaveValue(
+    "date"
+  );
+  await expect(filterGroup(page, "Отрасль").getByRole("checkbox")).toHaveCount(
+    10
+  );
+  for (const checkbox of await page.getByRole("checkbox").all())
+    await expect(checkbox).not.toBeChecked();
+});
+
+test("industries loading disables the list; an error keeps level filters working", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let fail = false;
+  await page.route("**/api/industries", async (route) => {
+    await ready;
+    if (fail)
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error: { code: "INTERNAL_ERROR", message: "Ошибка сервера" },
+        }),
+      });
+    else await route.continue();
+  });
+  await signIn(page, "student");
+  await expect(filterGroup(page, "Отрасль")).toHaveAttribute("disabled", "");
+  await expect(
+    filterGroup(page, "Уровень").getByLabel("Готовая")
+  ).toBeEnabled();
+  fail = true;
+  release();
+  await expect(
+    page.getByText("Не удалось загрузить отрасли", { exact: true })
+  ).toBeVisible();
+  await filterGroup(page, "Уровень").getByLabel("Готовая").click();
+  await expect(page).toHaveURL("/catalog?level=ready");
+  await expect(cards(page).first()).toContainText("Готовая");
+
+  fail = false;
+  await page.getByRole("button", { name: "Повторить", exact: true }).click();
+  await expect(filterGroup(page, "Отрасль").getByRole("checkbox")).toHaveCount(
+    10
+  );
+  await expect(
+    page.getByText("Не удалось загрузить отрасли", { exact: true })
+  ).toHaveCount(0);
 });

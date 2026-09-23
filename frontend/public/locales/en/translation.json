@@ -213,7 +213,10 @@
       "responses_other": "{{count}} responses"
     },
     "filters": {
-      "reset": "Reset filters"
+      "reset": "Reset filters",
+      "industry": "Industry",
+      "level": "Level",
+      "industriesError": "Could not load industries"
     },
     "empty": "No published tasks yet",
     "emptyFiltered": "No tasks match the selected filters",
